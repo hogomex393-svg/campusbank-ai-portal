@@ -149,10 +149,8 @@ The [GitHub workflow](.github/workflows/cloud-ci.yml) also builds the Docker ima
 | `data/`, `evaluation/`, `tests/` | Synthetic domain knowledge, authored benchmarks, reproducible evaluation, and automated checks. |
 | `docs/` | Interaction rationale, architecture, evidence, deployment instructions, and prospective research. |
 
-## Project ownership and development
+## Project background
 
-**Project portfolio owner: Zhou Yuxi.** The project began as a six-person CNSCC324 coursework assignment (Lab Class 1, Team 12) and was extended into this interactive portal. The owner iteratively defined and refined the interaction requirements: natural dialogue, persistent history, service entry points, account roles, human handoff, and shared customer/staff workflows.
+**Maintained by Zhou Yuxi.** The project began as a six-person CNSCC324 coursework assignment (Lab Class 1, Team 12) and was extended into this interactive portal. Its interaction requirements include natural dialogue, persistent history, service entry points, account roles, human handoff, and shared customer/staff workflows.
 
-AI coding assistance was used substantially for implementation, debugging, and documentation. This repository presents the resulting system, design rationale, and reproducible checks. It does not assert equal team contributions or sole unaided authorship. [Development process](docs/development-process.md) explains this attribution and the design iterations.
-
-For research applications, the strongest current evidence is **human–AI interaction design and end-to-end applied AI engineering**. [Research directions](docs/research-directions.md) outlines experiments that could turn the prototype into a research study; those experiments have not been conducted.
+[Development process](docs/development-process.md) describes the design iterations. [Research directions](docs/research-directions.md) outlines proposed experiments for evaluating the interface and agent behavior.

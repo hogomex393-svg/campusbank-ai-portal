@@ -1,12 +1,12 @@
-# Development process and attribution
+# Development process
 
 ## Origin
 
-CampusBank began with the banking inquiry-agent functionality in a six-person CNSCC324 coursework group (Lab Class 1, Team 12). This repository curates the interactive portal and reproducible engineering checks for a personal portfolio. It excludes university assignment PDFs, report drafts, private keys, accounts, and live conversations.
+CampusBank began with the banking inquiry-agent functionality in a six-person CNSCC324 coursework group (Lab Class 1, Team 12). This repository contains the interactive portal and reproducible engineering checks. It excludes university assignment PDFs, report drafts, private keys, accounts, and live conversations.
 
-## Owner-led interaction iterations
+## Interaction iterations
 
-The portfolio owner, Zhou Yuxi, repeatedly specified desired behavior and identified problems in prototype use:
+The interface was refined through the following requirements and prototype observations:
 
 1. Move from scripted menus toward understanding naturally phrased goals and follow-up questions.
 2. Support Chinese and English based on the current user's language.
@@ -17,12 +17,6 @@ The portfolio owner, Zhou Yuxi, repeatedly specified desired behavior and identi
 7. Publish a hosted group-testing version and correct customer views that exposed staff reply controls.
 
 These iterations provide a concrete record of interaction requirements and engineering decisions. They are informal prototype feedback, not a structured participant study.
-
-## AI-assisted engineering
-
-AI coding assistance was used substantially to write and revise the implementation, investigate errors, prepare tests, and document the project. The owner's contribution is represented as interaction goals, iterative requirements, prototype feedback, and project direction; the repository does not claim every line was independently handwritten.
-
-The original group context is acknowledged without inventing equal contributions, individual task assignments, or unverified member work. If the repository is included in an application, its owner should be ready to explain the tool loop, retrieval method, persistence model, role checks, evidence limitations, and the role of AI assistance.
 
 ## Reproducibility
 
