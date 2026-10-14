@@ -1,6 +1,6 @@
 # CampusBank — Bilingual AI Banking Service Portal
 
-[![Cloud deployment checks](https://github.com/hogomex393-svg/campusbank-ai-portal/actions/workflows/cloud-ci.yml/badge.svg)](https://github.com/hogomex393-svg/campusbank-ai-portal/actions/workflows/cloud-ci.yml)
+[![Cloud deployment checks](https://github.com/hogomex393-svg/campusbank-ai-portal/actions/workflows/cloud-ci.yml/badge.svg?branch=codex%2Fportfolio-release&event=push)](https://github.com/hogomex393-svg/campusbank-ai-portal/actions/workflows/cloud-ci.yml)
 ![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-web%20portal-009688?logo=fastapi&logoColor=white)
 ![Languages](https://img.shields.io/badge/Conversation-English%20%2B%20中文-176B5B)
