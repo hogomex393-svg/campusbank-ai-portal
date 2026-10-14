@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CampusBank · 银行服务助手</title>
+    <link rel="stylesheet" href="/assets/style.css" />
+    <script src="/assets/app.js" defer></script>
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar" id="sidebar">
+        <button class="brand" id="brandHome">
+          <span class="brand-mark">C</span
+          ><span>CampusBank<small>你的银行服务助手</small></span>
+        </button>
+        <button class="new-chat" id="newChat">
+          <span class="icon" data-icon="plus"></span><span>新建对话</span
+          ><kbd>＋</kbd>
+        </button>
+        <div class="sidebar-scroll">
+          <nav class="primary-nav">
+            <button id="homeNav" class="nav-item active">
+              <span class="icon" data-icon="chat"></span>智能咨询</button
+            ><button id="requestsNav" class="nav-item">
+              <span class="icon" data-icon="list"></span>我的办理记录</button
+            ><button id="supportHistoryNav" class="nav-item">
+              <span class="icon" data-icon="support"></span>人工客服记录
+            </button>
+          </nav>
+          <div class="section-title">业务服务 <span>可直接进入办理</span></div>
+          <nav class="business-nav" id="businessNav"></nav>
+          <div class="history-head">
+            <span>历史对话</span
+            ><button
+              class="icon-btn"
+              id="historySearchToggle"
+              aria-label="搜索历史"
+            >
+              <span class="icon" data-icon="search"></span>
+            </button>
+          </div>
+          <input
+            class="history-search"
+            id="historySearch"
+            type="search"
+            placeholder="搜索对话标题"
+            hidden
+          />
+          <div class="history-list" id="historyList">
+            <div class="muted small">正在加载…</div>
+          </div>
+        </div>
+        <div class="sidebar-bottom">
+          <button class="utility" id="referencesNav">
+            <span class="icon" data-icon="external"></span>银行官网参考</button
+          ><button class="utility" id="legacyImport" hidden>
+            <span class="icon" data-icon="import"></span
+            >导入旧版聊天记录</button
+          ><button class="utility" id="staffNav" hidden>
+            <span class="icon" data-icon="support"></span>工作人员演示台</button
+          ><button class="profile-button" id="accountButton">
+            <span class="avatar" id="profileAvatar">访</span
+            ><span id="profileName"
+              >登录 / 注册<small>保存个人对话与办理记录</small></span
+            ><span class="icon" data-icon="chevron"></span>
+          </button>
+        </div>
+      </aside>
+      <main class="main">
+        <header class="topbar">
+          <div class="topbar-left">
+            <button
+              class="icon-btn mobile-menu"
+              id="menuToggle"
+              aria-label="打开侧边栏"
+            >
+              <span class="icon" data-icon="menu"></span></button
+            ><span id="pageTitle">智能咨询</span
+            ><span class="online-indicator" id="onlineIndicator">自然对话</span>
+          </div>
+          <div class="topbar-right">
+            <button class="text-button" id="languageToggle">English</button
+            ><button class="icon-btn" id="settingsButton" aria-label="对话设置">
+              <span class="icon" data-icon="settings"></span></button
+            ><span class="demo-label">课程演示</span>
+          </div>
+        </header>
+        <section class="scroll-area" id="scrollArea">
+          <div id="content"></div>
+        </section>
+        <section class="composer-area" id="composerArea">
+          <div class="handoff-banner" id="handoffBanner" hidden></div>
+          <form id="composer" class="composer">
+            <textarea
+              id="messageInput"
+              rows="2"
+              maxlength="2000"
+              placeholder="描述你想办理的业务，或继续追问…"
+              aria-label="聊天消息"
+            ></textarea>
+            <div class="composer-toolbar">
+              <span
+                ><span class="icon" data-icon="spark"></span
+                ><span id="composerHint"
+                  >中文 / English · 自动跟随消息语言</span
+                ></span
+              ><button
+                type="button"
+                id="handoffButton"
+                class="handoff-shortcut"
+              >
+                转人工客服</button
+              ><button
+                class="send-button"
+                id="sendButton"
+                type="submit"
+                aria-label="发送消息"
+              >
+                <span class="icon" data-icon="arrow"></span>
+              </button>
+            </div>
+          </form>
+          <p class="composer-note">
+            CampusBank
+            为虚构银行。业务窗口只登记演示请求，请勿提供真实银行卡号、密码或验证码。
+          </p>
+        </section>
+      </main>
+    </div>
+    <dialog id="authDialog" class="auth-dialog">
+      <button
+        class="dialog-close icon-btn"
+        data-close="authDialog"
+        aria-label="关闭登录窗口"
+      >
+        ×
+      </button>
+      <div class="auth-brand brand-mark">C</div>
+      <h2 id="authTitle">欢迎回来</h2>
+      <p class="muted" id="authSubtitle">
+        登录后，你的对话与服务进度都在这里。
+      </p>
+      <div class="auth-tabs">
+        <button type="button" id="loginTab" class="active">登录</button
+        ><button type="button" id="registerTab">注册</button>
+      </div>
+      <form id="authForm">
+        <label id="groupTestCodeField" hidden
+          >小组测试邀请码<input
+            name="test_access_code"
+            maxlength="128"
+            autocomplete="off"
+            placeholder="由部署者提供，供组员注册测试"
+        /></label>
+        <label id="portalRoleLabel"
+          >登录身份<select name="portal_role" id="portalRole">
+            <option value="customer">客户</option>
+            <option value="staff">工作人员 / 管理员</option>
+          </select></label
+        >
+        <label id="staffInviteField" hidden
+          >工作人员邀请码<input
+            name="invite_code"
+            maxlength="128"
+            autocomplete="off"
+            placeholder="首次开通工作人员身份时填写"
+        /></label>
+        <label
+          >用户名<input
+            name="username"
+            autocomplete="username"
+            required
+            minlength="3"
+            maxlength="32"
+            pattern="[A-Za-z0-9_]+"
+            placeholder="3–32 位字母、数字或下划线" /></label
+        ><label id="displayNameField" hidden
+          >怎么称呼你<input
+            name="display_name"
+            autocomplete="nickname"
+            maxlength="50"
+            placeholder="你的称呼" /></label
+        ><label
+          >密码<input
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            required
+            minlength="8"
+            maxlength="128"
+            placeholder="至少 8 个字符"
+        /></label>
+        <p id="authError" class="form-error" role="alert"></p>
+        <button class="primary-button full" id="authSubmit" type="submit">
+          登录
+        </button>
+      </form>
+      <p class="tiny muted">
+        这是 CampusBank 课程演示账户，与真实银行账户无关。
+      </p>
+    </dialog>
+    <dialog id="serviceDialog" class="service-dialog">
+      <div class="drawer-heading">
+        <div>
+          <p class="eyebrow">CAMPUSBANK ONLINE SERVICES</p>
+          <h2 id="serviceTitle">业务办理</h2>
+        </div>
+        <button
+          class="icon-btn"
+          data-close="serviceDialog"
+          aria-label="关闭服务窗口"
+        >
+          ×
+        </button>
+      </div>
+      <div id="serviceBody"></div>
+    </dialog>
+    <dialog id="settingsDialog" class="small-dialog">
+      <div class="drawer-heading">
+        <h2>对话设置</h2>
+        <button class="icon-btn" data-close="settingsDialog">×</button>
+      </div>
+      <label
+        >回答方式<select id="modeSelect">
+          <option value="agent">自然对话 Agent（推荐）</option>
+          <option value="offline">离线应急资料</option>
+          <option value="rag">实验：固定 RAG</option>
+          <option value="llm">实验：无资料 LLM</option>
+        </select></label
+      ><label class="check-label"
+        ><input id="debugCheckbox" type="checkbox" />显示资料与工具细节</label
+      ><button id="exportChat" class="secondary-button full">
+        导出当前对话
+      </button>
+      <p class="tiny muted">
+        切换方式保留记录。自然对话需要已配置的 DeepSeek API。
+      </p>
+    </dialog>
+    <dialog id="profileDialog" class="small-dialog">
+      <div class="drawer-heading">
+        <h2>个人账户</h2>
+        <button class="icon-btn" data-close="profileDialog">×</button>
+      </div>
+      <div id="profileDetails"></div>
+      <button id="logoutButton" class="secondary-button full">退出登录</button>
+    </dialog>
+    <dialog id="staffInviteDialog" class="small-dialog">
+      <div class="drawer-heading">
+        <h2>邀请工作人员</h2>
+        <button class="icon-btn" data-close="staffInviteDialog">×</button>
+      </div>
+      <p class="muted small">
+        将邀请码交给组员。对方在注册或登录时选择“工作人员 /
+        管理员”并填写邀请码，即可进入客服端。
+      </p>
+      <label
+        >一次性邀请码<input id="staffInviteCode" readonly autocomplete="off"
+      /></label>
+      <p class="tiny muted" id="staffInviteExpiry"></p>
+      <button id="copyStaffInvite" class="primary-button full">
+        复制邀请码
+      </button>
+    </dialog>
+    <div id="toast" class="toast" role="status" hidden></div>
+  </body>
+</html>

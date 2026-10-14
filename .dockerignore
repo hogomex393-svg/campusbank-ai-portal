@@ -1,0 +1,12 @@
+**
+!Dockerfile
+!requirements-web.lock.txt
+!bankbot/
+!bankbot/*.py
+!web/
+!web/*.html
+!web/*.css
+!web/*.js
+!data/
+!data/*.json
+!data/*.jsonl

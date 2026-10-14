@@ -1,0 +1,274 @@
+{
+  "run_time": "2026-10-14T15:50:06.795930+08:00",
+  "model": "deepseek-v4-pro",
+  "faq_sha256": "99acfc0f662cc8366b52e2127a88978dbacd1a894df93477c6dcff011ca2546f",
+  "note": "10 authored turns for language regression; keyword checks are proxies, not full answer quality ratings.",
+  "summary": {
+    "mode": "agent",
+    "turns": 10,
+    "language_pass": 10,
+    "keypoint_pass": 10,
+    "api_calls": 18,
+    "errors": 0,
+    "language_corrections": 1
+  },
+  "outputs": [
+    {
+      "case": "switch",
+      "input": "学生账户开户需要什么材料？",
+      "answer": "开设**学生账户**需要准备以下材料：\n\n- **带照片的身份证件**（如身份证、护照等）\n- **在读学生证明**（如学生证或学校开具的在读证明）\n- **地址证明**（如水电账单、租房合同等）\n\n另外提醒一下，学生账户面向**年满 18 岁的在读学生**，且不收取账户月费。\n\n需要我帮您进入网上开户申请流程吗？",
+      "expected_language": "zh",
+      "language": "zh",
+      "language_pass": true,
+      "keypoint_pass": true,
+      "mode": "agent",
+      "source_ids": [
+        "PRODUCT_STUDENT"
+      ],
+      "tool_names": [
+        "get_product_info"
+      ],
+      "api_calls": 2,
+      "usage": {
+        "prompt_tokens": 2747,
+        "completion_tokens": 147,
+        "total_tokens": 2894
+      },
+      "error": null,
+      "latency_ms": 4382,
+      "language_corrections": 0,
+      "actions": []
+    },
+    {
+      "case": "switch",
+      "input": "那月费是多少？",
+      "answer": "学生账户**不收取账户月费**。只有国际转账等可选服务才会另外收费哦。",
+      "expected_language": "zh",
+      "language": "zh",
+      "language_pass": true,
+      "keypoint_pass": true,
+      "mode": "agent",
+      "source_ids": [],
+      "tool_names": [],
+      "api_calls": 1,
+      "usage": {
+        "prompt_tokens": 1641,
+        "completion_tokens": 21,
+        "total_tokens": 1662
+      },
+      "error": null,
+      "latency_ms": 1219,
+      "language_corrections": 0,
+      "actions": []
+    },
+    {
+      "case": "switch",
+      "input": "What about the monthly fee?",
+      "answer": "The Student Account has **no monthly account fee**. Only optional services like international transfers carry separate charges.",
+      "expected_language": "en",
+      "language": "en",
+      "language_pass": true,
+      "keypoint_pass": true,
+      "mode": "agent",
+      "source_ids": [],
+      "tool_names": [],
+      "api_calls": 1,
+      "usage": {
+        "prompt_tokens": 1671,
+        "completion_tokens": 20,
+        "total_tokens": 1691
+      },
+      "error": null,
+      "latency_ms": 756,
+      "language_corrections": 0,
+      "actions": []
+    },
+    {
+      "case": "branch",
+      "input": "最近的网点在哪里？",
+      "answer": "您好，我很乐意帮您查找附近的 CampusBank 网点。请问您在哪个城市呢？我可以帮您查询具体的网点地址和营业时间。",
+      "expected_language": "zh",
+      "language": "zh",
+      "language_pass": true,
+      "keypoint_pass": true,
+      "mode": "agent",
+      "source_ids": [],
+      "tool_names": [],
+      "api_calls": 1,
+      "usage": {
+        "prompt_tokens": 1204,
+        "completion_tokens": 30,
+        "total_tokens": 1234
+      },
+      "error": null,
+      "latency_ms": 1645,
+      "language_corrections": 0,
+      "actions": []
+    },
+    {
+      "case": "branch",
+      "input": "London",
+      "answer": "在伦敦的 CampusBank 网点信息如下：\n\n**CampusBank 伦敦网点**\n- 地址：20 Learning Street, London\n- 营业时间：周一至周五 09:00—17:00；周六 10:00—13:00\n\n如果您需要预约前往该网点办理业务，我可以帮您安排预约窗口，您只需点击下方按钮即可进入排队。需要我帮您预约吗？",
+      "expected_language": "zh",
+      "language": "zh",
+      "language_pass": true,
+      "keypoint_pass": true,
+      "mode": "agent",
+      "source_ids": [
+        "BR_LONDON"
+      ],
+      "tool_names": [
+        "find_branch"
+      ],
+      "api_calls": 2,
+      "usage": {
+        "prompt_tokens": 2674,
+        "completion_tokens": 131,
+        "total_tokens": 2805
+      },
+      "error": null,
+      "latency_ms": 4369,
+      "language_corrections": 0,
+      "actions": []
+    },
+    {
+      "case": "chinese_faq",
+      "input": "国际转账手续费是多少？",
+      "answer": "国际转账每笔收取 **8 英镑**手续费。请注意，其他银行或货币兑换环节可能另收费用（这些不在本演示资料中列明）。",
+      "expected_language": "zh",
+      "language": "zh",
+      "language_pass": true,
+      "keypoint_pass": true,
+      "mode": "agent",
+      "source_ids": [
+        "PAY_INTERNATIONAL_FEE",
+        "PAY_INTERNATIONAL_TIME",
+        "PAY_INTERNATIONAL_DETAILS"
+      ],
+      "tool_names": [
+        "search_bank_faq"
+      ],
+      "api_calls": 2,
+      "usage": {
+        "prompt_tokens": 3096,
+        "completion_tokens": 103,
+        "total_tokens": 3199
+      },
+      "error": null,
+      "latency_ms": 3904,
+      "language_corrections": 0,
+      "actions": []
+    },
+    {
+      "case": "english_to_chinese",
+      "input": "What documents do I need for a student account?",
+      "answer": "For a CampusBank Student Account, you'll need to bring three documents:\n\n- **Photo ID** (such as a passport or driver's licence)\n- **Proof of student status** (e.g. enrolment letter or student card)\n- **Proof of address** (e.g. a recent utility bill or bank statement)\n\nYou also need to be aged 18 or over and enrolled as a student. Would you like help starting an application?",
+      "expected_language": "en",
+      "language": "en",
+      "language_pass": true,
+      "keypoint_pass": true,
+      "mode": "agent",
+      "source_ids": [
+        "PRODUCT_STUDENT"
+      ],
+      "tool_names": [
+        "get_product_info"
+      ],
+      "api_calls": 2,
+      "usage": {
+        "prompt_tokens": 2754,
+        "completion_tokens": 147,
+        "total_tokens": 2901
+      },
+      "error": null,
+      "latency_ms": 3874,
+      "language_corrections": 0,
+      "actions": []
+    },
+    {
+      "case": "english_to_chinese",
+      "input": "我的银行卡丢了怎么办？",
+      "answer": "银行卡丢了，请按以下步骤处理：\n\n1. **立即冻结卡片**——在演示银行应用中冻结丢失的借记卡。\n2. **联系客服**——告知卡片遗失情况。\n\n补卡需要支付 **5 英镑**费用。请注意，我无法直接帮你冻结银行卡，请务必先在应用里操作。\n\n需要我为你准备补卡申请窗口吗？",
+      "expected_language": "zh",
+      "language": "zh",
+      "language_pass": true,
+      "keypoint_pass": true,
+      "mode": "agent",
+      "source_ids": [
+        "CARD_LOST",
+        "CARD_ACTIVATE",
+        "CARD_DECLINED"
+      ],
+      "tool_names": [
+        "search_bank_faq"
+      ],
+      "api_calls": 2,
+      "usage": {
+        "prompt_tokens": 3953,
+        "completion_tokens": 141,
+        "total_tokens": 4094
+      },
+      "error": null,
+      "latency_ms": 6200,
+      "language_corrections": 0,
+      "actions": []
+    },
+    {
+      "case": "service_then_language_switch",
+      "input": "我想开学生账户，可以在网上申请吗？请给我办理入口，简短回答就好。",
+      "answer": "请点击下方按钮进入学生账户在线申请入口。",
+      "expected_language": "zh",
+      "language": "zh",
+      "language_pass": true,
+      "keypoint_pass": true,
+      "mode": "agent",
+      "source_ids": [
+        "PRODUCT_STUDENT"
+      ],
+      "tool_names": [
+        "get_product_info",
+        "open_service_window"
+      ],
+      "api_calls": 3,
+      "usage": {
+        "prompt_tokens": 4471,
+        "completion_tokens": 132,
+        "total_tokens": 4603
+      },
+      "error": null,
+      "latency_ms": 4070,
+      "language_corrections": 0,
+      "actions": [
+        {
+          "service_id": "open_account",
+          "title": "在线开户申请",
+          "title_en": "Open an account",
+          "category": "accounts",
+          "description": "选择账户，核对材料，登记演示申请。"
+        }
+      ]
+    },
+    {
+      "case": "service_then_language_switch",
+      "input": "Before I apply, what documents do I need? Please keep it brief.",
+      "answer": "To open the Student Account, you need:\n\n- A photo ID\n- Proof of student status\n- Proof of address\n\nOnce you have these, click the application link below to get started.",
+      "expected_language": "en",
+      "language": "en",
+      "language_pass": true,
+      "keypoint_pass": true,
+      "mode": "agent",
+      "source_ids": [],
+      "tool_names": [],
+      "api_calls": 2,
+      "usage": {
+        "prompt_tokens": 2955,
+        "completion_tokens": 78,
+        "total_tokens": 3033
+      },
+      "error": null,
+      "latency_ms": 3485,
+      "language_corrections": 1,
+      "actions": []
+    }
+  ]
+}

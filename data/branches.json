@@ -1,0 +1,35 @@
+[
+  {
+    "branch_id": "BR_LANCASTER",
+    "city": "Lancaster",
+    "name": "CampusBank Lancaster",
+    "address": "10 Campus Way, Lancaster",
+    "hours": "Monday to Friday 09:00-17:00",
+    "fictional": true,
+    "name_zh": "CampusBank 兰开斯特网点",
+    "address_zh": "10 Campus Way, Lancaster",
+    "hours_zh": "周一至周五 09:00—17:00"
+  },
+  {
+    "branch_id": "BR_LONDON",
+    "city": "London",
+    "name": "CampusBank London",
+    "address": "20 Learning Street, London",
+    "hours": "Monday to Friday 09:00-17:00; Saturday 10:00-13:00",
+    "fictional": true,
+    "name_zh": "CampusBank 伦敦网点",
+    "address_zh": "20 Learning Street, London",
+    "hours_zh": "周一至周五 09:00—17:00；周六 10:00—13:00"
+  },
+  {
+    "branch_id": "BR_MANCHESTER",
+    "city": "Manchester",
+    "name": "CampusBank Manchester",
+    "address": "30 Library Road, Manchester",
+    "hours": "Monday to Friday 09:00-17:00",
+    "fictional": true,
+    "name_zh": "CampusBank 曼彻斯特网点",
+    "address_zh": "30 Library Road, Manchester",
+    "hours_zh": "周一至周五 09:00—17:00"
+  }
+]

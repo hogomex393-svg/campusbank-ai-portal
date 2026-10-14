@@ -1,0 +1,16 @@
+{
+  "url": "https://campusbank-production.up.railway.app",
+  "version": "2.2.1",
+  "https_health": true,
+  "secure_cookie": true,
+  "first_customer_not_admin": true,
+  "real_deepseek_agent_mode": "agent",
+  "real_deepseek_error": null,
+  "human_support_action": true,
+  "handoff_ticket_created": true,
+  "account_credentials_recorded_only_locally": true,
+  "provider_restart_persistence_verified": true,
+  "customer_readonly_history_browser_verified": true,
+  "customer_history_reply_input_count": 0,
+  "evidence_type": "Recorded deployment smoke checks; not a production audit or a participant study."
+}

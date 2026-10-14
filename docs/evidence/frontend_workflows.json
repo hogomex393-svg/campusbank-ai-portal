@@ -1,0 +1,21 @@
+{
+  "customer_history_has_no_reply_controls": true,
+  "staff_controls_require_active_staff_role": true,
+  "resolved_ticket_is_read_only": true,
+  "chat_handoff_posts_context": true,
+  "staff_queue_auto_syncs": true,
+  "staff_reply_draft_survives_customer_update": true,
+  "manual_reply_visible_in_customer_chat": true,
+  "invitation_and_role_picker_wired": true,
+  "test_type": "offline DOM with mock HTTP responses",
+  "categories": 6,
+  "history_after_new_chat": true,
+  "all_messages_preserved": true,
+  "service_button_opens_form": true,
+  "registration_form_wired": true,
+  "confirmation_form_posts_request": true,
+  "requests_visible": true,
+  "official_reference_links": 4,
+  "user_and_model_html_escaped": true,
+  "real_browser_layout_inspected": false
+}

@@ -1,0 +1,19 @@
+{
+  "observed_date": "2026-10-14",
+  "source": "curated public repository snapshot, separate from the private running project",
+  "python": "3.13.3",
+  "python_suite": {
+    "command": "python -m unittest discover -v",
+    "tests_run": 82,
+    "passed": true
+  },
+  "frontend": {
+    "command": "node scripts/verify_frontend.mjs",
+    "node": "24.19.0",
+    "passed": true,
+    "scope": "jsdom with mock HTTP; no live model"
+  },
+  "private_config_published": false,
+  "live_accounts_or_chat_database_published": false,
+  "note": "Test claims apply to the tested behaviors. See evaluation.md for limitations and the observed live language-following failure."
+}

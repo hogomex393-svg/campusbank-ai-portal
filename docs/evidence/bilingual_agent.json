@@ -1,0 +1,196 @@
+{
+  "run_time": "2026-10-11T16:18:37.760363+08:00",
+  "model": "deepseek-v4-pro",
+  "faq_sha256": "99acfc0f662cc8366b52e2127a88978dbacd1a894df93477c6dcff011ca2546f",
+  "note": "Eight authored turns for language regression; keyword checks are proxies, not full answer quality ratings.",
+  "summary": {
+    "mode": "agent",
+    "turns": 8,
+    "language_pass": 8,
+    "keypoint_pass": 8,
+    "api_calls": 12,
+    "errors": 0
+  },
+  "outputs": [
+    {
+      "case": "switch",
+      "input": "学生账户开户需要什么材料？",
+      "answer": "开立学生账户需要三类材料：\n\n1. **带照片的身份证件**（如身份证、护照或学生证）\n2. **在读学生证明**（如录取通知书或在校注册证明）\n3. **地址证明**（如水电账单或租赁合同）\n\n另外请注意，学生账户面向年满 18 岁的在读学生，且不收取月费，也不支付利息。如需办理，可通过线上申请或前往就近的 CampusBank 网点。",
+      "expected_language": "zh",
+      "language": "zh",
+      "language_pass": true,
+      "keypoint_pass": true,
+      "mode": "agent",
+      "source_ids": [
+        "PRODUCT_STUDENT"
+      ],
+      "tool_names": [
+        "get_product_info"
+      ],
+      "api_calls": 2,
+      "usage": {
+        "prompt_tokens": 1710,
+        "completion_tokens": 142,
+        "total_tokens": 1852
+      },
+      "error": null,
+      "latency_ms": 3055
+    },
+    {
+      "case": "switch",
+      "input": "那月费是多少？",
+      "answer": "学生账户**不收取账户月费**。不过，国际转账等可选服务会另外收费。",
+      "expected_language": "zh",
+      "language": "zh",
+      "language_pass": true,
+      "keypoint_pass": true,
+      "mode": "agent",
+      "source_ids": [],
+      "tool_names": [],
+      "api_calls": 1,
+      "usage": {
+        "prompt_tokens": 1122,
+        "completion_tokens": 21,
+        "total_tokens": 1143
+      },
+      "error": null,
+      "latency_ms": 1459
+    },
+    {
+      "case": "switch",
+      "input": "What about the monthly fee?",
+      "answer": "The Student Account has **no monthly account fee**. Optional services such as international transfers do have separate fees.",
+      "expected_language": "en",
+      "language": "en",
+      "language_pass": true,
+      "keypoint_pass": true,
+      "mode": "agent",
+      "source_ids": [],
+      "tool_names": [],
+      "api_calls": 1,
+      "usage": {
+        "prompt_tokens": 1152,
+        "completion_tokens": 21,
+        "total_tokens": 1173
+      },
+      "error": null,
+      "latency_ms": 1348
+    },
+    {
+      "case": "branch",
+      "input": "最近的网点在哪里？",
+      "answer": "你想查询哪个城市的网点？演示网点位于兰开斯特、伦敦和曼彻斯特。",
+      "expected_language": "zh",
+      "language": "zh",
+      "language_pass": true,
+      "keypoint_pass": true,
+      "mode": "clarification",
+      "source_ids": [],
+      "tool_names": [],
+      "api_calls": 0,
+      "usage": {},
+      "error": null,
+      "latency_ms": 3
+    },
+    {
+      "case": "branch",
+      "input": "London",
+      "answer": "伦敦的网点是 **CampusBank 伦敦网点**，地址为 20 Learning Street, London。\n\n营业时间：周一至周五 09:00—17:00；周六 10:00—13:00。",
+      "expected_language": "zh",
+      "language": "zh",
+      "language_pass": true,
+      "keypoint_pass": true,
+      "mode": "agent",
+      "source_ids": [
+        "BR_LONDON"
+      ],
+      "tool_names": [
+        "find_branch"
+      ],
+      "api_calls": 2,
+      "usage": {
+        "prompt_tokens": 1624,
+        "completion_tokens": 91,
+        "total_tokens": 1715
+      },
+      "error": null,
+      "latency_ms": 2806
+    },
+    {
+      "case": "chinese_faq",
+      "input": "国际转账手续费是多少？",
+      "answer": "国际转账每笔收取 8 英镑手续费。其他银行或货币兑换可能另收费用，这些未包含在演示资料中。",
+      "expected_language": "zh",
+      "language": "zh",
+      "language_pass": true,
+      "keypoint_pass": true,
+      "mode": "agent",
+      "source_ids": [
+        "PAY_INTERNATIONAL_FEE",
+        "PAY_INTERNATIONAL_TIME",
+        "PAY_INTERNATIONAL_DETAILS"
+      ],
+      "tool_names": [
+        "search_bank_faq"
+      ],
+      "api_calls": 2,
+      "usage": {
+        "prompt_tokens": 2058,
+        "completion_tokens": 90,
+        "total_tokens": 2148
+      },
+      "error": null,
+      "latency_ms": 2811
+    },
+    {
+      "case": "english_to_chinese",
+      "input": "What documents do I need for a student account?",
+      "answer": "To open a CampusBank Student Account, you'll need:\n\n- A photo ID\n- Proof of student status\n- Proof of address\n\nNote that you must be an enrolled student aged 18 or above to qualify.",
+      "expected_language": "en",
+      "language": "en",
+      "language_pass": true,
+      "keypoint_pass": true,
+      "mode": "agent",
+      "source_ids": [
+        "PRODUCT_STUDENT"
+      ],
+      "tool_names": [
+        "get_product_info"
+      ],
+      "api_calls": 2,
+      "usage": {
+        "prompt_tokens": 1714,
+        "completion_tokens": 90,
+        "total_tokens": 1804
+      },
+      "error": null,
+      "latency_ms": 2988
+    },
+    {
+      "case": "english_to_chinese",
+      "input": "我的银行卡丢了怎么办？",
+      "answer": "请立即在演示银行应用中冻结丢失的借记卡，并联系 CampusBank 客服。补办新卡费用为 5 英镑；本助手无法为您实际冻结银行卡。",
+      "expected_language": "zh",
+      "language": "zh",
+      "language_pass": true,
+      "keypoint_pass": true,
+      "mode": "agent",
+      "source_ids": [
+        "CARD_LOST",
+        "CARD_ACTIVATE",
+        "CARD_DECLINED"
+      ],
+      "tool_names": [
+        "search_bank_faq"
+      ],
+      "api_calls": 2,
+      "usage": {
+        "prompt_tokens": 2803,
+        "completion_tokens": 93,
+        "total_tokens": 2896
+      },
+      "error": null,
+      "latency_ms": 2726
+    }
+  ]
+}

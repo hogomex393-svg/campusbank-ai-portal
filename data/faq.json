@@ -1,0 +1,1154 @@
+[
+  {
+    "faq_id": "ACC_STUDENT_DOCUMENTS",
+    "topic": "accounts",
+    "product": "student_account",
+    "attribute": "documents",
+    "question": "What documents do I need for a student account?",
+    "aliases": [
+      "What should I bring to open a student account?"
+    ],
+    "answer": "For the Student Account, bring a photo ID, proof of student status and proof of address.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "学生账户开户需要哪些材料？",
+    "aliases_zh": [
+      "学生开户要带什么证件？"
+    ],
+    "answer_zh": "开立学生账户需要带照片身份证件、在读学生证明和地址证明。"
+  },
+  {
+    "faq_id": "ACC_STUDENT_FEES",
+    "topic": "accounts",
+    "product": "student_account",
+    "attribute": "fees",
+    "question": "Does the student account have a monthly fee?",
+    "aliases": [
+      "Is the student account free each month?"
+    ],
+    "answer": "The Student Account has no monthly account fee. Optional international transfers have separate fees.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "学生账户有月费吗？",
+    "aliases_zh": [
+      "学生账户每个月收费吗？"
+    ],
+    "answer_zh": "学生账户不收取账户月费。国际转账等可选服务另外收费。"
+  },
+  {
+    "faq_id": "ACC_STUDENT_ELIGIBILITY",
+    "topic": "accounts",
+    "product": "student_account",
+    "attribute": "eligibility",
+    "question": "Who can open a student account?",
+    "aliases": [
+      "What is the minimum age for student banking?"
+    ],
+    "answer": "The demo Student Account is available to enrolled students aged 18 or above.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "谁可以开立学生账户？",
+    "aliases_zh": [
+      "学生账户要求多大年龄？"
+    ],
+    "answer_zh": "演示学生账户面向年满 18 岁的在读学生。"
+  },
+  {
+    "faq_id": "ACC_STUDENT_APPLY",
+    "topic": "accounts",
+    "product": "student_account",
+    "attribute": "apply",
+    "question": "How do I apply for a student account?",
+    "aliases": [
+      "Can I open a student account online?"
+    ],
+    "answer": "Apply for the Student Account through the demo online application or visit a CampusBank branch.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "怎样申请学生账户？",
+    "aliases_zh": [
+      "学生账户可以网上开户吗？"
+    ],
+    "answer_zh": "可以通过演示网上申请流程开立学生账户，也可以前往 CampusBank 网点办理。"
+  },
+  {
+    "faq_id": "ACC_EVERYDAY_FEES",
+    "topic": "accounts",
+    "product": "everyday_account",
+    "attribute": "fees",
+    "question": "What is the everyday account monthly fee?",
+    "aliases": [
+      "How much does a current account cost per month?"
+    ],
+    "answer": "The demo Everyday Account costs GBP 3 per month.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "日常账户的月费是多少？",
+    "aliases_zh": [
+      "普通账户每月多少钱？"
+    ],
+    "answer_zh": "演示日常账户每月收费 3 英镑。"
+  },
+  {
+    "faq_id": "ACC_EVERYDAY_DOCUMENTS",
+    "topic": "accounts",
+    "product": "everyday_account",
+    "attribute": "documents",
+    "question": "What documents do I need for an everyday account?",
+    "aliases": [
+      "What identification is needed for a current account?"
+    ],
+    "answer": "For the Everyday Account, bring a photo ID and proof of address.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "开立日常账户需要哪些材料？",
+    "aliases_zh": [
+      "普通账户开户要带什么证明？"
+    ],
+    "answer_zh": "开立日常账户需要照片身份证件和地址证明。"
+  },
+  {
+    "faq_id": "ACC_CLOSE",
+    "topic": "accounts",
+    "product": "",
+    "attribute": "close",
+    "question": "How can I close my account?",
+    "aliases": [
+      "How do I terminate a bank account?"
+    ],
+    "answer": "Contact CampusBank support or visit a branch to request closure. Settle any outstanding balance and move recurring payments first.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "怎样关闭银行账户？",
+    "aliases_zh": [
+      "账户如何注销？"
+    ],
+    "answer_zh": "请联系客服或前往网点申请关闭账户。关闭前先结清未付余额，并迁移定期付款安排。"
+  },
+  {
+    "faq_id": "ACC_ADDRESS",
+    "topic": "accounts",
+    "product": "",
+    "attribute": "address",
+    "question": "How do I update my address?",
+    "aliases": [
+      "Where can I change my residential address?"
+    ],
+    "answer": "Update your address in the demo app's Profile section or visit a branch with proof of the new address.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "怎样更新我的地址？",
+    "aliases_zh": [
+      "搬家后如何修改住址？"
+    ],
+    "answer_zh": "可以在演示应用的个人资料中更新地址，也可以携带新地址证明到网点办理。"
+  },
+  {
+    "faq_id": "CARD_LOST",
+    "topic": "cards",
+    "product": "debit_card",
+    "attribute": "lost",
+    "question": "What should I do if I lose my debit card?",
+    "aliases": [
+      "My bank card was stolen; what should I do?"
+    ],
+    "answer": "Freeze the lost Debit Card in the demo banking app and contact CampusBank support. A replacement costs GBP 5; this assistant cannot freeze cards itself.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "借记卡丢了怎么办？",
+    "aliases_zh": [
+      "银行卡遗失或被盗如何挂失？"
+    ],
+    "answer_zh": "请在演示银行应用中冻结丢失的借记卡，并联系客服。补卡费用为 5 英镑；本助手不能实际冻结银行卡。"
+  },
+  {
+    "faq_id": "CARD_REPLACEMENT",
+    "topic": "cards",
+    "product": "debit_card",
+    "attribute": "replacement",
+    "question": "How can I replace a damaged debit card?",
+    "aliases": [
+      "Can I order a new card if mine is broken?"
+    ],
+    "answer": "Request a replacement Debit Card in the demo app or through support. The replacement costs GBP 5 and arrives in 5 working days.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "借记卡损坏后如何补办？",
+    "aliases_zh": [
+      "银行卡坏了可以申请新卡吗？"
+    ],
+    "answer_zh": "可以在演示应用中或通过客服申请补办借记卡。补卡费用为 5 英镑，预计 5 个工作日送达。"
+  },
+  {
+    "faq_id": "CARD_ACTIVATE",
+    "topic": "cards",
+    "product": "debit_card",
+    "attribute": "activate",
+    "question": "How do I activate my debit card?",
+    "aliases": [
+      "How can I start using my new bank card?"
+    ],
+    "answer": "Activate the demo Debit Card from the Cards section in the banking app. Follow the app instructions; do not share card details with this assistant.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "怎样激活借记卡？",
+    "aliases_zh": [
+      "新银行卡如何启用？"
+    ],
+    "answer_zh": "请在演示银行应用的银行卡页面激活借记卡，按应用指引操作。不要向本助手提供银行卡信息。"
+  },
+  {
+    "faq_id": "CARD_PIN",
+    "topic": "cards",
+    "product": "debit_card",
+    "attribute": "pin",
+    "question": "What if I forget my debit card PIN?",
+    "aliases": [
+      "I cannot remember my bank card PIN."
+    ],
+    "answer": "Use the demo app's secure PIN-help process or contact support. Do not type your PIN into this chat.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "忘记借记卡 PIN 怎么办？",
+    "aliases_zh": [
+      "银行卡取款密码忘了怎么办？"
+    ],
+    "answer_zh": "请使用演示应用中的安全 PIN 帮助流程，或联系客服。不要在聊天中输入你的 PIN。"
+  },
+  {
+    "faq_id": "CARD_CREDIT_DOCUMENTS",
+    "topic": "cards",
+    "product": "credit_card",
+    "attribute": "documents",
+    "question": "What documents are required for a credit card?",
+    "aliases": [
+      "What paperwork is needed for a credit card application?"
+    ],
+    "answer": "For the demo Credit Card, provide a photo ID, proof of address and proof of income.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "申请信用卡需要哪些材料？",
+    "aliases_zh": [
+      "办理信用卡需要什么证明？"
+    ],
+    "answer_zh": "申请演示信用卡需要照片身份证件、地址证明和收入证明。"
+  },
+  {
+    "faq_id": "CARD_CREDIT_FEES",
+    "topic": "cards",
+    "product": "credit_card",
+    "attribute": "fees",
+    "question": "Is there an annual credit card fee?",
+    "aliases": [
+      "What are the credit card charges?"
+    ],
+    "answer": "The fictional Credit Card has no annual fee; late payments incur a GBP 10 demo fee.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "信用卡收年费吗？",
+    "aliases_zh": [
+      "信用卡有哪些费用？"
+    ],
+    "answer_zh": "演示信用卡不收年费；逾期付款会产生 10 英镑的演示费用。"
+  },
+  {
+    "faq_id": "CARD_CREDIT_RATE",
+    "topic": "cards",
+    "product": "credit_card",
+    "attribute": "rate",
+    "question": "What interest rate does the credit card have?",
+    "aliases": [
+      "What is the credit card purchase rate?"
+    ],
+    "answer": "The fictional Credit Card has a 19% annual purchase interest rate. This is a demonstration value.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "信用卡的利率是多少？",
+    "aliases_zh": [
+      "信用卡消费年利率是多少？"
+    ],
+    "answer_zh": "虚构信用卡的消费年利率为 19%，仅用于演示。"
+  },
+  {
+    "faq_id": "CARD_DECLINED",
+    "topic": "cards",
+    "product": "",
+    "attribute": "declined",
+    "question": "Why was my card payment declined?",
+    "aliases": [
+      "My card transaction did not go through."
+    ],
+    "answer": "Check the card status, available funds and payment limit in the demo app. If the issue continues, contact CampusBank support; this assistant cannot inspect your transactions.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "刷卡付款被拒绝怎么办？",
+    "aliases_zh": [
+      "银行卡交易失败该找谁？"
+    ],
+    "answer_zh": "请在演示应用中检查银行卡状态、可用余额和付款限额。仍有问题请联系客服；本助手不能查看你的交易。"
+  },
+  {
+    "faq_id": "PAY_DOMESTIC_FEE",
+    "topic": "payments",
+    "product": "",
+    "attribute": "fees",
+    "question": "What is the domestic transfer fee?",
+    "aliases": [
+      "Does a local bank transfer cost anything?"
+    ],
+    "answer": "Demo domestic transfers are free. Check recipient details in the banking app before submitting a payment.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "国内转账的手续费是多少？",
+    "aliases_zh": [
+      "本地转账收费吗？"
+    ],
+    "answer_zh": "演示国内转账免费。提交付款前，请在银行应用中核对收款人信息。"
+  },
+  {
+    "faq_id": "PAY_DOMESTIC_TIME",
+    "topic": "payments",
+    "product": "",
+    "attribute": "time",
+    "question": "How long does a domestic transfer take?",
+    "aliases": [
+      "When will a local transfer arrive?"
+    ],
+    "answer": "Demo domestic transfers usually arrive within one working day. This assistant cannot track a real payment.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "国内转账多久到账？",
+    "aliases_zh": [
+      "本地汇款需要几个工作日？"
+    ],
+    "answer_zh": "演示国内转账通常在 1 个工作日内到账。本助手不能追踪真实付款。"
+  },
+  {
+    "faq_id": "PAY_INTERNATIONAL_FEE",
+    "topic": "payments",
+    "product": "",
+    "attribute": "fees",
+    "question": "What is the international transfer fee?",
+    "aliases": [
+      "How much does sending money abroad cost?"
+    ],
+    "answer": "The fictional international transfer fee is GBP 8 per payment. Other banks or currency conversion may add charges that are not specified in this demo.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "国际转账手续费是多少？",
+    "aliases_zh": [
+      "向国外汇款要多少钱？"
+    ],
+    "answer_zh": "虚构国际转账每笔收取 8 英镑手续费。其他银行或货币兑换可能另收费，这些费用未在演示资料中规定。"
+  },
+  {
+    "faq_id": "PAY_INTERNATIONAL_TIME",
+    "topic": "payments",
+    "product": "",
+    "attribute": "time",
+    "question": "How long do international transfers take?",
+    "aliases": [
+      "When does an overseas bank payment arrive?"
+    ],
+    "answer": "Demo international transfers usually take 3 to 5 working days. Weekends and holidays are not working days.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "国际转账多久到账？",
+    "aliases_zh": [
+      "境外汇款需要几天？"
+    ],
+    "answer_zh": "演示国际转账通常需要 3 至 5 个工作日。周末和节假日不计入工作日。"
+  },
+  {
+    "faq_id": "PAY_INTERNATIONAL_DETAILS",
+    "topic": "payments",
+    "product": "",
+    "attribute": "documents",
+    "question": "What details are needed for an international transfer?",
+    "aliases": [
+      "Do I need an IBAN and SWIFT code to send money abroad?"
+    ],
+    "answer": "For a demo international transfer, enter the recipient name, destination country, account or IBAN and SWIFT/BIC code in the banking app. Do not submit account details in this chat.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "国际转账需要哪些收款人信息？",
+    "aliases_zh": [
+      "境外汇款需要 IBAN 和 SWIFT 吗？"
+    ],
+    "answer_zh": "演示国际转账需要在银行应用中填写收款人姓名、目的国家、账户或 IBAN，以及 SWIFT/BIC 代码。不要在聊天中提交账户信息。"
+  },
+  {
+    "faq_id": "PAY_CANCEL",
+    "topic": "payments",
+    "product": "",
+    "attribute": "cancel",
+    "question": "Can I cancel a pending transfer?",
+    "aliases": [
+      "How do I stop a bank payment before it is sent?"
+    ],
+    "answer": "Check the payment status in the demo app and contact support promptly. Completed transfers may not be cancellable; the assistant cannot cancel payments.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "可以取消尚未完成的转账吗？",
+    "aliases_zh": [
+      "转账没发出时如何撤销？"
+    ],
+    "answer_zh": "请在演示应用中检查付款状态，并尽快联系客服。已完成的转账可能无法取消，本助手不能撤销付款。"
+  },
+  {
+    "faq_id": "PAY_STANDING_ORDER",
+    "topic": "payments",
+    "product": "",
+    "attribute": "recurring",
+    "question": "How do I set up a standing order?",
+    "aliases": [
+      "Can I arrange the same transfer every month?"
+    ],
+    "answer": "Use the demo app's Payments section to create a standing order with an amount and schedule. You can review or cancel it in the app.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "如何设置定期转账？",
+    "aliases_zh": [
+      "可以安排每个月自动汇款吗？"
+    ],
+    "answer_zh": "可以在演示应用的付款页面设置固定金额和时间的定期转账，并在应用中查看或取消。"
+  },
+  {
+    "faq_id": "PAY_FAILED",
+    "topic": "payments",
+    "product": "",
+    "attribute": "failed",
+    "question": "What should I do about a failed transfer?",
+    "aliases": [
+      "My transfer failed; how can I get help?"
+    ],
+    "answer": "Check the transfer status and recipient information in the demo app. Contact support with the app's reference number through the secure support channel.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "转账失败了怎么办？",
+    "aliases_zh": [
+      "汇款报错怎样获得帮助？"
+    ],
+    "answer_zh": "请在演示应用中检查转账状态和收款人信息，并通过安全客服渠道提供应用中的参考编号。"
+  },
+  {
+    "faq_id": "SAVE_RATE",
+    "topic": "savings",
+    "product": "savings_account",
+    "attribute": "rate",
+    "question": "What is the savings account interest rate?",
+    "aliases": [
+      "How much interest does the savings account pay?"
+    ],
+    "answer": "The fictional Savings Account pays 2% annual interest. This is a demo value, not a real bank rate.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "储蓄账户利率是多少？",
+    "aliases_zh": [
+      "储蓄账户每年有多少利息？"
+    ],
+    "answer_zh": "虚构储蓄账户的年利率为 2%。这是演示值，并非真实银行报价。"
+  },
+  {
+    "faq_id": "SAVE_FEES",
+    "topic": "savings",
+    "product": "savings_account",
+    "attribute": "fees",
+    "question": "Does the savings account have a monthly fee?",
+    "aliases": [
+      "Are there regular charges for the savings account?"
+    ],
+    "answer": "The demo Savings Account has no monthly account fee.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "储蓄账户每月收费吗？",
+    "aliases_zh": [
+      "储蓄账户有月费吗？"
+    ],
+    "answer_zh": "演示储蓄账户不收取账户月费。"
+  },
+  {
+    "faq_id": "SAVE_DOCUMENTS",
+    "topic": "savings",
+    "product": "savings_account",
+    "attribute": "documents",
+    "question": "What documents do I need for a savings account?",
+    "aliases": [
+      "What should I bring to open savings?"
+    ],
+    "answer": "For the Savings Account, bring a photo ID and proof of address.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "储蓄账户开户需要什么材料？",
+    "aliases_zh": [
+      "开储蓄账户要带哪些证件？"
+    ],
+    "answer_zh": "开立储蓄账户需要照片身份证件和地址证明。"
+  },
+  {
+    "faq_id": "SAVE_MINIMUM",
+    "topic": "savings",
+    "product": "savings_account",
+    "attribute": "minimum",
+    "question": "What is the minimum opening deposit for savings?",
+    "aliases": [
+      "How much money is needed to start a savings account?"
+    ],
+    "answer": "The fictional Savings Account requires an opening deposit of GBP 10.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "储蓄账户最低开户存款是多少？",
+    "aliases_zh": [
+      "储蓄账户起存金额是多少？"
+    ],
+    "answer_zh": "虚构储蓄账户的最低开户存款为 10 英镑。"
+  },
+  {
+    "faq_id": "SAVE_WITHDRAW",
+    "topic": "savings",
+    "product": "savings_account",
+    "attribute": "withdraw",
+    "question": "Can I withdraw money from my savings account?",
+    "aliases": [
+      "Is early withdrawal allowed for ordinary savings?"
+    ],
+    "answer": "The demo Savings Account allows withdrawals without an early-withdrawal penalty. It is not a fixed-term deposit.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "储蓄账户提前取款有罚金吗？",
+    "aliases_zh": [
+      "普通储蓄账户可以随时取钱吗？"
+    ],
+    "answer_zh": "演示储蓄账户允许取款，不收提前取款罚金。它不是定期存款产品。"
+  },
+  {
+    "faq_id": "SAVE_INTEREST_PAYMENT",
+    "topic": "savings",
+    "product": "savings_account",
+    "attribute": "payment",
+    "question": "When is savings interest paid?",
+    "aliases": [
+      "How often is interest added to savings?"
+    ],
+    "answer": "In this fictional demo, Savings Account interest is credited monthly.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "储蓄利息什么时候到账？",
+    "aliases_zh": [
+      "储蓄利息多久结算一次？"
+    ],
+    "answer_zh": "虚构储蓄账户每月计入利息。"
+  },
+  {
+    "faq_id": "SAVE_APPLY",
+    "topic": "savings",
+    "product": "savings_account",
+    "attribute": "apply",
+    "question": "How do I open a savings account?",
+    "aliases": [
+      "Can I apply for savings through the app?"
+    ],
+    "answer": "Open a Savings Account through the demo app or at a CampusBank branch.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "怎样开立储蓄账户？",
+    "aliases_zh": [
+      "可以通过应用申请储蓄账户吗？"
+    ],
+    "answer_zh": "可以通过演示应用或前往 CampusBank 网点开立储蓄账户。"
+  },
+  {
+    "faq_id": "SAVE_FIXED_TERM",
+    "topic": "savings",
+    "product": "",
+    "attribute": "fixed",
+    "question": "Does CampusBank offer fixed-term deposits?",
+    "aliases": [
+      "Can I put money into a fixed deposit?"
+    ],
+    "answer": "Fixed-term deposits are not included in the CampusBank demo catalogue. Contact support for products outside this demo.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "有定期存款产品吗？",
+    "aliases_zh": [
+      "CampusBank 提供固定期限存款吗？"
+    ],
+    "answer_zh": "CampusBank 演示产品目录不包含定期存款。关于演示范围以外的产品，请咨询客服。"
+  },
+  {
+    "faq_id": "LOAN_DOCUMENTS",
+    "topic": "loans",
+    "product": "personal_loan",
+    "attribute": "documents",
+    "question": "What documents are needed for a personal loan?",
+    "aliases": [
+      "What paperwork should I provide for a loan?"
+    ],
+    "answer": "For the demo Personal Loan, provide a photo ID, proof of address and proof of income.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "个人贷款需要什么材料？",
+    "aliases_zh": [
+      "申请贷款要提交哪些证明？"
+    ],
+    "answer_zh": "演示个人贷款需要照片身份证件、地址证明和收入证明。"
+  },
+  {
+    "faq_id": "LOAN_ELIGIBILITY",
+    "topic": "loans",
+    "product": "personal_loan",
+    "attribute": "eligibility",
+    "question": "Who is eligible for a personal loan?",
+    "aliases": [
+      "What are the personal loan requirements?"
+    ],
+    "answer": "The demo Personal Loan requires age 18 or above and an affordability review; eligibility is not approval.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "申请个人贷款有什么条件？",
+    "aliases_zh": [
+      "谁可以申请个人贷款？"
+    ],
+    "answer_zh": "演示个人贷款要求申请人年满 18 岁，并接受偿还能力审核。符合条件不等于获批。"
+  },
+  {
+    "faq_id": "LOAN_RATE",
+    "topic": "loans",
+    "product": "personal_loan",
+    "attribute": "rate",
+    "question": "What is the personal loan interest rate?",
+    "aliases": [
+      "Is the personal loan rate fixed?"
+    ],
+    "answer": "The fictional Personal Loan has a fixed 8% annual interest rate. This is a demo value.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "个人贷款利率是多少？",
+    "aliases_zh": [
+      "个人贷款是固定利率吗？"
+    ],
+    "answer_zh": "虚构个人贷款的固定年利率为 8%，仅用于演示。"
+  },
+  {
+    "faq_id": "LOAN_FEES",
+    "topic": "loans",
+    "product": "personal_loan",
+    "attribute": "fees",
+    "question": "Is there a personal loan application fee?",
+    "aliases": [
+      "Does applying for a loan cost anything?"
+    ],
+    "answer": "The demo Personal Loan has no application fee. Consult the loan agreement for other charges.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "申请个人贷款收费吗？",
+    "aliases_zh": [
+      "个人贷款有申请费吗？"
+    ],
+    "answer_zh": "演示个人贷款不收申请费。其他费用以贷款协议为准。"
+  },
+  {
+    "faq_id": "LOAN_APPLY",
+    "topic": "loans",
+    "product": "personal_loan",
+    "attribute": "apply",
+    "question": "How can I apply for a personal loan?",
+    "aliases": [
+      "Can I submit a personal loan application online?"
+    ],
+    "answer": "Apply for the Personal Loan online or request an appointment at a CampusBank branch.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "怎样申请个人贷款？",
+    "aliases_zh": [
+      "个人贷款可以线上办理吗？"
+    ],
+    "answer_zh": "可以在线申请演示个人贷款，也可以预约 CampusBank 网点。"
+  },
+  {
+    "faq_id": "LOAN_TIME",
+    "topic": "loans",
+    "product": "personal_loan",
+    "attribute": "time",
+    "question": "How long does a personal loan decision take?",
+    "aliases": [
+      "When will I hear back about my loan application?"
+    ],
+    "answer": "The demo bank aims to review a complete Personal Loan application within 5 working days. This does not guarantee approval.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "个人贷款审核多久出结果？",
+    "aliases_zh": [
+      "完整贷款申请需要审查几天？"
+    ],
+    "answer_zh": "演示银行计划在 5 个工作日内审查完整的个人贷款申请，但不保证批准。"
+  },
+  {
+    "faq_id": "LOAN_REPAY",
+    "topic": "loans",
+    "product": "personal_loan",
+    "attribute": "repay",
+    "question": "How do I repay a personal loan?",
+    "aliases": [
+      "Are loan repayments made monthly?"
+    ],
+    "answer": "The demo Personal Loan uses monthly repayments by direct debit. Consult your loan agreement for the schedule; the assistant cannot see your agreement.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "个人贷款怎样还款？",
+    "aliases_zh": [
+      "贷款是每月自动扣款吗？"
+    ],
+    "answer_zh": "演示个人贷款通过直接扣款按月还款。具体时间表请查看贷款协议，本助手不能访问你的协议。"
+  },
+  {
+    "faq_id": "LOAN_EARLY",
+    "topic": "loans",
+    "product": "personal_loan",
+    "attribute": "early",
+    "question": "Can I repay a personal loan early?",
+    "aliases": [
+      "Can I clear my loan before the end of the term?"
+    ],
+    "answer": "Contact support to request a demo early-repayment quote. Any settlement charge is determined by the agreement, not by this assistant.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "个人贷款可以提前还清吗？",
+    "aliases_zh": [
+      "如何提前偿还个人贷款？"
+    ],
+    "answer_zh": "请联系客服获取演示提前还款报价。结清费用由协议决定，不能由本助手确定。"
+  },
+  {
+    "faq_id": "DIG_REGISTER",
+    "topic": "digital",
+    "product": "",
+    "attribute": "register",
+    "question": "How do I register for online banking?",
+    "aliases": [
+      "How can I create online banking access?"
+    ],
+    "answer": "Use the demo bank's online registration flow or request help at a branch. Follow its secure verification steps outside this chat.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "怎样注册网上银行？",
+    "aliases_zh": [
+      "如何开通网银？"
+    ],
+    "answer_zh": "请使用演示银行的网上注册流程，或到网点寻求帮助，并在聊天以外完成安全验证步骤。"
+  },
+  {
+    "faq_id": "DIG_PASSWORD",
+    "topic": "digital",
+    "product": "",
+    "attribute": "password",
+    "question": "How do I reset my online banking password?",
+    "aliases": [
+      "I forgot my banking password."
+    ],
+    "answer": "Choose Forgot password on the demo login screen and follow the secure recovery steps. Do not share passwords or recovery codes here.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "忘记网银密码怎么重置？",
+    "aliases_zh": [
+      "网上银行密码忘了怎么办？"
+    ],
+    "answer_zh": "请在演示登录页面选择“忘记密码”，按安全找回流程操作。不要在这里提供密码或验证码。"
+  },
+  {
+    "faq_id": "DIG_LOGIN",
+    "topic": "digital",
+    "product": "",
+    "attribute": "login",
+    "question": "Why can I not log in to online banking?",
+    "aliases": [
+      "I am locked out of the banking app."
+    ],
+    "answer": "Check the app version and your connection, then use the secure recovery flow if necessary. Contact support if access remains blocked.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "网上银行无法登录怎么办？",
+    "aliases_zh": [
+      "手机银行把我锁定了怎么处理？"
+    ],
+    "answer_zh": "请检查应用版本和网络连接，必要时使用安全找回流程。仍无法访问时，请联系客服。"
+  },
+  {
+    "faq_id": "DIG_APP",
+    "topic": "digital",
+    "product": "",
+    "attribute": "app",
+    "question": "Where can I get the mobile banking app?",
+    "aliases": [
+      "How do I download the banking app?"
+    ],
+    "answer": "This coursework demo does not publish a mobile app. The app references describe a fictional banking workflow; use this web chat for the demonstration.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "在哪里下载手机银行应用？",
+    "aliases_zh": [
+      "有真实的 CampusBank 手机应用吗？"
+    ],
+    "answer_zh": "本课程演示没有发布真实手机应用。相关应用流程为虚构银行设定，请使用当前网页聊天进行演示。"
+  },
+  {
+    "faq_id": "DIG_ALERTS",
+    "topic": "digital",
+    "product": "",
+    "attribute": "alerts",
+    "question": "How do I enable payment notifications?",
+    "aliases": [
+      "Can I get alerts for card transactions?"
+    ],
+    "answer": "In the fictional app, open Settings and enable transaction notifications. Notifications are a demo policy, not a function executed by this assistant.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "如何开启付款通知？",
+    "aliases_zh": [
+      "可以接收银行卡交易提醒吗？"
+    ],
+    "answer_zh": "在虚构应用中打开设置并启用交易通知。这是演示政策，本助手不会实际修改通知设置。"
+  },
+  {
+    "faq_id": "DIG_PROFILE",
+    "topic": "digital",
+    "product": "",
+    "attribute": "profile",
+    "question": "How do I change my phone number?",
+    "aliases": [
+      "Where can I update contact information?"
+    ],
+    "answer": "Use the fictional app's Profile section or contact support through its secure channel to update contact information.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "怎样修改绑定手机号？",
+    "aliases_zh": [
+      "联系方式变了怎样更新？"
+    ],
+    "answer_zh": "请在虚构应用的个人资料页面修改，或通过安全客服渠道更新联系方式。"
+  },
+  {
+    "faq_id": "DIG_SECURITY",
+    "topic": "digital",
+    "product": "",
+    "attribute": "security",
+    "question": "How can I recognise a phishing message?",
+    "aliases": [
+      "A suspicious email asks for my banking password."
+    ],
+    "answer": "Do not share passwords or codes or follow suspicious login links. Use the bank's secure support channel to report the message.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "如何识别银行钓鱼邮件？",
+    "aliases_zh": [
+      "可疑邮件让我提供银行密码怎么办？"
+    ],
+    "answer_zh": "不要提供密码或验证码，也不要点击可疑登录链接。请通过银行的安全客服渠道报告该信息。"
+  },
+  {
+    "faq_id": "DIG_STATEMENTS",
+    "topic": "digital",
+    "product": "",
+    "attribute": "statements",
+    "question": "How do I download a bank statement?",
+    "aliases": [
+      "Where can I find my monthly account statements?"
+    ],
+    "answer": "In the fictional app, choose Accounts, then Statements, and select the month. This assistant cannot access or download your statements.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "如何下载银行账单？",
+    "aliases_zh": [
+      "每月账户对账单在哪里？"
+    ],
+    "answer_zh": "在虚构应用中选择账户、对账单和月份。本助手不能访问或下载你的真实账单。"
+  },
+  {
+    "faq_id": "BR_LANCASTER",
+    "topic": "branches",
+    "product": "",
+    "attribute": "location",
+    "question": "Where is the Lancaster branch and when is it open?",
+    "aliases": [
+      "What are the Lancaster branch opening hours?"
+    ],
+    "answer": "Our fictional Lancaster branch is at 10 Campus Way, Lancaster. It opens Monday to Friday 09:00-17:00.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "兰开斯特网点地址和营业时间是什么？",
+    "aliases_zh": [
+      "兰开斯特分行在哪里、几点开门？"
+    ],
+    "answer_zh": "虚构兰开斯特网点位于 10 Campus Way，Lancaster。营业时间为周一至周五 09:00—17:00。"
+  },
+  {
+    "faq_id": "BR_LONDON",
+    "topic": "branches",
+    "product": "",
+    "attribute": "location",
+    "question": "Where is the London branch and when is it open?",
+    "aliases": [
+      "What are the London branch opening hours?"
+    ],
+    "answer": "Our fictional London branch is at 20 Learning Street, London. It opens Monday to Friday 09:00-17:00 and Saturday 10:00-13:00.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "伦敦网点在哪里、什么时候营业？",
+    "aliases_zh": [
+      "伦敦分行地址和营业时间是什么？"
+    ],
+    "answer_zh": "虚构伦敦网点位于 20 Learning Street，London。周一至周五 09:00—17:00，周六 10:00—13:00 营业。"
+  },
+  {
+    "faq_id": "BR_MANCHESTER",
+    "topic": "branches",
+    "product": "",
+    "attribute": "location",
+    "question": "Where is the Manchester branch and when is it open?",
+    "aliases": [
+      "What are the Manchester branch opening hours?"
+    ],
+    "answer": "Our fictional Manchester branch is at 30 Library Road, Manchester. It opens Monday to Friday 09:00-17:00.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "曼彻斯特网点地址和营业时间是什么？",
+    "aliases_zh": [
+      "曼城分行在哪里、几点关门？"
+    ],
+    "answer_zh": "虚构曼彻斯特网点位于 30 Library Road，Manchester。营业时间为周一至周五 09:00—17:00。"
+  },
+  {
+    "faq_id": "BR_APPOINTMENT",
+    "topic": "branches",
+    "product": "",
+    "attribute": "appointment",
+    "question": "How can I book a branch appointment?",
+    "aliases": [
+      "Do I need to reserve a bank appointment?"
+    ],
+    "answer": "Request an appointment through CampusBank support. Walk-in availability depends on the fictional branch; this assistant cannot book appointments.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "怎样预约网点服务？",
+    "aliases_zh": [
+      "到银行需要预约吗？"
+    ],
+    "answer_zh": "请通过 CampusBank 客服申请预约。虚构网点的直接到访安排取决于现场情况，本助手不能实际预约。"
+  },
+  {
+    "faq_id": "BR_WEEKEND",
+    "topic": "branches",
+    "product": "",
+    "attribute": "weekend",
+    "question": "Are any branches open on Saturday?",
+    "aliases": [
+      "Can I visit a branch during the weekend?"
+    ],
+    "answer": "The fictional London branch opens Saturday 10:00-13:00. Lancaster and Manchester branches are closed at weekends.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "哪些网点周六营业？",
+    "aliases_zh": [
+      "周末可以去银行吗？"
+    ],
+    "answer_zh": "虚构伦敦网点周六 10:00—13:00 营业。兰开斯特和曼彻斯特网点周末关闭。"
+  },
+  {
+    "faq_id": "BR_ATM",
+    "topic": "branches",
+    "product": "",
+    "attribute": "atm",
+    "question": "Can I use an ATM outside opening hours?",
+    "aliases": [
+      "Are cash machines available after the branch closes?"
+    ],
+    "answer": "The fictional external ATMs at demo branches are available 24 hours, subject to maintenance. This assistant cannot confirm a live ATM status.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "营业时间外可以使用取款机吗？",
+    "aliases_zh": [
+      "外部 ATM 全天开放吗？"
+    ],
+    "answer_zh": "演示网点的外部取款机设定为 24 小时开放，但可能维护。本助手不能确认实时取款机状态。"
+  },
+  {
+    "faq_id": "BR_ACCESS",
+    "topic": "branches",
+    "product": "",
+    "attribute": "access",
+    "question": "Are the branches wheelchair accessible?",
+    "aliases": [
+      "Is step-free access available at demo branches?"
+    ],
+    "answer": "All three fictional CampusBank branches provide step-free access. Contact support for any specific access needs.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "网点有无障碍通道吗？",
+    "aliases_zh": [
+      "轮椅使用者能进入网点吗？"
+    ],
+    "answer_zh": "三个虚构 CampusBank 网点均设有无台阶通道。特殊无障碍需求请联系客服。"
+  },
+  {
+    "faq_id": "BR_HOLIDAY",
+    "topic": "branches",
+    "product": "",
+    "attribute": "holiday",
+    "question": "Are branches open on bank holidays?",
+    "aliases": [
+      "Can I visit the bank on a public holiday?"
+    ],
+    "answer": "The fictional CampusBank branches are closed on bank holidays. Ordinary opening hours apply on working days.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "银行节假日网点营业吗？",
+    "aliases_zh": [
+      "公众假期可以去分行吗？"
+    ],
+    "answer_zh": "虚构 CampusBank 网点在银行节假日关闭。工作日按通常营业时间开放。"
+  },
+  {
+    "faq_id": "SUP_CONTACT",
+    "topic": "support",
+    "product": "",
+    "attribute": "contact",
+    "question": "How do I contact customer support?",
+    "aliases": [
+      "What is the CampusBank support email?"
+    ],
+    "answer": "For this fictional demo, customer support is support@campusbank.example. The .example address is not a real contact channel.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "怎样联系银行客服？",
+    "aliases_zh": [
+      "CampusBank 客服邮箱是什么？"
+    ],
+    "answer_zh": "虚构客服邮箱为 support@campusbank.example。.example 地址仅用于演示，不是真实联系方式。"
+  },
+  {
+    "faq_id": "SUP_HOURS",
+    "topic": "support",
+    "product": "",
+    "attribute": "hours",
+    "question": "When is customer support available?",
+    "aliases": [
+      "What are the helpdesk service hours?"
+    ],
+    "answer": "Fictional CampusBank support hours are Monday to Friday 09:00-18:00.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "客服什么时候提供服务？",
+    "aliases_zh": [
+      "银行客服工作时间是什么？"
+    ],
+    "answer_zh": "虚构 CampusBank 客服的服务时间为周一至周五 09:00—18:00。"
+  },
+  {
+    "faq_id": "SUP_COMPLAINT",
+    "topic": "support",
+    "product": "",
+    "attribute": "complaint",
+    "question": "How do I make a complaint?",
+    "aliases": [
+      "Where can I complain about bank service?"
+    ],
+    "answer": "Send a complaint through the fictional secure support channel or discuss it at a branch. The demo policy aims to acknowledge complaints within 2 working days.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "怎样投诉银行服务？",
+    "aliases_zh": [
+      "服务不满意可以在哪里投诉？"
+    ],
+    "answer_zh": "请通过虚构安全客服渠道提交投诉，或在网点反映。演示政策计划在 2 个工作日内确认收到投诉。"
+  },
+  {
+    "faq_id": "SUP_HUMAN",
+    "topic": "support",
+    "product": "",
+    "attribute": "human",
+    "question": "Can I talk to a human adviser?",
+    "aliases": [
+      "Please connect me to a person."
+    ],
+    "answer": "This demo cannot connect to a live adviser. Its fictional support contact is support@campusbank.example, Monday to Friday 09:00-18:00.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "可以转人工客服吗？",
+    "aliases_zh": [
+      "我想和真人顾问沟通。"
+    ],
+    "answer_zh": "本演示不能连接真人顾问。虚构客服地址为 support@campusbank.example，服务时间为周一至周五 09:00—18:00。"
+  },
+  {
+    "faq_id": "SUP_FRAUD",
+    "topic": "support",
+    "product": "",
+    "attribute": "fraud",
+    "question": "How do I report suspected fraud?",
+    "aliases": [
+      "I see a payment I did not authorise."
+    ],
+    "answer": "Use the bank's secure support channel to report suspected fraud and freeze a affected card through the app. This demo cannot inspect, reverse or investigate transactions.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "怎样报告疑似欺诈交易？",
+    "aliases_zh": [
+      "发现不是我授权的付款怎么办？"
+    ],
+    "answer_zh": "请通过银行安全客服渠道报告疑似欺诈，并在应用中冻结受影响的银行卡。本演示不能查看、撤销或调查真实交易。"
+  },
+  {
+    "faq_id": "SUP_SCOPE",
+    "topic": "support",
+    "product": "",
+    "attribute": "scope",
+    "question": "What banking topics can you answer?",
+    "aliases": [
+      "What can this assistant help me with?"
+    ],
+    "answer": "I can explain fictional CampusBank accounts, cards, transfers, savings, loans, online banking, branches and support procedures.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "这个助手能回答哪些银行问题？",
+    "aliases_zh": [
+      "你可以帮助我了解什么？"
+    ],
+    "answer_zh": "我可以介绍虚构 CampusBank 的账户、银行卡、转账、储蓄、贷款、网上银行、网点和客服流程。"
+  },
+  {
+    "faq_id": "SUP_BALANCE",
+    "topic": "support",
+    "product": "",
+    "attribute": "balance",
+    "question": "Can you tell me my account balance?",
+    "aliases": [
+      "How much money is in my bank account?"
+    ],
+    "answer": "I cannot access account balances. Check your balance through the bank's secure app or support channel; do not share account details here.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "你能查询我的账户余额吗？",
+    "aliases_zh": [
+      "帮我查一下银行卡还有多少钱。"
+    ],
+    "answer_zh": "我不能访问账户余额。请通过银行安全应用或客服渠道查询，不要在这里提供账户信息。"
+  },
+  {
+    "faq_id": "SUP_PRIVACY",
+    "topic": "support",
+    "product": "",
+    "attribute": "privacy",
+    "question": "Should I provide my PIN in this chat?",
+    "aliases": [
+      "Can I send you my password or card number?"
+    ],
+    "answer": "Do not share passwords, PINs, full card numbers or confidential account information in this demo chat.",
+    "source": "Original fictional CampusBank coursework policy",
+    "version": "1.1-bilingual",
+    "question_zh": "可以在这里提供我的 PIN 吗？",
+    "aliases_zh": [
+      "应该把密码或完整卡号发给你吗？"
+    ],
+    "answer_zh": "不要在演示聊天中提供密码、PIN、完整银行卡号或其他机密账户信息。"
+  }
+]

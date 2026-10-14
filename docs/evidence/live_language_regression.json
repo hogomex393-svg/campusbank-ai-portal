@@ -1,0 +1,18 @@
+{
+  "observed_date": "2026-10-14",
+  "environment": "hosted version 2.2.1; synthetic verification account",
+  "preceding_request_language": "zh",
+  "input": "Before I apply, what documents do I need? Please keep it brief.",
+  "observed_answer": "开立学生账户需要以下三样材料：带照片的身份证件、在读学生证明、地址证明。",
+  "mode": "agent",
+  "requested_response_language": "en",
+  "observed_response_language": "zh",
+  "language_check_passed": false,
+  "source_ids": ["PRODUCT_STUDENT"],
+  "tool_names": ["get_product_info"],
+  "latency_ms": 5449,
+  "api_calls": 2,
+  "usage": {"prompt_tokens": 3134, "completion_tokens": 74, "total_tokens": 3208},
+  "error": null,
+  "note": "Answer text transcribed from visible UI; credentials and live record identifiers omitted."
+}

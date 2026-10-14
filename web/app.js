@@ -1,0 +1,1862 @@
+"use strict";
+const $ = (id) => document.getElementById(id);
+const S = {
+  boot: null,
+  chats: [],
+  current: null,
+  view: "chat",
+  busy: false,
+  mode: "agent",
+  debug: false,
+  lang: localStorage.getItem("campusbank_language") || "zh",
+  afterLogin: null,
+  authKind: "login",
+  service: null,
+  ticket: null,
+  staffId: null,
+  staffFingerprint: "",
+  staffDetailFingerprint: "",
+  staffPolling: false,
+  handoffBusy: false,
+};
+const icons = {
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  chat: '<path d="M21 11a8 8 0 0 1-8 8H5l-3 3V11a9 9 0 0 1 19 0Z"/><path d="M7 10h10M7 14h6"/>',
+  wallet:
+    '<path d="M3 6h17v14H3zM3 6V3h14v3M15 11h7v5h-7z"/><path d="M18 13.5h.1"/>',
+  card: '<rect x="2" y="4" width="20" height="16" rx="3"/><path d="M2 9h20M6 15h5"/>',
+  transfer: '<path d="M4 7h16l-4-4M20 17H4l4 4M20 7l-4 4M4 17l4-4"/>',
+  savings:
+    '<path d="M4 10h14l2 3v5h-3v3h-3v-3H8v3H5v-5H2v-5h2zM7 5h7M10 3v4M18 9l2-3M7 12h.1"/>',
+  loan: '<path d="M12 3 2 8h20L12 3ZM4 21h16M5 9v9M10 9v9M15 9v9M20 9v9M3 18h18"/>',
+  support:
+    '<path d="M4 12V9a8 8 0 0 1 16 0v3M4 10H2v8h4v-8H4ZM20 10h2v8h-4v-8h2ZM20 18v3h-6"/>',
+  shield:
+    '<path d="m12 2 8 3v6c0 5-8 11-8 11S4 16 4 11V5l8-3Z"/><path d="m8 11 3 3 5-6"/>',
+  location:
+    '<path d="M20 9c0 6-8 13-8 13S4 15 4 9a8 8 0 1 1 16 0Z"/><circle cx="12" cy="9" r="2.5"/>',
+  external: '<path d="M14 3h7v7M21 3l-11 11M10 3H3v18h18v-7"/>',
+  list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.1M3 12h.1M3 18h.1"/>',
+  search: '<circle cx="10" cy="10" r="7"/><path d="m16 16 6 6"/>',
+  menu: '<path d="M3 5h18M3 12h18M3 19h18"/>',
+  settings:
+    '<path d="M3 6h18M3 12h18M3 18h18"/><circle cx="8" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="10" cy="18" r="2"/>',
+  arrow: '<path d="M12 20V4M5 11l7-7 7 7"/>',
+  spark: '<path d="m12 2 3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7Z"/>',
+  chevron: '<path d="m9 5 7 7-7 7"/>',
+  import: '<path d="M12 3v12m-5-5 5 5 5-5M3 17v4h18v-4"/>',
+};
+function icon(name) {
+  const e = document.createElement("span");
+  e.className = "icon";
+  e.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${icons[name] || icons.chat}</svg>`;
+  return e;
+}
+function el(tag, className = "", text) {
+  const e = document.createElement(tag);
+  e.className = className;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+function t(zh, en) {
+  return S.lang === "zh" ? zh : en;
+}
+function hasStaffAccess() {
+  return (
+    S.boot?.portal_role === "staff" &&
+    !!(S.boot?.user?.is_admin || S.boot?.user?.is_staff)
+  );
+}
+const identityChannel =
+  typeof BroadcastChannel !== "undefined"
+    ? new BroadcastChannel("campusbank-identity")
+    : null;
+if (identityChannel) identityChannel.onmessage = () => refreshSessionIdentity();
+async function refreshSessionIdentity() {
+  if (!S.boot) return;
+  if (S.busy) {
+    S.pendingIdentityRefresh = true;
+    return;
+  }
+  S.pendingIdentityRefresh = false;
+  try {
+    const next = await api("/api/bootstrap");
+    const changedUser = next.user?.id !== S.boot.user?.id;
+    S.boot = next;
+    if (changedUser) {
+      S.current = null;
+      setChatUrl(null);
+    }
+    await refreshHistory();
+    renderSidebar();
+    if (hasStaffAccess()) await showStaff();
+    else if (changedUser || S.view === "staff") showChat();
+  } catch (e) {
+    toast(e.message);
+  }
+}
+function button(text, className, fn) {
+  const b = el("button", className, text);
+  b.type = "button";
+  b.addEventListener("click", fn);
+  return b;
+}
+function toast(text) {
+  $("toast").textContent = text;
+  $("toast").hidden = false;
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => ($("toast").hidden = true), 3500);
+}
+async function api(path, method = "GET", body) {
+  const headers = { "Content-Type": "application/json" };
+  if (S.boot?.csrf) headers["X-CSRF-Token"] = S.boot.csrf;
+  const r = await fetch(path, {
+    method,
+    headers,
+    credentials: "same-origin",
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  let data;
+  try {
+    data = await r.json();
+  } catch {
+    throw Error(t("服务暂时不可用", "Service unavailable"));
+  }
+  if (!r.ok)
+    throw Error(
+      typeof data.detail === "string"
+        ? data.detail
+        : t("请检查填写内容后重试", "Please check the form"),
+    );
+  return data;
+}
+function setChatUrl(id) {
+  const u = new URL(location.href);
+  if (id) u.searchParams.set("chat", id);
+  else u.searchParams.delete("chat");
+  history.replaceState(null, "", u);
+}
+function closeMobile() {
+  $("sidebar").classList.remove("open");
+}
+function busy(value) {
+  S.busy = value;
+  $("sendButton").disabled = value;
+  $("messageInput").disabled = value;
+}
+function timeText(value) {
+  return new Date(value).toLocaleString(S.lang === "zh" ? "zh-CN" : "en-GB", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+function statusText(value) {
+  return (
+    {
+      pending: t("待审核", "Pending"),
+      processing: t("处理中", "Processing"),
+      completed: t("已完成", "Completed"),
+      waiting: t("等待接单", "Waiting"),
+      active: t("客服处理中", "Active"),
+      resolved: t("已结束", "Resolved"),
+    }[value] || value
+  );
+}
+function escapeHTML(v) {
+  return String(v)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+function inline(v) {
+  return escapeHTML(v)
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>");
+}
+function markdown(text) {
+  const root = el("div");
+  let list = null,
+    code = null;
+  for (const line of String(text).split("\n")) {
+    if (line.startsWith("```")) {
+      if (code) {
+        code = null;
+      } else {
+        code = el("pre");
+        const c = el("code");
+        code.append(c);
+        root.append(code);
+      }
+      list = null;
+      continue;
+    }
+    if (code) {
+      code.firstChild.textContent += line + "\n";
+      continue;
+    }
+    if (!line.trim()) {
+      list = null;
+      continue;
+    }
+    const item = line.match(/^\s*(?:[-*]|\d+\.)\s+(.*)$/);
+    if (item) {
+      const ordered = /^\s*\d+\./.test(line);
+      if (!list || list.tagName !== (ordered ? "OL" : "UL")) {
+        list = el(ordered ? "ol" : "ul");
+        root.append(list);
+      }
+      const li = el("li");
+      li.innerHTML = inline(item[1]);
+      list.append(li);
+    } else {
+      list = null;
+      const h = line.match(/^#{1,4}\s+(.*)$/);
+      if (h) root.append(el("h3", "", h[1]));
+      else if (!/^---+$/.test(line)) {
+        const p = el("p");
+        p.innerHTML = inline(line);
+        root.append(p);
+      }
+    }
+  }
+  return root;
+}
+function servicesFor(category) {
+  return S.boot.services.filter((s) => s.category === category);
+}
+function serviceBy(id) {
+  return S.boot.services.find((s) => s.id === id);
+}
+function updateIdentity() {
+  const u = S.boot.user;
+  $("profileAvatar").textContent = u ? u.display_name[0] || "U" : t("访", "G");
+  $("profileName").replaceChildren(
+    document.createTextNode(
+      u ? u.display_name : t("登录 / 注册", "Sign in / Register"),
+    ),
+    el(
+      "small",
+      "",
+      u
+        ? "@" + u.username
+        : t("保存个人对话与办理记录", "Keep chats and requests"),
+    ),
+  );
+  $("staffNav").hidden = !hasStaffAccess();
+  $("legacyImport").hidden = !hasStaffAccess() || !u?.is_admin;
+  $("supportHistoryNav").hidden = S.boot?.portal_role === "staff";
+  $("onlineIndicator").textContent = S.boot.api_available
+    ? t("自然对话 · 已连接", "AI connected")
+    : t("离线应急", "Offline");
+}
+function renderSidebar() {
+  const nav = $("businessNav");
+  nav.replaceChildren();
+  for (const c of S.boot.categories) {
+    const b = button("", "", () => showServices(c.id));
+    b.append(icon(c.icon), document.createTextNode(t(c.name, c.en)));
+    nav.append(b);
+  }
+  renderHistory();
+  updateIdentity();
+}
+function renderHistory() {
+  const container = $("historyList");
+  container.replaceChildren();
+  const search = $("historySearch").value.toLowerCase();
+  const items = S.chats.filter((c) => c.title.toLowerCase().includes(search));
+  if (!items.length) {
+    container.append(
+      el(
+        "p",
+        "muted tiny",
+        t(
+          "开始一段对话，它会保留在这里。",
+          "Your conversations will appear here.",
+        ),
+      ),
+    );
+    return;
+  }
+  let group = "";
+  for (const c of items) {
+    const today =
+      new Date(c.updated_at).toDateString() === new Date().toDateString();
+    const label = t(today ? "今天" : "之前", today ? "Today" : "Earlier");
+    if (group !== label) {
+      container.append(el("div", "history-group", label));
+      group = label;
+    }
+    const row = el(
+      "div",
+      "history-entry" + (S.current?.id === c.id ? " active" : ""),
+    );
+    const b = button(c.title, "", () => selectChat(c.id));
+    b.title = c.title;
+    const rename = button("···", "rename", async () => {
+      const title = prompt(t("重命名对话", "Rename conversation"), c.title);
+      if (title?.trim()) {
+        try {
+          await api("/api/chats/" + c.id, "PATCH", { title: title.trim() });
+          await refreshHistory();
+          if (S.current?.id === c.id) S.current.title = title.trim();
+        } catch (e) {
+          toast(e.message);
+        }
+      }
+    });
+    rename.setAttribute(
+      "aria-label",
+      t("重命名 " + c.title, "Rename " + c.title),
+    );
+    row.append(b, rename);
+    container.append(row);
+  }
+}
+async function refreshHistory() {
+  S.chats = await api("/api/chats");
+  renderHistory();
+}
+function title(value) {
+  $("pageTitle").textContent = value;
+  document
+    .querySelectorAll(".primary-nav button")
+    .forEach((b) => b.classList.remove("active"));
+}
+function showComposer(value) {
+  $("composerArea").hidden = !value;
+}
+function showChat(scroll = true) {
+  S.view = "chat";
+  closeMobile();
+  title(t("智能咨询", "Banking assistant"));
+  $("homeNav").classList.add("active");
+  showComposer(true);
+  renderChat(scroll);
+  renderHistory();
+}
+async function selectChat(id) {
+  if (S.busy) return;
+  try {
+    S.current = await api("/api/chats/" + id);
+    setChatUrl(id);
+    showChat();
+  } catch (e) {
+    toast(e.message);
+  }
+}
+async function newChat() {
+  if (S.busy) return;
+  busy(true);
+  try {
+    S.current = await api("/api/chats", "POST");
+    setChatUrl(S.current.id);
+    await refreshHistory();
+    showChat();
+  } catch (e) {
+    toast(e.message);
+  } finally {
+    busy(false);
+    $("messageInput").focus();
+  }
+}
+async function ensureChat() {
+  if (!S.current) {
+    S.current = await api("/api/chats", "POST");
+    setChatUrl(S.current.id);
+    await refreshHistory();
+  }
+  return S.current;
+}
+async function startHandoff() {
+  if (S.handoffBusy || S.busy) return;
+  if (!S.boot.user) {
+    openAuth("login", startHandoff);
+    return;
+  }
+  S.handoffBusy = true;
+  $("handoffButton").disabled = true;
+  try {
+    const chat = await ensureChat();
+    const result = await api("/api/chats/" + chat.id + "/handoff", "POST");
+    S.current = result.chat;
+    setChatUrl(S.current.id);
+    await refreshHistory();
+    showChat();
+    toast(
+      result.existing
+        ? t("已在人工客服队列中", "Already in the support queue")
+        : t(
+            "已转人工，工作人员将收到当前对话",
+            "Sent to staff with your conversation",
+          ),
+    );
+  } catch (e) {
+    toast(e.message);
+  } finally {
+    S.handoffBusy = false;
+    if (S.view === "chat") renderChat(false);
+  }
+}
+function renderWelcome() {
+  const root = el("div", "welcome");
+  root.append(
+    el(
+      "div",
+      "greeting",
+      t("你好，让办理变得更简单", "Hello, let’s make banking simpler"),
+    ),
+    el("h1", "", t("今天有什么可以帮你？", "How can I help you today?")),
+    el(
+      "p",
+      "",
+      t(
+        "直接描述你的需要。我们可以一起了解要求，然后进入对应的在线服务窗口。",
+        "Describe what you need. We can explore your options and open the right service window.",
+      ),
+    ),
+  );
+  const suggestions = el("div", "suggestions");
+  const items = [
+    ["wallet", "我要开学生账户", "Open a student account", "open_account"],
+    ["card", "银行卡丢了怎么办", "Help with a lost card", "replace_card"],
+    ["transfer", "了解网上转账费用", "Online transfer fees", "transfer_demo"],
+    ["savings", "看看储蓄账户", "Explore savings", "open_savings"],
+    ["loan", "个人贷款怎么申请", "Apply for a loan", "apply_loan"],
+    ["location", "预约附近的网点", "Book a branch visit", "branch_appointment"],
+  ];
+  for (const [i, zh, en, id] of items) {
+    const b = button("", "suggestion", () => {
+      const s = serviceBy(id);
+      $("messageInput").value = t(zh, en);
+      sendMessage();
+    });
+    b.append(
+      icon(i),
+      el("strong", "", t(zh, en)),
+      el("small", "", t("咨询并获取服务入口", "Ask and find a service")),
+    );
+    suggestions.append(b);
+  }
+  root.append(suggestions);
+  const cap = el("div", "welcome-caption");
+  cap.append(
+    icon("shield"),
+    document.createTextNode(
+      t(
+        "咨询、办理入口和历史记录，在一个地方。",
+        "Advice, service windows and chat history in one place.",
+      ),
+    ),
+  );
+  root.append(cap);
+  return root;
+}
+function renderMessage(m) {
+  const meta = m.metadata || {};
+  const row = el(
+    "article",
+    "message " + m.role + (meta.sender === "staff" ? " staff" : ""),
+  );
+  if (m.role !== "user")
+    row.append(
+      el(
+        "div",
+        "assistant-avatar",
+        meta.sender === "staff" ? t("人", "H") : "C",
+      ),
+    );
+  const body = el("div", "message-body");
+  body.append(markdown(m.content));
+  if (m.role !== "user") {
+    const actions = el("div", "service-actions");
+    for (const action of meta.actions || []) {
+      const service = serviceBy(action.service_id);
+      if (!service) continue;
+      const b = button("", "service-action", () => {
+        if (service.id === "human_support") startHandoff();
+        else openService(service.id, action.prefill || {});
+      });
+      b.append(
+        icon(service.icon),
+        document.createTextNode(
+          service.id === "human_support"
+            ? t("转接人工客服", "Talk to staff")
+            : t("进入" + service.title, "Open " + service.en),
+        ),
+        icon("chevron"),
+      );
+      actions.append(b);
+    }
+    if (actions.childNodes.length) body.append(actions);
+    const foot = el("div", "message-meta");
+    if (meta.sender === "staff")
+      foot.append(
+        el(
+          "span",
+          "",
+          t("人工客服（演示）", "Demo staff") +
+            (meta.staff_name ? " · " + meta.staff_name : ""),
+        ),
+      );
+    else if (meta.error)
+      foot.append(el("span", "", t("离线应急回答", "Offline fallback")));
+    const copy = button(t("复制", "Copy"), "copy-button", () =>
+      navigator.clipboard
+        .writeText(m.content)
+        .then(() => toast(t("已复制", "Copied"))),
+    );
+    foot.append(copy);
+    body.append(foot);
+    if (S.debug) {
+      const d = el("details", "source-details");
+      d.append(
+        el("summary", "", t("资料与工具详情", "Sources and tools")),
+        el("pre", "", JSON.stringify(meta, null, 2)),
+      );
+      body.append(d);
+    }
+  }
+  row.append(body);
+  return row;
+}
+function renderChat(scroll = true) {
+  const content = $("content");
+  content.replaceChildren();
+  if (!S.current?.messages?.length) content.append(renderWelcome());
+  else {
+    const list = el("div", "message-list");
+    for (const m of S.current.messages) list.append(renderMessage(m));
+    if (S.busy) {
+      const pending = el("article", "message assistant");
+      pending.append(
+        el("div", "assistant-avatar", "C"),
+        el(
+          "div",
+          "thinking",
+          t("正在理解你的问题", "Thinking about your request"),
+        ),
+      );
+      list.append(pending);
+    }
+    content.append(list);
+  }
+  const ticket = S.current?.ticket;
+  $("handoffButton").disabled = !!ticket || S.handoffBusy;
+  $("handoffButton").textContent = ticket
+    ? t("已转人工", "In support queue")
+    : t("转人工客服", "Talk to staff");
+  const banner = $("handoffBanner");
+  banner.hidden = !ticket;
+  banner.replaceChildren();
+  if (ticket) {
+    banner.append(
+      el(
+        "span",
+        "",
+        t("人工客服队列 · ", "Support queue · ") + statusText(ticket.status),
+      ),
+      button(t("返回 AI 咨询", "Return to AI"), "", async () => {
+        try {
+          await api("/api/tickets/" + ticket.id + "/resume-ai", "POST");
+          S.current = await api("/api/chats/" + S.current.id);
+          renderChat(false);
+        } catch (e) {
+          toast(e.message);
+        }
+      }),
+    );
+  }
+  if (scroll)
+    requestAnimationFrame(
+      () => ($("scrollArea").scrollTop = $("scrollArea").scrollHeight),
+    );
+}
+async function sendMessage() {
+  const text = $("messageInput").value.trim();
+  if (!text || S.busy) return;
+  if (S.boot.requires_login && !S.boot.user) {
+    openAuth("login", sendMessage);
+    return;
+  }
+  busy(true);
+  try {
+    await ensureChat();
+    showChat(false);
+    $("messageInput").value = "";
+    S.current.messages.push({ role: "user", content: text, metadata: {} });
+    renderChat(true);
+    S.current = await api("/api/chats/" + S.current.id + "/messages", "POST", {
+      text,
+      mode: S.mode,
+      request_id: crypto.randomUUID().replaceAll("-", ""),
+    });
+    await refreshHistory();
+  } catch (e) {
+    toast(e.message);
+    if (!$("messageInput").value) $("messageInput").value = text;
+    if (S.current) {
+      try {
+        S.current = await api("/api/chats/" + S.current.id);
+      } catch {}
+    }
+  } finally {
+    busy(false);
+    if (S.view === "chat") renderChat(true);
+    $("messageInput").focus();
+    if (S.pendingIdentityRefresh) await refreshSessionIdentity();
+  }
+}
+function showServices(category) {
+  if (S.busy) return;
+  S.view = "services";
+  S.category = category;
+  closeMobile();
+  showComposer(false);
+  const c = S.boot.categories.find((c) => c.id === category);
+  title(c ? t(c.name, c.en) : t("在线服务中心", "Service centre"));
+  const page = el("section", "page-section");
+  page.append(
+    el("h1", "", c ? t(c.name, c.en) : t("在线服务中心", "Online services")),
+    el(
+      "p",
+      "page-subtitle",
+      t(
+        "选择业务即可进入服务窗口。填写、核对、提交后，可在“我的办理记录”查看进度。",
+        "Choose a service, review the details and save a demo request. Track its progress under My requests.",
+      ),
+    ),
+  );
+  const grid = el("div", "service-grid");
+  for (const s of c ? servicesFor(c.id) : S.boot.services) {
+    const b = button("", "service-card", () => openService(s.id));
+    b.append(
+      icon(s.icon),
+      el("h3", "", t(s.title, s.en)),
+      el("p", "", s.description),
+      el("span", "card-link", t("进入服务窗口 →", "Open service window →")),
+    );
+    grid.append(b);
+  }
+  page.append(grid);
+  $("content").replaceChildren(page);
+  $("scrollArea").scrollTop = 0;
+}
+async function showRequests() {
+  if (S.busy) return;
+  S.view = "requests";
+  closeMobile();
+  showComposer(false);
+  title(t("我的办理记录", "My requests"));
+  $("requestsNav").classList.add("active");
+  const page = el("section", "page-section");
+  page.append(
+    el("h1", "", t("每一步，都有记录", "Your service progress")),
+    el(
+      "p",
+      "page-subtitle",
+      t(
+        "查看你的演示申请、预约与客服工单。",
+        "Track your demo applications, appointments and support tickets.",
+      ),
+    ),
+  );
+  if (!S.boot.user) {
+    page.append(
+      el(
+        "div",
+        "empty-state",
+        t(
+          "登录个人账户后，可保存并查看办理记录。",
+          "Sign in to save and track requests.",
+        ),
+      ),
+      button(t("登录 / 注册", "Sign in / Register"), "primary-button", () =>
+        openAuth("login", showRequests),
+      ),
+    );
+    $("content").replaceChildren(page);
+    return;
+  }
+  try {
+    const records = await api("/api/requests");
+    if (!records.length)
+      page.append(
+        el(
+          "div",
+          "empty-state",
+          t(
+            "还没有办理记录。可以从左侧业务入口开始。",
+            "No requests yet. Choose a service in the sidebar.",
+          ),
+        ),
+      );
+    for (const r of records) {
+      const wrap = el("div");
+      const row = el("div", "request-row");
+      row.append(icon(serviceBy(r.service_id)?.icon));
+      const main = el("div", "request-main");
+      main.append(
+        el("strong", "", t(r.title, serviceBy(r.service_id)?.en || r.title)),
+        el("small", "", r.id + " · " + timeText(r.created_at)),
+      );
+      row.append(main, el("span", "status " + r.status, statusText(r.status)));
+      wrap.append(row);
+      const d = el("details", "request-details");
+      d.append(el("summary", "", t("查看登记信息", "View request details")));
+      for (const f of serviceBy(r.service_id).fields) {
+        const value = r.payload[f.name];
+        if (value === undefined || value === "") continue;
+        d.append(
+          el(
+            "div",
+            "",
+            f.label +
+              "：" +
+              (typeof value === "boolean"
+                ? value
+                  ? t("已确认", "Confirmed")
+                  : "—"
+                : value),
+          ),
+        );
+      }
+      wrap.append(d);
+      page.append(wrap);
+    }
+  } catch (e) {
+    toast(e.message);
+  }
+  $("content").replaceChildren(page);
+}
+async function showSupportHistory() {
+  if (S.busy) return;
+  if (!S.boot.user) {
+    openAuth("login", showSupportHistory);
+    return;
+  }
+  S.view = "supportHistory";
+  closeMobile();
+  showComposer(false);
+  title(t("人工客服记录", "Support history"));
+  $("supportHistoryNav").classList.add("active");
+  try {
+    const tickets = await api("/api/support-tickets");
+    if (S.view !== "supportHistory") return;
+    const page = el("section", "page-section");
+    page.append(
+      el("h1", "", t("我的人工客服记录", "My support history")),
+      el(
+        "p",
+        "page-subtitle",
+        t(
+          "查看你发起的工单、咨询历史和人工回复。需要补充问题时，可进入原对话。",
+          "View your tickets, questions and staff replies. Open the original chat to add information.",
+        ),
+      ),
+    );
+    if (!tickets.length)
+      page.append(
+        el(
+          "div",
+          "empty-state",
+          t(
+            "还没有人工客服工单，可在聊天中点击转人工客服。",
+            "No support tickets yet. Use Talk to staff in your chat.",
+          ),
+        ),
+      );
+    for (const ticket of tickets) {
+      const row = el("div", "request-row"),
+        body = el("div", "request-main");
+      body.append(el("strong", "", ticket.subject), el("small", "", ticket.id));
+      row.append(
+        icon("support"),
+        body,
+        el("span", "status " + ticket.status, statusText(ticket.status)),
+        button(t("查看记录", "View history"), "secondary-button", () =>
+          showCustomerTicket(ticket.id),
+        ),
+      );
+      page.append(row);
+    }
+    $("content").replaceChildren(page);
+  } catch (e) {
+    toast(e.message);
+  }
+}
+async function showCustomerTicket(id) {
+  S.view = "supportDetail";
+  S.supportTicketId = id;
+  closeMobile();
+  showComposer(false);
+  title(t("人工客服记录", "Support history"));
+  try {
+    const data = await api("/api/support-tickets/" + id);
+    if (S.view !== "supportDetail" || S.supportTicketId !== id) return;
+    const page = el("section", "page-section"),
+      ticket = data.ticket;
+    page.append(
+      button(
+        t("返回工单列表", "Back to tickets"),
+        "secondary-button",
+        showSupportHistory,
+      ),
+      el("h1", "", ticket.subject),
+      el("p", "muted small", ticket.description),
+      el("span", "status " + ticket.status, statusText(ticket.status)),
+    );
+    if (ticket.assigned_name)
+      page.append(
+        el(
+          "p",
+          "muted small",
+          t("工作人员：", "Staff: ") + ticket.assigned_name,
+        ),
+      );
+    const transcript = el("div", "staff-transcript");
+    for (const m of data.chat?.messages || []) {
+      const line = el("div");
+      line.append(
+        el(
+          "strong",
+          "",
+          m.role === "user"
+            ? t("你：", "You: ")
+            : m.metadata?.sender === "staff"
+              ? t("人工客服：", "Staff: ")
+              : t("助手：", "Assistant: "),
+        ),
+        markdown(m.content),
+      );
+      transcript.append(line);
+    }
+    page.append(
+      transcript,
+      el(
+        "p",
+        "muted small",
+        t(
+          "这里只显示咨询记录和收到的回复。",
+          "This view shows your questions and the replies you received.",
+        ),
+      ),
+    );
+    if (data.chat)
+      page.append(
+        button(
+          t("查看原对话 / 补充问题", "Open chat / add information"),
+          "primary-button",
+          () => selectChat(data.chat.id),
+        ),
+      );
+    $("content").replaceChildren(page);
+  } catch (e) {
+    toast(e.message);
+  }
+}
+function showReferences() {
+  S.view = "references";
+  closeMobile();
+  showComposer(false);
+  title(t("银行官网参考", "Official bank references"));
+  const page = el("section", "page-section");
+  page.append(
+    el("h1", "", t("我们参考的银行服务体验", "Banking experiences we studied")),
+    el(
+      "p",
+      "page-subtitle",
+      t(
+        "以下链接指向银行官方页面，用于了解业务分类、数字助手和服务入口。本站办理流程属于 CampusBank 课程演示。",
+        "Official bank pages for navigation, digital assistants and service entry points. CampusBank forms are fictional coursework flows.",
+      ),
+    ),
+  );
+  const list = el("div", "reference-list");
+  for (const r of S.boot.bank_references) {
+    const a = el("a", "reference-card");
+    a.href = r.url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    const body = el("div");
+    body.append(el("strong", "", r.name), el("small", "", r.detail));
+    a.append(body, icon("external"));
+    list.append(a);
+  }
+  page.append(list);
+  $("content").replaceChildren(page);
+}
+function fieldLabel(f) {
+  const en = {
+    product: "Account type",
+    applicant: "Demo applicant name",
+    channel: "Application channel",
+    documents_ready: "I have reviewed the demo document requirements",
+    card_type: "Card type",
+    linked_product: "Linked account",
+    purpose: "Purpose",
+    reviewed: "I have reviewed the demo requirements",
+    reason: "Reason",
+    action: "Requested service",
+    note: "Additional notes",
+    transfer_type: "Transfer type",
+    recipient: "Demo recipient nickname",
+    amount: "Demo amount (GBP)",
+    opening_deposit: "Demo opening deposit (GBP, minimum 10)",
+    city: "City",
+    date: "Requested visit date",
+    category: "Issue category",
+    subject: "Subject",
+    description: "Describe your request",
+  };
+  return t(f.label, en[f.name] || f.label);
+}
+function openService(id, prefill = {}) {
+  const service = serviceBy(id);
+  if (!service) return;
+  S.service = service;
+  S.servicePrefill = prefill;
+  $("serviceTitle").textContent = t(service.title, service.en);
+  renderServiceForm(prefill);
+  if (!$("serviceDialog").open) $("serviceDialog").showModal();
+}
+function renderServiceForm(prefill) {
+  const s = S.service;
+  const body = $("serviceBody");
+  body.replaceChildren();
+  body.append(el("p", "drawer-desc", s.description));
+  const steps = el("div", "steps");
+  steps.append(
+    el("span", "active", t("01 填写信息", "01 Details")),
+    el("span", "", t("02 核对确认", "02 Review")),
+    el("span", "", t("03 受理编号", "03 Reference")),
+  );
+  body.append(steps);
+  const form = el("form");
+  form.id = "serviceForm";
+  for (const f of s.fields) {
+    const label = el(
+      "label",
+      f.type === "checkbox" ? "check-label" : "",
+      f.type === "checkbox" ? "" : fieldLabel(f),
+    );
+    let input;
+    if (f.type === "select") {
+      input = el("select");
+      for (const o of f.options) {
+        const opt = el("option", "", o.label);
+        opt.value = o.value;
+        input.append(opt);
+      }
+    } else if (f.type === "textarea") input = el("textarea");
+    else {
+      input = el("input");
+      input.type =
+        f.type === "checkbox"
+          ? "checkbox"
+          : f.type === "number"
+            ? "number"
+            : f.type === "date"
+              ? "date"
+              : "text";
+      if (f.type === "number") {
+        input.min = f.name === "opening_deposit" ? "10" : "0.01";
+        input.step = ".01";
+        input.max = "1000000";
+      }
+    }
+    input.name = f.name;
+    input.required = f.required;
+    input.maxLength = 2000;
+    if (prefill[f.name] !== undefined) {
+      if (f.type === "checkbox") input.checked = !!prefill[f.name];
+      else input.value = prefill[f.name];
+    } else if (f.name === "applicant" && S.boot.user)
+      input.value = S.boot.user.display_name;
+    else if (s.id === "human_support" && S.current) {
+      const last = [...S.current.messages]
+        .reverse()
+        .find((m) => m.role === "user");
+      if (last && ["subject", "description"].includes(f.name))
+        input.value = last.content.slice(0, f.name === "subject" ? 80 : 2000);
+    }
+    label.append(input);
+    if (f.type === "checkbox")
+      label.append(document.createTextNode(fieldLabel(f)));
+    form.append(label);
+  }
+  form.append(el("div", "service-notice", s.notice));
+  const error = el("p", "form-error");
+  form.append(error);
+  const submit = el(
+    "button",
+    "primary-button full",
+    t("下一步，核对信息", "Next, review details"),
+  );
+  submit.type = "submit";
+  form.append(submit);
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const values = {};
+    for (const f of s.fields) {
+      const i = form.elements[f.name];
+      values[f.name] = f.type === "checkbox" ? i.checked : i.value.trim();
+    }
+    renderReview(values);
+  });
+  body.append(form);
+}
+function renderReview(values) {
+  const s = S.service;
+  const body = $("serviceBody");
+  body.replaceChildren();
+  const steps = el("div", "steps");
+  steps.append(
+    el("span", "", t("01 填写信息", "01 Details")),
+    el("span", "active", t("02 核对确认", "02 Review")),
+    el("span", "", t("03 受理编号", "03 Reference")),
+  );
+  body.append(steps);
+  for (const f of s.fields) {
+    let value = values[f.name];
+    if (value === "") continue;
+    if (f.type === "select")
+      value = f.options.find((o) => o.value === value)?.label || value;
+    if (f.type === "checkbox")
+      value = value ? t("已确认", "Confirmed") : t("未确认", "Not confirmed");
+    const row = el("div", "review-row");
+    row.append(el("span", "", fieldLabel(f)), el("span", "", value));
+    body.append(row);
+  }
+  body.append(el("div", "service-notice", s.notice));
+  const actions = el("div", "section-actions");
+  actions.append(
+    button(t("返回修改", "Back"), "secondary-button", () =>
+      renderServiceForm(values),
+    ),
+    button(
+      S.boot.user
+        ? t("确认提交演示请求", "Confirm demo request")
+        : t("登录并保存申请", "Sign in and save"),
+      "primary-button",
+      async () => {
+        if (!S.boot.user) {
+          $("serviceDialog").close();
+          openAuth("login", () => {
+            openService(s.id, values);
+            renderReview(values);
+          });
+          return;
+        }
+        try {
+          let chatId = S.current?.id;
+          if (s.id === "human_support" && !chatId)
+            chatId = (await ensureChat()).id;
+          const r = await api("/api/requests", "POST", {
+            service_id: s.id,
+            payload: values,
+            chat_id: chatId || null,
+            confirmed: true,
+          });
+          renderReceipt(r);
+          if (S.current) {
+            S.current = await api("/api/chats/" + S.current.id);
+            if (S.view === "chat") renderChat(false);
+          }
+          await refreshHistory();
+        } catch (e) {
+          toast(e.message);
+        }
+      },
+    ),
+  );
+  body.append(actions);
+}
+function renderReceipt(r) {
+  const body = $("serviceBody");
+  body.replaceChildren();
+  const receipt = el("div", "receipt");
+  receipt.append(
+    el("div", "success-mark", "✓"),
+    el("h3", "", t("演示请求已登记", "Demo request received")),
+    el(
+      "p",
+      "",
+      t(
+        "你的记录已保存，可以随时查看进度。",
+        "Your request is saved and ready to track.",
+      ),
+    ),
+    el("div", "reference-number", r.id),
+    el(
+      "p",
+      "",
+      t("当前状态：待审核 / 待确认", "Status: pending review / confirmation"),
+    ),
+    button(
+      t("查看我的办理记录", "View my requests"),
+      "primary-button full",
+      () => {
+        $("serviceDialog").close();
+        showRequests();
+      },
+    ),
+  );
+  if (r.service_id === "human_support") {
+    receipt.append(
+      button(
+        t("返回转接会话", "Back to support chat"),
+        "secondary-button full",
+        () => {
+          $("serviceDialog").close();
+          showChat();
+        },
+      ),
+    );
+    if (hasStaffAccess())
+      receipt.append(
+        button(
+          t("进入工作人员演示台", "Open staff workspace"),
+          "secondary-button full",
+          () => {
+            $("serviceDialog").close();
+            showStaff();
+          },
+        ),
+      );
+  }
+  body.append(receipt);
+}
+function authKind(kind) {
+  S.authKind = kind;
+  const register = kind === "register";
+  $("loginTab").classList.toggle("active", !register);
+  $("registerTab").classList.toggle("active", register);
+  $("displayNameField").hidden = !register;
+  $("authForm").elements.display_name.required = register;
+  $("authTitle").textContent = register
+    ? t("创建你的账户", "Create your account")
+    : t("欢迎回来", "Welcome back");
+  $("authSubtitle").textContent = t(
+    "登录后，你的对话与服务进度都在这里。",
+    "Your chats and service progress in one place.",
+  );
+  $("authSubmit").textContent = register
+    ? t("注册并登录", "Register and sign in")
+    : t("登录", "Sign in");
+  $("authError").textContent = "";
+  $("authForm").elements.password.autocomplete = register
+    ? "new-password"
+    : "current-password";
+  updateAuthRole();
+}
+function updateAuthRole() {
+  const staff = $("portalRole").value === "staff";
+  $("staffInviteField").hidden = !staff;
+  const groupCode =
+    S.authKind === "register" &&
+    !staff &&
+    S.boot?.registration_access_code_required;
+  $("groupTestCodeField").hidden = !groupCode;
+  $("authForm").elements.test_access_code.required = !!groupCode;
+  $("staffInviteField").firstChild.textContent =
+    staff && S.authKind === "register" && S.boot?.first_admin_setup_required
+      ? t("管理员初始化邀请码", "Administrator setup invitation")
+      : t("工作人员邀请码", "Staff invitation");
+  $("authSubtitle").textContent = staff
+    ? t(
+        "工作人员进入客服端。首次开通需要管理员邀请码；已开通的账户无需再次填写。",
+        "Staff enter the support workspace. An invitation is required only when first enabling staff access.",
+      )
+    : t(
+        "客户登录后可咨询、办理业务并接收人工回复。",
+        "Customers can chat, open services and receive staff replies.",
+      );
+}
+function openAuth(kind = "login", after = null) {
+  S.afterLogin = after;
+  authKind(kind === "register" ? "register" : "login");
+  $("authDialog").showModal();
+}
+async function submitAuth(e) {
+  e.preventDefault();
+  const f = $("authForm");
+  const body = {
+    username: f.elements.username.value.trim(),
+    password: f.elements.password.value,
+    portal_role: f.elements.portal_role.value,
+    invite_code: f.elements.invite_code.value.trim(),
+  };
+  if (S.authKind === "register") {
+    body.display_name = f.elements.display_name.value.trim();
+    body.test_access_code = f.elements.test_access_code.value.trim();
+  }
+  $("authSubmit").disabled = true;
+  try {
+    const data = await api(
+      "/api/" + (S.authKind === "register" ? "register" : "login"),
+      "POST",
+      body,
+    );
+    S.boot.user = data.user;
+    S.boot.csrf = data.csrf;
+    S.boot.portal_role = data.portal_role || body.portal_role;
+    identityChannel?.postMessage("identity-changed");
+    if (data.user.is_admin) S.boot.first_admin_setup_required = false;
+    $("authDialog").close();
+    f.reset();
+    $("authError").textContent = "";
+    await refreshHistory();
+    renderSidebar();
+    if (S.current) S.current = await api("/api/chats/" + S.current.id);
+    if (S.view === "chat") renderChat(false);
+    toast(t("欢迎，", "Welcome, ") + data.user.display_name);
+    const callback = S.afterLogin;
+    S.afterLogin = null;
+    if (callback) await callback();
+    else if (S.boot.portal_role === "staff") await showStaff();
+  } catch (e) {
+    $("authError").textContent = e.message;
+  } finally {
+    $("authSubmit").disabled = false;
+  }
+}
+function showProfile() {
+  if (!S.boot.user) {
+    openAuth("login");
+    return;
+  }
+  const p = $("profileDetails");
+  p.replaceChildren(
+    el("p", "", S.boot.user.display_name),
+    el("p", "muted small", "@" + S.boot.user.username),
+    el(
+      "p",
+      "muted tiny",
+      S.boot.user.is_admin
+        ? t(
+            "管理员：可邀请工作人员、处理工单及导入旧记录。",
+            "Administrator: invite staff, handle tickets and import legacy chats.",
+          )
+        : S.boot.user.is_staff
+          ? t(
+              "工作人员：可接单、查看客户需求并回复。",
+              "Staff: accept tickets, view customer requests and reply.",
+            )
+          : t(
+              "仅显示本账户的历史与服务记录。",
+              "Only your chats and requests are visible.",
+            ),
+    ),
+  );
+  p.append(
+    el(
+      "p",
+      "muted small",
+      t("当前身份：", "Current role: ") +
+        (S.boot.portal_role === "staff"
+          ? t("工作人员", "Staff")
+          : t("客户", "Customer")),
+    ),
+  );
+  if (S.boot.user.is_admin || S.boot.user.is_staff)
+    p.append(
+      button(
+        S.boot.portal_role === "staff"
+          ? t("切换到客户界面", "Switch to customer")
+          : t("切换到工作人员界面", "Switch to staff"),
+        "secondary-button full",
+        () =>
+          switchPortalRole(
+            S.boot.portal_role === "staff" ? "customer" : "staff",
+          ),
+      ),
+    );
+  $("profileDialog").showModal();
+}
+async function switchPortalRole(role) {
+  if (S.busy) return;
+  try {
+    const result = await api("/api/session/role", "POST", {
+      portal_role: role,
+    });
+    S.boot.user = result.user;
+    S.boot.csrf = result.csrf;
+    S.boot.portal_role = result.portal_role;
+    identityChannel?.postMessage("identity-changed");
+    $("profileDialog").close();
+    S.staffId = null;
+    S.staffDrafts = {};
+    renderSidebar();
+    if (role === "staff") await showStaff();
+    else showChat();
+    toast(
+      role === "staff"
+        ? t("已切换为工作人员", "Staff mode active")
+        : t("已切换为客户", "Customer mode active"),
+    );
+  } catch (e) {
+    toast(e.message);
+  }
+}
+async function inviteStaff() {
+  try {
+    const data = await api("/api/admin/staff-invites", "POST");
+    $("staffInviteCode").value = data.invite_code;
+    $("staffInviteExpiry").textContent =
+      t("有效期至：", "Expires: ") +
+      new Date(data.expires_at).toLocaleString() +
+      t(" · 仅可使用一次", " · Single use");
+    $("staffInviteDialog").showModal();
+  } catch (e) {
+    toast(e.message);
+  }
+}
+async function showStaff() {
+  if (!hasStaffAccess()) return;
+  S.view = "staff";
+  closeMobile();
+  showComposer(false);
+  title(t("工作人员演示台", "Staff workspace"));
+  const page = el("section", "page-section");
+  page.append(
+    el("h1", "", t("客服接单与回复", "Support queue")),
+    el(
+      "p",
+      "page-subtitle",
+      t(
+        "客户提交与新消息每 3 秒同步。回复会在客户原对话中标记为人工客服（演示）。",
+        "Customer tickets and messages sync every 3 seconds. Manual replies appear in the customer's original chat.",
+      ),
+    ),
+  );
+  const toolbar = el("div", "staff-toolbar");
+  toolbar.append(
+    button(t("刷新工单", "Refresh tickets"), "secondary-button", () =>
+      refreshStaff(),
+    ),
+  );
+  if (S.boot.user.is_admin)
+    toolbar.append(
+      button(
+        t("邀请工作人员", "Invite staff"),
+        "secondary-button",
+        inviteStaff,
+      ),
+    );
+  const status = el("span", "muted tiny", t("正在同步…", "Syncing…"));
+  status.id = "staffSyncStatus";
+  toolbar.append(status);
+  page.append(toolbar);
+  const layout = el("div", "staff-layout");
+  const list = el("div");
+  list.id = "staffTicketList";
+  const detail = el("div", "staff-detail");
+  detail.id = "staffTicketDetail";
+  detail.append(
+    el(
+      "p",
+      "muted small",
+      t(
+        "选择工单查看上下文并回复。",
+        "Choose a ticket to view context and reply.",
+      ),
+    ),
+  );
+  layout.append(list, detail);
+  page.append(layout);
+  $("content").replaceChildren(page);
+  S.staffFingerprint = "";
+  S.staffDetailFingerprint = "";
+  await refreshStaff();
+}
+function staffEmpty(detail) {
+  detail.replaceChildren(
+    el("h3", "", t("先创建一张人工客服工单", "Create a support ticket first")),
+    el(
+      "p",
+      "muted small",
+      t(
+        "客户在聊天中点击“转人工客服”，工单和对话会自动出现在这里。也可以用当前账户走一遍演示。",
+        "When a customer clicks Talk to staff, their ticket and conversation appear here. You can also try the flow with this account.",
+      ),
+    ),
+  );
+  const steps = el("ol", "muted small");
+  for (const step of [
+    t(
+      "客户登录，正常咨询后点击聊天中的转人工按钮。",
+      "A customer signs in, chats, then clicks Talk to staff.",
+    ),
+    t(
+      "工作人员选择工单并接单，查看完整对话后回复。",
+      "Staff select and accept the ticket, review the conversation and reply.",
+    ),
+    t(
+      "客户原对话自动显示人工回复，处理完后可结束工单。",
+      "The original customer chat shows the reply automatically. Resolve the ticket when done.",
+    ),
+  ])
+    steps.append(el("li", "", step));
+  detail.append(
+    steps,
+    button(
+      t("创建人工客服工单", "Create support ticket"),
+      "primary-button",
+      async () => {
+        if (!S.current) await newChat();
+        if (S.current) openService("human_support");
+      },
+    ),
+  );
+}
+async function refreshStaff(quiet = false) {
+  if (S.staffPolling || S.view !== "staff" || !hasStaffAccess()) return;
+  S.staffPolling = true;
+  try {
+    const tickets = await api("/api/admin/tickets");
+    if (S.view !== "staff") return;
+    const list = $("staffTicketList"),
+      detail = $("staffTicketDetail");
+    if (!list || !detail) return;
+    const fingerprint = JSON.stringify(tickets);
+    if (fingerprint !== S.staffFingerprint) {
+      S.staffFingerprint = fingerprint;
+      list.replaceChildren();
+      if (!tickets.length) {
+        S.staffId = null;
+        list.append(
+          el("div", "empty-state", t("暂无客服工单", "No tickets yet")),
+        );
+        staffEmpty(detail);
+      } else {
+        if (!tickets.some((x) => x.id === S.staffId)) {
+          S.staffId = (
+            tickets.find((x) => x.status !== "resolved") || tickets[0]
+          ).id;
+          S.staffDetailFingerprint = "";
+        }
+        for (const ticket of tickets) {
+          const b = button(
+            "",
+            "ticket-item" + (ticket.id === S.staffId ? " active" : ""),
+            async () => {
+              const currentDraft = detail.querySelector("textarea");
+              if (currentDraft && detail.dataset.ticketId) {
+                S.staffDrafts ||= {};
+                S.staffDrafts[detail.dataset.ticketId] = currentDraft.value;
+              }
+              S.staffId = ticket.id;
+              S.staffDetailFingerprint = "";
+              for (const item of list.querySelectorAll("button"))
+                item.classList.remove("active");
+              b.classList.add("active");
+              try {
+                await staffDetail(ticket.id, detail);
+              } catch (e) {
+                toast(e.message);
+              }
+            },
+          );
+          b.append(
+            el("strong", "", ticket.subject),
+            el("small", "", ticket.id + " · " + statusText(ticket.status)),
+            el(
+              "small",
+              "",
+              t("客户：", "Customer: ") +
+                (ticket.customer_name || "—") +
+                (ticket.assigned_name
+                  ? t(" · 接单：", " · Assigned: ") + ticket.assigned_name
+                  : ""),
+            ),
+          );
+          list.append(b);
+        }
+      }
+    }
+    if (S.staffId) await staffDetail(S.staffId, detail);
+    if ($("staffSyncStatus"))
+      $("staffSyncStatus").textContent =
+        t("自动同步中 · ", "Live sync · ") + new Date().toLocaleTimeString();
+  } catch (e) {
+    if ($("staffSyncStatus"))
+      $("staffSyncStatus").textContent = t(
+        "同步失败，请刷新或重新登录",
+        "Sync failed; refresh or sign in again",
+      );
+    if (!quiet) toast(e.message);
+  } finally {
+    S.staffPolling = false;
+  }
+}
+async function staffDetail(id, detail) {
+  try {
+    const data = await api("/api/admin/tickets/" + id);
+    if (S.view !== "staff" || S.staffId !== id) return;
+    const fingerprint = JSON.stringify(data);
+    if (
+      fingerprint === S.staffDetailFingerprint &&
+      detail.dataset.ticketId === id
+    )
+      return;
+    const previous = detail.querySelector("textarea");
+    const focused = previous && document.activeElement === previous;
+    const selection = previous
+      ? [previous.selectionStart, previous.selectionEnd]
+      : null;
+    S.staffDrafts ||= {};
+    if (previous && detail.dataset.ticketId === id)
+      S.staffDrafts[id] = previous.value;
+    const ticket = data.ticket;
+    detail.dataset.ticketId = id;
+    detail.replaceChildren(
+      el("h3", "", ticket.subject),
+      el("p", "muted small", ticket.description),
+      el(
+        "p",
+        "muted small",
+        t("客户：", "Customer: ") +
+          (ticket.customer_name || "—") +
+          (ticket.assigned_name
+            ? t(" · 处理人：", " · Staff: ") + ticket.assigned_name
+            : ""),
+      ),
+      el("span", "status " + ticket.status, statusText(ticket.status)),
+    );
+    if (data.chat) {
+      const transcript = el("div", "staff-transcript");
+      for (const m of data.chat.messages)
+        transcript.append(
+          el(
+            "p",
+            "",
+            (m.role === "user"
+              ? t("客户：", "Customer: ")
+              : m.metadata?.sender === "staff"
+                ? t("人工客服：", "Staff: ")
+                : t("助手：", "Assistant: ")) + m.content,
+          ),
+        );
+      detail.append(transcript);
+    }
+    if (ticket.status === "resolved") {
+      detail.append(
+        el(
+          "p",
+          "muted small",
+          t(
+            "工单已结束，仅可查看历史记录。",
+            "This ticket is resolved. History is read-only.",
+          ),
+        ),
+      );
+      S.staffDetailFingerprint = fingerprint;
+      return;
+    }
+    if (ticket.assigned_to && ticket.assigned_to !== S.boot.user.id) {
+      detail.append(
+        el(
+          "p",
+          "muted small",
+          t(
+            "此工单由其他工作人员处理，仅可查看历史。",
+            "Another staff member owns this ticket. History is read-only.",
+          ),
+        ),
+      );
+      if (S.boot.user.is_admin)
+        detail.append(
+          button(t("结束工单", "Resolve"), "secondary-button", async () => {
+            try {
+              await api("/api/admin/tickets/" + id + "/resolve", "POST");
+              S.staffDetailFingerprint = "";
+              await refreshStaff();
+            } catch (e) {
+              toast(e.message);
+            }
+          }),
+        );
+      S.staffDetailFingerprint = fingerprint;
+      return;
+    }
+    const input = el("textarea");
+    input.placeholder = t(
+      "输入人工回复（课程演示）",
+      "Enter a manual demo reply",
+    );
+    input.setAttribute("aria-label", t("人工客服回复", "Staff reply"));
+    input.maxLength = 2000;
+    input.value = S.staffDrafts[id] || "";
+    input.addEventListener("input", () => {
+      S.staffDrafts[id] = input.value;
+    });
+    const unavailable =
+      ticket.status === "resolved" ||
+      (ticket.assigned_to && ticket.assigned_to !== S.boot.user.id);
+    input.disabled = !!unavailable;
+    detail.append(input);
+    const actions = el("div", "staff-actions");
+    const restoreControls = () => {
+      [...actions.querySelectorAll("button")].forEach((b, index) => {
+        b.disabled =
+          ticket.status === "resolved" ||
+          (!!unavailable && !(index === 2 && S.boot.user.is_admin));
+      });
+    };
+    const act = async (suffix, body) => {
+      for (const b of actions.querySelectorAll("button")) b.disabled = true;
+      try {
+        await api("/api/admin/tickets/" + id + "/" + suffix, "POST", body);
+        if (suffix === "reply") {
+          input.value = "";
+          S.staffDrafts[id] = "";
+          toast(t("人工回复已发送", "Staff reply sent"));
+        }
+        S.staffDetailFingerprint = "";
+        await refreshStaff();
+      } catch (e) {
+        restoreControls();
+        toast(e.message);
+      }
+    };
+    actions.append(
+      button(t("接单", "Accept"), "secondary-button", () => act("claim")),
+      button(t("发送回复", "Send reply"), "primary-button", () => {
+        if (!input.value.trim()) {
+          toast(t("请先输入回复", "Enter a reply first"));
+          return;
+        }
+        return act("reply", { text: input.value.trim() });
+      }),
+      button(t("结束工单", "Resolve"), "secondary-button", () =>
+        act("resolve"),
+      ),
+    );
+    restoreControls();
+    if (unavailable && ticket.status !== "resolved")
+      detail.append(
+        el(
+          "p",
+          "muted small",
+          t(
+            "此工单已由其他工作人员接单。",
+            "Another staff member is handling this ticket.",
+          ),
+        ),
+      );
+    detail.append(actions);
+    S.staffDetailFingerprint = fingerprint;
+    if (focused && !input.disabled) {
+      input.focus();
+      if (selection) input.setSelectionRange(...selection);
+    }
+  } catch (e) {
+    throw e;
+  }
+}
+function setLanguage() {
+  localStorage.setItem("campusbank_language", S.lang);
+  document.documentElement.lang = S.lang === "zh" ? "zh-CN" : "en";
+  $("languageToggle").textContent = S.lang === "zh" ? "English" : "中文";
+  $("newChat").children[1].textContent = t("新建对话", "New chat");
+  $("homeNav").lastChild.textContent = t("智能咨询", "Assistant");
+  $("requestsNav").lastChild.textContent = t("我的办理记录", "My requests");
+  $("supportHistoryNav").lastChild.textContent = t(
+    "人工客服记录",
+    "Support history",
+  );
+  $("messageInput").placeholder = t(
+    "描述你想办理的业务，或继续追问…",
+    "Describe what you need, or ask a follow-up…",
+  );
+  $("composerHint").textContent = t(
+    "中文 / English · 自动跟随消息语言",
+    "Chinese / English · Reply follows your message",
+  );
+  document.querySelector(".composer-note").textContent = t(
+    "CampusBank 为虚构银行。业务窗口只登记演示请求，请勿提供真实银行卡号、密码或验证码。",
+    "CampusBank is a fictional bank. Forms record demo requests only. Please use example situations.",
+  );
+  document.querySelector(".history-head>span").textContent = t(
+    "历史对话",
+    "Chat history",
+  );
+  document.querySelector(".section-title").firstChild.textContent = t(
+    "业务服务 ",
+    "Banking services ",
+  );
+  document.querySelector(".section-title>span").textContent = t(
+    "可直接进入办理",
+    "Open a service directly",
+  );
+  $("referencesNav").lastChild.textContent = t(
+    "银行官网参考",
+    "Official bank references",
+  );
+  $("legacyImport").lastChild.textContent = t(
+    "导入旧版聊天记录",
+    "Import legacy chats",
+  );
+  $("staffNav").lastChild.textContent = t("工作人员演示台", "Staff workspace");
+  renderSidebar();
+  if (S.view === "chat") showChat(false);
+  else if (S.view === "requests") showRequests();
+  else if (S.view === "references") showReferences();
+  else if (S.view === "services") showServices(S.category);
+  else if (S.view === "staff") showStaff();
+  else if (S.view === "supportHistory") showSupportHistory();
+  else if (S.view === "supportDetail") showCustomerTicket(S.supportTicketId);
+}
+async function init() {
+  document
+    .querySelectorAll("[data-icon]")
+    .forEach((e) => e.replaceChildren(icon(e.dataset.icon).firstChild));
+  document
+    .querySelectorAll("[data-close]")
+    .forEach((b) =>
+      b.addEventListener("click", () => $(b.dataset.close).close()),
+    );
+  $("newChat").onclick = newChat;
+  $("brandHome").onclick = () => showChat();
+  $("homeNav").onclick = () => showChat();
+  $("requestsNav").onclick = showRequests;
+  $("supportHistoryNav").onclick = showSupportHistory;
+  $("referencesNav").onclick = showReferences;
+  $("staffNav").onclick = showStaff;
+  $("historySearchToggle").onclick = () => {
+    $("historySearch").hidden = !$("historySearch").hidden;
+    if (!$("historySearch").hidden) $("historySearch").focus();
+  };
+  $("historySearch").oninput = renderHistory;
+  $("accountButton").onclick = showProfile;
+  $("composer").onsubmit = (e) => {
+    e.preventDefault();
+    sendMessage();
+  };
+  $("messageInput").onkeydown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+  $("menuToggle").onclick = () => $("sidebar").classList.toggle("open");
+  $("settingsButton").onclick = () => $("settingsDialog").showModal();
+  $("modeSelect").onchange = (e) => {
+    S.mode = e.target.value;
+    toast(t("回答方式已切换，历史保留", "Mode changed; history preserved"));
+  };
+  $("debugCheckbox").onchange = (e) => {
+    S.debug = e.target.checked;
+    if (S.view === "chat") renderChat(false);
+  };
+  $("exportChat").onclick = () => {
+    if (!S.current) return;
+    const blob = new Blob([JSON.stringify(S.current, null, 2)], {
+      type: "application/json",
+    });
+    const a = el("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "campusbank_chat.json";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+  $("loginTab").onclick = () => authKind("login");
+  $("registerTab").onclick = () => authKind("register");
+  $("authForm").onsubmit = submitAuth;
+  $("portalRole").onchange = updateAuthRole;
+  $("handoffButton").onclick = startHandoff;
+  $("copyStaffInvite").onclick = async () => {
+    try {
+      await navigator.clipboard.writeText($("staffInviteCode").value);
+      toast(t("邀请码已复制", "Invitation copied"));
+    } catch {
+      toast(
+        t("请选中邀请码手动复制", "Select the invitation and copy it manually"),
+      );
+    }
+  };
+  $("languageToggle").onclick = () => {
+    S.lang = S.lang === "zh" ? "en" : "zh";
+    setLanguage();
+  };
+  $("logoutButton").onclick = async () => {
+    try {
+      const r = await api("/api/logout", "POST");
+      S.boot.user = r.user;
+      S.boot.csrf = r.csrf;
+      S.boot.portal_role = "customer";
+      identityChannel?.postMessage("identity-changed");
+      S.staffId = null;
+      S.staffDrafts = {};
+      S.current = null;
+      setChatUrl(null);
+      $("profileDialog").close();
+      await refreshHistory();
+      renderSidebar();
+      showChat();
+    } catch (e) {
+      toast(e.message);
+    }
+  };
+  $("legacyImport").onclick = async () => {
+    try {
+      const r = await api("/api/admin/import-legacy", "POST");
+      await refreshHistory();
+      toast(
+        t(
+          "已导入 " + r.imported + " 段旧会话",
+          "Imported " + r.imported + " legacy chats",
+        ),
+      );
+    } catch (e) {
+      toast(e.message);
+    }
+  };
+  try {
+    S.boot = await api("/api/bootstrap");
+    S.chats = await api("/api/chats");
+    const requested = new URL(location.href).searchParams.get("chat");
+    if (requested) {
+      try {
+        S.current = await api("/api/chats/" + requested);
+      } catch {
+        setChatUrl(null);
+      }
+    }
+    setLanguage();
+    showChat();
+    if (S.boot.portal_role === "staff" && hasStaffAccess()) await showStaff();
+    const requestedService = new URL(location.href).searchParams.get("service");
+    if (requestedService && serviceBy(requestedService))
+      openService(requestedService);
+  } catch (e) {
+    $("content").replaceChildren(el("div", "empty-state", e.message));
+  }
+}
+setInterval(async () => {
+  if (document.hidden) return;
+  if (S.view === "staff") {
+    await refreshStaff(true);
+    return;
+  }
+  if (S.busy || S.view !== "chat" || !S.current?.ticket) return;
+  try {
+    const r = await api("/api/chats/" + S.current.id);
+    if (
+      r.messages.length !== S.current.messages.length ||
+      r.ticket?.status !== S.current.ticket?.status
+    ) {
+      const area = $("scrollArea");
+      const bottom =
+        area.scrollHeight - area.scrollTop - area.clientHeight < 100;
+      S.current = r;
+      renderChat(bottom);
+    }
+  } catch {}
+}, 3000);
+init();

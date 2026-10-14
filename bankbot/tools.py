@@ -1,0 +1,59 @@
+"""Three read-only tools. Model-supplied names never execute arbitrary code."""
+import json
+from .dialogue import PRODUCT_ALIASES
+from .language import canonical_city
+from .catalog import SERVICES, service_action
+
+
+def schema(name, description, field):
+    return {"type": "function", "function": {"name": name, "description": description,
+            "parameters": {"type": "object", "properties": {field: {"type": "string"}},
+                           "required": [field], "additionalProperties": False}}}
+
+
+TOOL_SCHEMAS = [
+    schema("search_bank_faq", "Search fictional CampusBank policies and procedures. Include the product and the specific question. Use for bank-specific facts before answering.", "query"),
+    schema("get_product_info", "Get the authoritative fictional product record, including fees, required documents, eligibility and interest. Product names: student_account, everyday_account, savings_account, debit_card, credit_card, personal_loan.", "product_name"),
+    schema("find_branch", "Find fictional branch addresses and opening hours in a named city. Ask for the city if it is missing. This tool only reads local demo records.", "city"),
+]
+window_schema=schema("open_service_window", "Prepare a local service window after explaining how the user can apply online, request a card, report a lost card, transfer, open savings, apply for a loan, book a branch or contact human support. This ONLY creates a clickable UI entry, never submits an application or moves money. Choose one approved service ID.", "service_id")
+window_schema["function"]["parameters"]["properties"]["service_id"]["enum"]=list(SERVICES)
+TOOL_SCHEMAS.append(window_schema)
+
+
+class Tools:
+    def __init__(self, knowledge, retriever, threshold=0.18):
+        self.knowledge = knowledge
+        self.retriever = retriever
+        self.threshold = threshold
+
+    def execute(self, name: str, arguments: str | dict) -> dict:
+        required = {"search_bank_faq": "query", "get_product_info": "product_name", "find_branch": "city", "open_service_window":"service_id"}
+        if not isinstance(name, str) or name not in required:
+            return {"error": "unknown_tool", "message": "This tool is not available."}
+        try:
+            args = json.loads(arguments) if isinstance(arguments, str) else arguments
+        except (ValueError, TypeError):
+            return {"error": "invalid_arguments", "message": "Arguments must be a JSON object."}
+        field = required[name]
+        if not isinstance(args, dict) or set(args) != {field} or not isinstance(args.get(field), str) or not args[field].strip() or len(args[field]) > 2000:
+            return {"error": "invalid_arguments", "message": f"Supply only a non-empty string field named {field}."}
+        value = args[field].strip()
+        if name == "open_service_window":
+            action=service_action(value)
+            return {"ui_action":action,"prepared":True,"message":"A clickable demo service window is ready. The user must open it and confirm any submission."} if action else {"error":"unknown_service","message":"Choose an approved local service window."}
+        if name == "search_bank_faq":
+            hits = self.retriever.search(value)
+            hits = [h for h in hits if h["score"] >= self.threshold]
+            return {"records": hits, "source_ids": [h["faq_id"] for h in hits], "found": bool(hits)}
+        if name == "get_product_info":
+            canonical = value.lower().replace(" ", "_")
+            for product, aliases in PRODUCT_ALIASES.items():
+                if value.lower() in aliases:
+                    canonical = product
+            result = next((p for p in self.knowledge.products if p["product_name"] == canonical), None)
+            return {"record": result, "found": result is not None,
+                    "source_ids": [result["source_id"]] if result else []}
+        value = canonical_city(value)
+        results = [b for b in self.knowledge.branches if b["city"].casefold() == value.casefold()]
+        return {"records": results, "found": bool(results), "source_ids": [b["branch_id"] for b in results]}
