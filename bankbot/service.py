@@ -267,6 +267,8 @@ class ChatService:
             labels={f['name']:f['label'] if language=='zh' else f['label_en'] for f in service['fields']}
             summary='; '.join(labels[key]+': '+str(value) for key,value in new.service_drafts[draft_action['service_id']].items())
             answer=('表单草稿已更新：'+summary+'。请打开下方窗口核对；尚未提交。') if language=='zh' else ('Draft updated: '+summary+'. Open the form below to review; nothing has been submitted.')
+            if not explicit_fields:
+                answer='暂时无法确定要修改的字段，请明确新的城市、收款人昵称或数字金额。原草稿保持不变。' if language=='zh' else 'I could not identify the changed field. Specify a city, recipient nickname or numeric GBP amount; the previous draft is unchanged.'
         if not turn or turn[-1]["role"] != "assistant":
             turn.append({"role": "assistant", "content": answer})
         new.turns.append(turn)

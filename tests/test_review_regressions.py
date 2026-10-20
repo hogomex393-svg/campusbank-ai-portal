@@ -8,7 +8,7 @@ import uuid
 from fastapi.testclient import TestClient
 from bankbot.config import Settings
 from bankbot.dialogue import coerce_state
-from bankbot.forms import draft_from_message
+from bankbot.forms import draft_from_message, chinese_number
 from bankbot.portal_store import PortalStore, PortalError
 from bankbot.service import ChatService
 from bankbot.web import create_app
@@ -32,6 +32,11 @@ class ReviewRegressionTests(unittest.TestCase):
         third=self.bot.respond('收款人改成 Amy',second.state,mode='offline')
         self.assertEqual(third.actions[-1]['prefill']['recipient'],'Amy')
         self.assertEqual(third.actions[-1]['prefill']['amount'],'500')
+        self.assertEqual(chinese_number('两千五'),'2500')
+        self.assertEqual(chinese_number('两千零五'),'2005')
+        explicit=draft_from_message('Change amount to five hundred pounds',third.state)
+        self.assertEqual(explicit['prefill']['recipient'],'Amy')
+        self.assertNotIn('recipient',explicit['_explicit_fields'])
 
     def test_appointment_keeps_date_and_purpose_when_only_city_changes(self):
         first=self.bot.respond('预约伦敦，2026 年 11 月 2 日，咨询学生账户',mode='offline')

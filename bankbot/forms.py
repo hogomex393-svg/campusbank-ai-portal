@@ -45,15 +45,19 @@ def update_draft(state, service_id, patch):
 def chinese_number(text):
     digits = {'零':0,'一':1,'二':2,'两':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9}
     units = {'十':10,'百':100,'千':1000,'万':10000}
-    total, section, number = 0, 0, 0
+    total, section, number, last_unit = 0, 0, 0, 1
     for char in text:
         if char in digits: number = digits[char]
         elif char in units:
             unit = units[char]
+            last_unit=unit
             if unit == 10000:
                 total += (section + number) * unit; section = number = 0
             else: section += (number or 1) * unit; number = 0
         else: raise ValueError('Unsupported number')
+    # Colloquial 两千五 means 2500; an explicit 零 keeps 两千零五 at 2005.
+    if number and last_unit>10 and '零' not in text[text.rfind(next((c for c in reversed(text) if c in units),''))+1:]:
+        number*=last_unit//10
     return str(total + section + number)
 
 
@@ -84,8 +88,9 @@ def draft_from_message(text, state):
         if service_id == 'transfer_demo':
             if re.search(r'国际|international', lower): patch['transfer_type'] = 'international'
             elif re.search(r'国内|domestic', lower): patch['transfer_type'] = 'domestic'
-            name = re.search(r'(?:\bto\s+|\brecipient\s*(?:is|:|=)?\s*|给\s*|收款人(?:改成|换成|为|是|：|:)?\s*)([A-Za-z][A-Za-z -]{0,45}?)(?=\s+(?:£|GBP|[\d]|for\b|an?\s|international\b|domestic\b|simulate\b)|\s*(?:模拟|转账|汇款)|[,，。;]|$)', text, re.I)
+            name = re.search(r'(?:\bto\s+|\brecipient\s*(?:is|to|:|=)?\s*|给\s*|收款人(?:改成|换成|为|是|：|:)?\s*)([A-Za-z][A-Za-z -]{0,45}?)(?=\s+(?:£|GBP|[\d]|for\b|an?\s|international\b|domestic\b|simulate\b)|\s*(?:模拟|转账|汇款)|[,，。;]|$)', text, re.I)
             if not name:name=re.search(r'[、,，]\s*([A-Za-z][A-Za-z -]{0,35}?)\s*(?=[、,，])',text)
+            if re.search(r'\b(?:change|set|update)\b',lower) and not re.search(r'recipient|收款人',lower):name=None
             if name and name[1].strip().lower() not in ('gbp','pounds','amount','it'): patch['recipient'] = name[1].strip()
         amount = re.search(r'(?:£|GBP\s*)([+-]?\d[\d,]*(?:\.\d+)?)|([+-]?\d[\d,]*(?:\.\d+)?)\s*(?:英镑|GBP|pounds?)', text, re.I)
         if not amount:
