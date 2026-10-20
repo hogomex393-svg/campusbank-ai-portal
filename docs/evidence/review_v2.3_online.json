@@ -1,0 +1,348 @@
+{
+  "run_time": "2026-10-20T08:58:14.859995+00:00",
+  "online": true,
+  "model": "deepseek-v4-pro",
+  "faq_sha256": "2a37057009525718aaec33637e41fed44a45806a4315c1d23725fec4a15d85f4",
+  "note": "Authored regression only; lexical/draft checks do not establish general answer quality. Inspect recorded answers.",
+  "summary": {
+    "turns": 10,
+    "proxy_checks_passed": 10,
+    "online_failures": 0,
+    "api_calls": 16
+  },
+  "outputs": [
+    {
+      "case": "compound_zh",
+      "input": "学生账户开户需要什么材料，有月费吗，可以网上办吗？",
+      "answer": "开立学生账户需要以下材料：\n\n- **带照片的身份证件**（如护照或驾照）\n- **在读学生证明**（如学生证或录取通知）\n- **地址证明**（如近期的账单或租房合同）\n\n费用方面，学生账户**不收取账户月费**，但像国际转账这样的可选服务会另外收费。\n\n办理方式上，您可以选择**网上申请**，也可以前往 CampusBank 网点办理。需要我为您打开学生账户的网上申请窗口吗？",
+      "mode": "agent",
+      "error": null,
+      "proxy_pass": true,
+      "actions": [
+        {
+          "service_id": "open_account",
+          "title": "在线开户申请",
+          "title_en": "Open an account",
+          "category": "accounts",
+          "description": "选择账户，核对材料，登记演示申请。",
+          "prefill": {
+            "product": "student_account",
+            "channel": "online"
+          }
+        }
+      ],
+      "drafts": {
+        "open_account": {
+          "product": "student_account",
+          "channel": "online"
+        }
+      },
+      "source_ids": [
+        "PRODUCT_STUDENT"
+      ],
+      "api_calls": 1,
+      "usage": {
+        "prompt_tokens": 3246,
+        "completion_tokens": 105,
+        "total_tokens": 3351
+      },
+      "latency_ms": 3196
+    },
+    {
+      "case": "compound_rag",
+      "input": "What documents are needed for a student account, and what is the international transfer fee?",
+      "answer": "For a Student Account, you’ll need a photo ID, proof of student status, and proof of address.\n\nInternational transfers cost **GBP 8** per payment in this demo. Other banks or currency conversion may add charges that are not specified here.\n\nIf you’d like to proceed, I can open a demo form for you.",
+      "mode": "rag",
+      "error": null,
+      "proxy_pass": true,
+      "actions": [
+        {
+          "service_id": "transfer_demo",
+          "title": "转账服务窗口",
+          "title_en": "Transfer request",
+          "category": "payments",
+          "description": "核对收款信息与费用，登记模拟付款。",
+          "prefill": {
+            "transfer_type": "international"
+          }
+        }
+      ],
+      "drafts": {
+        "transfer_demo": {
+          "transfer_type": "international"
+        }
+      },
+      "source_ids": [
+        "PRODUCT_STUDENT",
+        "PAY_INTERNATIONAL_FEE",
+        "LOAN_DOCUMENTS",
+        "PAY_INTERNATIONAL_DETAILS"
+      ],
+      "api_calls": 1,
+      "usage": {
+        "prompt_tokens": 3201,
+        "completion_tokens": 69,
+        "total_tokens": 3270
+      },
+      "latency_ms": 3092
+    },
+    {
+      "case": "transfer_edit",
+      "input": "给 Sam 模拟国际转账两千英镑",
+      "answer": "已为您准备好国际转账（演示）窗口，收款人 Sam、金额 £2000，费用为 £8 演示费。请点击下方按钮打开窗口核对信息并确认提交（注意：这只是模拟登记，不会实际转账）。",
+      "mode": "agent",
+      "error": null,
+      "proxy_pass": true,
+      "actions": [
+        {
+          "service_id": "transfer_demo",
+          "title": "转账服务窗口",
+          "title_en": "Transfer request",
+          "category": "payments",
+          "description": "核对收款信息与费用，登记模拟付款。",
+          "prefill": {
+            "transfer_type": "international",
+            "recipient": "Sam",
+            "amount": "2000"
+          }
+        }
+      ],
+      "drafts": {
+        "transfer_demo": {
+          "transfer_type": "international",
+          "recipient": "Sam",
+          "amount": "2000"
+        }
+      },
+      "source_ids": [],
+      "api_calls": 2,
+      "usage": {
+        "prompt_tokens": 6546,
+        "completion_tokens": 181,
+        "total_tokens": 6727
+      },
+      "latency_ms": 5543
+    },
+    {
+      "case": "transfer_edit",
+      "input": "改成五百",
+      "answer": "已将金额改为 £500，其他信息不变：国际转账、收款人 Sam、费用 £8 演示费。请点击下方按钮核对后确认提交（模拟登记，不实际转账）。",
+      "mode": "agent",
+      "error": null,
+      "proxy_pass": true,
+      "actions": [
+        {
+          "service_id": "transfer_demo",
+          "title": "转账服务窗口",
+          "title_en": "Transfer request",
+          "category": "payments",
+          "description": "核对收款信息与费用，登记模拟付款。",
+          "prefill": {
+            "transfer_type": "international",
+            "recipient": "Sam",
+            "amount": "500"
+          }
+        }
+      ],
+      "drafts": {
+        "transfer_demo": {
+          "transfer_type": "international",
+          "recipient": "Sam",
+          "amount": "500"
+        }
+      },
+      "source_ids": [],
+      "api_calls": 2,
+      "usage": {
+        "prompt_tokens": 7104,
+        "completion_tokens": 123,
+        "total_tokens": 7227
+      },
+      "latency_ms": 3735
+    },
+    {
+      "case": "appointment_edit",
+      "input": "预约伦敦，2026 年 11 月 2 日，咨询学生账户",
+      "answer": "已为您准备好网点预约窗口，信息如下：\n\n- **城市**：伦敦\n- **日期**：2026 年 11 月 2 日\n- **咨询事项**：学生账户\n\n请点击下方按钮打开预约窗口确认提交即可。温馨提示：这是演示登记，实际到网点前建议备好学生身份证明和入学相关材料，以便咨询学生账户的开户与豁免条件。",
+      "mode": "agent",
+      "error": null,
+      "proxy_pass": true,
+      "actions": [
+        {
+          "service_id": "branch_appointment",
+          "title": "网点服务预约",
+          "title_en": "Branch appointment",
+          "category": "support",
+          "description": "选择城市与日期，登记待确认预约。",
+          "prefill": {
+            "city": "London",
+            "date": "2026-11-02",
+            "purpose": "学生账户"
+          }
+        }
+      ],
+      "drafts": {
+        "branch_appointment": {
+          "city": "London",
+          "date": "2026-11-02",
+          "purpose": "学生账户"
+        }
+      },
+      "source_ids": [],
+      "api_calls": 2,
+      "usage": {
+        "prompt_tokens": 6560,
+        "completion_tokens": 199,
+        "total_tokens": 6759
+      },
+      "latency_ms": 5094
+    },
+    {
+      "case": "appointment_edit",
+      "input": "改成曼彻斯特",
+      "answer": "已为您更新预约信息：\n\n- **城市**：曼彻斯特\n- **日期**：2026 年 11 月 2 日\n- **咨询事项**：学生账户\n\n请点击下方按钮打开预约窗口确认提交即可。",
+      "mode": "agent",
+      "error": null,
+      "proxy_pass": true,
+      "actions": [
+        {
+          "service_id": "branch_appointment",
+          "title": "网点服务预约",
+          "title_en": "Branch appointment",
+          "category": "support",
+          "description": "选择城市与日期，登记待确认预约。",
+          "prefill": {
+            "city": "Manchester",
+            "date": "2026-11-02",
+            "purpose": "学生账户"
+          }
+        }
+      ],
+      "drafts": {
+        "branch_appointment": {
+          "city": "Manchester",
+          "date": "2026-11-02",
+          "purpose": "学生账户"
+        }
+      },
+      "source_ids": [],
+      "api_calls": 2,
+      "usage": {
+        "prompt_tokens": 7191,
+        "completion_tokens": 141,
+        "total_tokens": 7332
+      },
+      "latency_ms": 3650
+    },
+    {
+      "case": "minimum_unknown",
+      "input": "学生账户最低开户存款是多少？",
+      "answer": "开户申请窗口已经准备好，您可以在下方点击进入，选择学生账户并填写相关演示信息。\n\n需要留意的是，这个窗口只是**登记演示申请**，并不会真正提交或完成开户。关于最低开户存款，资料中并未说明，建议您通过网点或客服进一步核实。",
+      "mode": "agent",
+      "error": null,
+      "proxy_pass": true,
+      "actions": [
+        {
+          "service_id": "open_account",
+          "title": "在线开户申请",
+          "title_en": "Open an account",
+          "category": "accounts",
+          "description": "选择账户，核对材料，登记演示申请。",
+          "prefill": {
+            "product": "student_account"
+          }
+        }
+      ],
+      "drafts": {
+        "open_account": {
+          "product": "student_account"
+        }
+      },
+      "source_ids": [
+        "PRODUCT_STUDENT"
+      ],
+      "api_calls": 2,
+      "usage": {
+        "prompt_tokens": 6663,
+        "completion_tokens": 220,
+        "total_tokens": 6883
+      },
+      "latency_ms": 5635
+    },
+    {
+      "case": "simulation_fields",
+      "input": "模拟国际转账需要提供什么资料？",
+      "answer": "国际转账演示不需要真实账户资料、卡号或 IBAN。我们的表单只记录以下几项：\n\n| 字段 | 说明 |\n|------|------|\n| 转账类型 | 国际转账（演示费 £8） |\n| 收款人昵称 | 例如“房东”“家人”等，便于识别 |\n| 金额 | 转账金额 |\n| 备注 | 可选，说明用途 |\n\n需要特别说明的是：这是一份**模拟演示表单**，只会登记示例请求，不会真正发起转账或划走资金。\n\n需要我帮你打开国际转账的表单吗？我会带上你之前已选好的“国际转账”选项。",
+      "mode": "agent",
+      "error": null,
+      "proxy_pass": true,
+      "actions": [
+        {
+          "service_id": "transfer_demo",
+          "title": "转账服务窗口",
+          "title_en": "Transfer request",
+          "category": "payments",
+          "description": "核对收款信息与费用，登记模拟付款。",
+          "prefill": {
+            "transfer_type": "international"
+          }
+        }
+      ],
+      "drafts": {
+        "transfer_demo": {
+          "transfer_type": "international"
+        }
+      },
+      "source_ids": [],
+      "api_calls": 1,
+      "usage": {
+        "prompt_tokens": 3134,
+        "completion_tokens": 135,
+        "total_tokens": 3269
+      },
+      "latency_ms": 3633
+    },
+    {
+      "case": "lost_card_limit",
+      "input": "我的银行卡丢了，能在这里直接冻结吗？",
+      "answer": "很抱歉，这里**无法真正联网冻结您的银行卡**——本门户只用于登记演示请求，没有可操作的银行应用，也不能访问您的账户。\n\n我可以为您做两件事选址其一：\n\n- **登记冻结请求**（演示）：记录您希望冻结银行卡的意向；\n- **申请补卡**（演示）：登记补办新卡，演示费用为 £5。\n\n您需要我帮您打开挂失窗口登记吗？如果需要，请告诉我您选择「冻结」还是「补卡」。",
+      "mode": "agent",
+      "error": null,
+      "proxy_pass": true,
+      "actions": [],
+      "drafts": {},
+      "source_ids": [
+        "CARD_LOST",
+        "CARD_ACTIVATE",
+        "CARD_DECLINED"
+      ],
+      "api_calls": 2,
+      "usage": {
+        "prompt_tokens": 6953,
+        "completion_tokens": 203,
+        "total_tokens": 7156
+      },
+      "latency_ms": 6102
+    },
+    {
+      "case": "comparison_table",
+      "input": "Please compare Student and Everyday accounts in a table: monthly fees, age and documents.",
+      "answer": "| Feature | Student Account | Everyday Account |\n|---|---|---|\n| Monthly fee | No monthly fee | Not specified |\n| Age eligibility | Not specified | Adults aged 18 or above |\n| Required documents | Not specified | Photo ID and proof of address |\n\nHere's what I have confirmed so far:\n\n- **Student Account** – no monthly fee, but age and document requirements weren't listed in my current records.\n- **Everyday Account** – available to adults aged 18+, requiring a photo ID and proof of address. Its monthly fee wasn't specified in my records (though one earlier data point noted £3/month — please treat that as unconfirmed).\n\nWould you like me to look up the missing details for the Student Account (age/documents) and confirm the Everyday Account's fee?",
+      "mode": "agent",
+      "error": null,
+      "proxy_pass": true,
+      "actions": [],
+      "drafts": {},
+      "source_ids": [
+        "PRODUCT_EVERYDAY"
+      ],
+      "api_calls": 1,
+      "usage": {
+        "prompt_tokens": 3202,
+        "completion_tokens": 160,
+        "total_tokens": 3362
+      },
+      "latency_ms": 3822
+    }
+  ]
+}

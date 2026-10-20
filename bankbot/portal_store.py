@@ -44,6 +44,8 @@ class PortalStore:
                 PRIMARY KEY(chat_id,request_id));
             CREATE TABLE IF NOT EXISTS requests(id TEXT PRIMARY KEY, owner TEXT NOT NULL, service_id TEXT NOT NULL,
                 chat_id TEXT, payload TEXT NOT NULL, status TEXT NOT NULL, created_at TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS request_submissions(owner TEXT NOT NULL, request_key TEXT NOT NULL,
+                fingerprint TEXT NOT NULL, result TEXT NOT NULL, PRIMARY KEY(owner,request_key));
             CREATE TABLE IF NOT EXISTS tickets(id TEXT PRIMARY KEY, owner TEXT NOT NULL, chat_id TEXT,
                 subject TEXT NOT NULL, description TEXT NOT NULL, category TEXT NOT NULL,
                 status TEXT NOT NULL, assigned_to TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
@@ -211,31 +213,40 @@ class PortalStore:
                 if not n.is_finite() or not minimum<=n<=1000000 or n.as_tuple().exponent < -2:raise PortalError(400,'金额超出允许范围或超过两位小数。')
                 value=str(n)
             if f['type']=='date':
-                try:date.fromisoformat(value)
+                try:visit=date.fromisoformat(value)
                 except ValueError:raise PortalError(400,'日期格式不正确。') from None
+                if visit < datetime.now(timezone.utc).date():raise PortalError(400,'预约日期不能早于今天。')
             clean[f['name']]=value
         return clean
 
-    def submit(self,owner,service_id,payload,chat_id=None):
+    def submit(self,owner,service_id,payload,chat_id=None,request_id=None):
         if not owner.startswith('u:'):raise PortalError(401,'请登录后保存办理请求。')
-        clean=self.validate_form(service_id,payload)
         if chat_id:self.chat(owner,chat_id)
+        fingerprint=hashlib.sha256(json.dumps([service_id,payload,chat_id],sort_keys=True,ensure_ascii=False).encode()).hexdigest()
         id_='CB'+datetime.now().strftime('%y%m%d')+'-'+secrets.token_hex(4).upper()
         stamp=now()
         with self.db() as c:
             c.execute('BEGIN IMMEDIATE')
+            if request_id:
+                previous=c.execute('SELECT fingerprint,result FROM request_submissions WHERE owner=? AND request_key=?',(owner,request_id)).fetchone()
+                if previous:
+                    if previous['fingerprint']!=fingerprint:raise PortalError(409,'提交标识已用于其他内容，请重新打开服务窗口。')
+                    return json.loads(previous['result'])
+            clean=self.validate_form(service_id,payload)
             if service_id=='human_support' and chat_id and c.execute("SELECT 1 FROM tickets WHERE chat_id=? AND status IN ('waiting','active')",(chat_id,)).fetchone():
                 raise PortalError(409,'当前对话已有人工客服工单，请返回对话继续补充问题。')
             c.execute('INSERT INTO requests VALUES(?,?,?,?,?,?,?)',(id_,owner,service_id,chat_id,json.dumps(clean,ensure_ascii=False),'pending',stamp))
             if service_id=='human_support':
                 c.execute('INSERT INTO tickets VALUES(?,?,?,?,?,?,?,?,?,?)',(id_,owner,chat_id,clean['subject'],clean['description'],clean['category'],'waiting',None,stamp,stamp))
+            result={'id':id_,'service_id':service_id,'title':SERVICES[service_id]['title'],'status':'pending','created_at':stamp,'payload':clean,'demo':True}
+            if request_id:c.execute('INSERT INTO request_submissions VALUES(?,?,?,?)',(owner,request_id,fingerprint,json.dumps(result,ensure_ascii=False)))
         if service_id=='human_support' and chat_id:
             chat=self.chat(owner,chat_id)
             last=next((m['content'] for m in reversed(chat['messages']) if m['role']=='user'),clean['description'])
             language=detect_language(last,coerce_state(chat['state']).language)
             message=('已创建人工客服工单 '+id_+'，等待工作人员接单。后续消息和人工回复会保留在此会话中。') if language=='zh' else ('Support ticket '+id_+' is waiting for a staff member. Your messages and manual replies will stay in this conversation.')
             self.append_message(chat_id,'assistant',message,{'sender':'service','ticket_id':id_})
-        return {'id':id_,'service_id':service_id,'title':SERVICES[service_id]['title'],'status':'pending','created_at':stamp,'payload':clean,'demo':True}
+        return result
 
     def requests(self,owner):
         with self.db() as c:rows=[dict(r) for r in c.execute('SELECT * FROM requests WHERE owner=? ORDER BY created_at DESC',(owner,))]

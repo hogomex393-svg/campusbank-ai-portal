@@ -420,6 +420,31 @@ a {
   margin: auto;
   padding-bottom: 20px;
 }
+.message-body { min-width: 0; }
+.answer-table-wrap {
+  width: 100%; max-width: 100%; overflow-x: auto; margin: 18px 0 8px;
+  border: 1px solid #dbe5de; border-radius: 12px; background: #fff;
+  scrollbar-width: thin; overscroll-behavior-inline: contain;
+}
+.answer-table { width: 100%; min-width: 540px; border-collapse: separate; border-spacing: 0; font-size: 13px; line-height: 1.65; }
+.answer-table th, .answer-table td { padding: 13px 16px; border-bottom: 1px solid #e5ebe7; vertical-align: top; min-width: 150px; overflow-wrap: anywhere; }
+.answer-table thead th { background: #edf5ef; color: #205346; font-weight: 650; }
+.answer-table tbody th { background: #f6f9f6; font-weight: 600; min-width: 105px; width: 120px; }
+.answer-table tr:last-child > * { border-bottom: 0; }
+.answer-table tbody tr:nth-child(even) td { background: #fbfcfa; }
+.answer-table tbody tr:hover td { background: #f1f7f2; }
+.answer-table [data-align="left"] { text-align: left; }
+.answer-table [data-align="right"] { text-align: right; }
+.answer-table [data-align="center"] { text-align: center; }
+.table-hint { display: none; }
+.send-feedback { max-width: 825px; margin: 0 auto 10px; padding: 10px 14px; border: 1px solid #e5d6b6; border-radius: 10px; background: #fffaf0; font-size: 13px; }
+.send-feedback:not([hidden]) { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+@media (max-width: 640px) {
+  .answer-table { min-width: 520px; font-size: 12px; }
+  .answer-table th, .answer-table td { padding: 11px 12px; }
+  .answer-table thead th:first-child, .answer-table tbody th { position: sticky; left: 0; z-index: 1; box-shadow: 1px 0 #e2e9e3; }
+  .table-hint { display: block; font-size: 11px !important; color: #6f8076; margin-top: 4px !important; }
+}
 .message {
   margin: 0 0 25px;
   display: flex;

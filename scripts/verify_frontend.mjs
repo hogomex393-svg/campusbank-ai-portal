@@ -170,7 +170,7 @@ w.fetch = async (url, options = {}) => {
 };
 w.eval(
   (await fs.readFile(path.join(root, "web/app.js"), "utf8")) +
-    "\nwindow.__test={S,showChat,showStaff,switchPortalRole,showSupportHistory,showCustomerTicket,startHandoff,newChat,selectChat,sendMessage,showServices,openService,showRequests,showReferences,renderChat,openAuth,authKind};",
+    "\nwindow.__test={S,showChat,showStaff,switchPortalRole,showSupportHistory,showCustomerTicket,startHandoff,newChat,selectChat,sendMessage,showServices,openService,showRequests,showReferences,renderChat,openAuth,authKind,markdown,setLanguage};",
 );
 async function flush() {
   for (let i = 0; i < 20; i++)
@@ -339,7 +339,81 @@ w.document.getElementById("portalRole").value = "staff";
 w.document.getElementById("portalRole").dispatchEvent(new w.Event("change"));
 assert(!w.document.getElementById("staffInviteField").hidden);
 w.document.getElementById("authDialog").close();
+// Readable tables, including escaped pipes, formatting, safe HTML, and fenced output.
+const table = ui.markdown("```markdown\n| Feature | Student | Everyday |\n|---|:---:|---:|\n| **Monthly fee** | No fee | GBP 3 |\n| Documents | Photo ID \\| address | `<script>` |\n```\nNext steps");
+assert.equal(table.querySelectorAll("table").length,1);
+assert.equal(table.querySelectorAll("thead th").length,3);
+assert.equal(table.querySelectorAll("tbody tr").length,2);
+assert.equal(table.querySelector("tbody th strong").textContent,"Monthly fee");
+assert.equal(table.querySelectorAll("tbody tr")[1].children[1].textContent,"Photo ID | address");
+assert.equal(table.querySelector("script"),null);
+assert(table.textContent.includes("Next steps"));
+assert(!table.textContent.includes("|---"));
+
+// A stale action must open the latest saved server draft, without losing unchanged slots.
+ui.S.current.service_drafts = {transfer_demo:{transfer_type:"international",recipient:"Sam",amount:"500"}};
+ui.openService("transfer_demo",{transfer_type:"domestic",amount:"2000"});
+let reviewForm = w.document.getElementById("serviceForm");
+assert.equal(reviewForm.elements.transfer_type.value,"international");
+assert.equal(reviewForm.elements.recipient.value,"Sam");
+assert.equal(reviewForm.elements.amount.value,"500");
+reviewForm.dispatchEvent(new w.Event("submit",{bubbles:true,cancelable:true}));
+const requestCount = calls.filter(c=>c.url==="/api/requests" && c.method==="POST").length;
+const confirmTwice = [...w.document.querySelectorAll("#serviceBody button")].find(b=>b.textContent.includes("确认提交"));
+assert(confirmTwice); confirmTwice.click(); confirmTwice.click(); await flush();
+const newRequests=calls.filter(c=>c.url==="/api/requests" && c.method==="POST");
+assert.equal(newRequests.length,requestCount+1);
+assert.match(newRequests.at(-1).body.request_id,/^[a-f0-9]{32}$/);
+
+ui.openService("branch_appointment"); reviewForm=w.document.getElementById("serviceForm");
+reviewForm.elements.date.value="2000-01-01"; reviewForm.elements.purpose.value="Demo visit";
+reviewForm.dispatchEvent(new w.Event("submit",{bubbles:true,cancelable:true}));
+assert(w.document.querySelector("#serviceForm .form-error").textContent.includes("不能早于"));
+reviewForm.elements.date.value=new Date().toISOString().slice(0,10); reviewForm.elements.purpose.value="   ";
+reviewForm.dispatchEvent(new w.Event("submit",{bubbles:true,cancelable:true}));
+assert(w.document.querySelector("#serviceForm .form-error").textContent.includes("请填写"));
+reviewForm.elements.purpose.value="Demo visit"; reviewForm.dispatchEvent(new w.Event("input",{bubbles:true}));
+w.document.getElementById("serviceDialog").close(); ui.openService("branch_appointment");
+assert.equal(w.document.getElementById("serviceForm").elements.purpose.value,"Demo visit");
+w.document.getElementById("serviceDialog").close();
+
+w.document.getElementById("historySearch").value="no-such-conversation";
+w.document.getElementById("historySearch").dispatchEvent(new w.Event("input"));
+assert(w.document.getElementById("historyList").textContent.includes("没有匹配"));
+w.document.getElementById("historySearch").value="";
+ui.S.lang="en"; ui.setLanguage();
+for (const service of catalog.services) {
+  ui.openService(service.id);
+  const text=w.document.getElementById("serviceDialog").textContent;
+  assert(!/[\u4e00-\u9fff]/.test(text),`Untranslated service: ${service.id}`);
+  w.document.getElementById("serviceDialog").close();
+}
+assert(!/[\u4e00-\u9fff]/.test(w.document.getElementById("settingsDialog").textContent));
+// Interrupted requests retain the question, offer retry, and reuse the original send ID.
+ui.showChat(); const originalFetch=w.fetch;
+w.fetch=async(url,options)=> { if (url.endsWith("/messages")) throw new TypeError("Failed to fetch"); return originalFetch(url,options); };
+w.document.getElementById("messageInput").value="Retry this question";
+await ui.sendMessage();
+assert.equal(w.document.getElementById("messageInput").value,"Retry this question");
+assert(w.document.getElementById("sendFeedback").textContent.includes("Retry sending"));
+assert(!w.document.getElementById("sendFeedback").textContent.includes("Failed to fetch"));
+const failedId=ui.S.retryMessage.id; w.fetch=originalFetch;
+await ui.sendMessage(); assert.equal(calls.filter(c=>c.url.endsWith("/messages")).at(-1).body.request_id,failedId);
+w.fetch=async(url,options)=>url.endsWith("/messages") ? {ok:false,status:429,json:async()=>({detail:"Rate limited",retry_after:2})} : originalFetch(url,options);
+w.document.getElementById("messageInput").value="Please wait"; await ui.sendMessage();
+assert(w.document.getElementById("sendFeedback").textContent.includes("Retry in"));
+assert(w.document.getElementById("sendButton").disabled);
+w.clearTimeout(ui.S.cooldownTimer); w.fetch=originalFetch;
 const summary = {
+  readable_tables_and_safe_cells:true,
+  latest_chat_draft_prefills_form:true,
+  confirmation_double_click_only_posts_once:true,
+  past_dates_and_whitespace_block_review:true,
+  form_draft_retained_on_reopen:true,
+  english_service_catalog_and_settings:true,
+  readable_search_empty_state:true,
+  network_retry_preserves_message_and_send_id:true,
+  rate_limit_countdown_and_retry:true,
   customer_history_has_no_reply_controls: true,
   staff_controls_require_active_staff_role: true,
   resolved_ticket_is_read_only: true,

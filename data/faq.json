@@ -152,14 +152,14 @@
     "aliases": [
       "My bank card was stolen; what should I do?"
     ],
-    "answer": "Freeze the lost Debit Card in the demo banking app and contact CampusBank support. A replacement costs GBP 5; this assistant cannot freeze cards itself.",
+    "answer": "Use the Lost or damaged card window to record a demo freeze or replacement request. A replacement has a fictional GBP 5 fee. This portal cannot freeze a real card and has no separate banking app.",
     "source": "Original fictional CampusBank coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "借记卡丢了怎么办？",
     "aliases_zh": [
       "银行卡遗失或被盗如何挂失？"
     ],
-    "answer_zh": "请在演示银行应用中冻结丢失的借记卡，并联系客服。补卡费用为 5 英镑；本助手不能实际冻结银行卡。"
+    "answer_zh": "请使用“挂失与补卡服务”窗口登记演示冻结或补卡请求。补卡演示费用为 5 英镑。本网站不能真正冻结银行卡，也没有另一个可操作的银行应用。"
   },
   {
     "faq_id": "CARD_REPLACEMENT",
@@ -188,14 +188,14 @@
     "aliases": [
       "How can I start using my new bank card?"
     ],
-    "answer": "Activate the demo Debit Card from the Cards section in the banking app. Follow the app instructions; do not share card details with this assistant.",
+    "answer": "This portal cannot activate real debit cards. Use Digital banking help or Human support to record a demo assistance request. Do not enter real card details.",
     "source": "Original fictional CampusBank coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "怎样激活借记卡？",
     "aliases_zh": [
       "新银行卡如何启用？"
     ],
-    "answer_zh": "请在演示银行应用的银行卡页面激活借记卡，按应用指引操作。不要向本助手提供银行卡信息。"
+    "answer_zh": "本网站不能激活真实借记卡。可通过“网上银行协助”或“转接人工客服”登记演示协助请求，请勿填写真实银行卡信息。"
   },
   {
     "faq_id": "CARD_PIN",
@@ -296,14 +296,14 @@
     "aliases": [
       "Does a local bank transfer cost anything?"
     ],
-    "answer": "Demo domestic transfers are free. Check recipient details in the banking app before submitting a payment.",
+    "answer": "Demo domestic transfers are free. In the Transfer request window, review a fictional recipient nickname, amount and optional note before confirming. No money moves.",
     "source": "Original fictional CampusBank coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "国内转账的手续费是多少？",
     "aliases_zh": [
       "本地转账收费吗？"
     ],
-    "answer_zh": "演示国内转账免费。提交付款前，请在银行应用中核对收款人信息。"
+    "answer_zh": "演示国内转账免费。在“转账服务窗口”核对虚构收款人昵称、演示金额和可选附言后确认。不会实际扣款或转移资金。"
   },
   {
     "faq_id": "PAY_DOMESTIC_TIME",
@@ -368,14 +368,14 @@
     "aliases": [
       "Do I need an IBAN and SWIFT code to send money abroad?"
     ],
-    "answer": "For a demo international transfer, enter the recipient name, destination country, account or IBAN and SWIFT/BIC code in the banking app. Do not submit account details in this chat.",
+    "answer": "A simulated international transfer needs only transfer type, a fictional recipient nickname, a GBP demo amount and optional note. Open Transfer request and review before confirming. Do not provide IBAN, account numbers, SWIFT/BIC or actual payment details.",
     "source": "Original fictional CampusBank coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "国际转账需要哪些收款人信息？",
     "aliases_zh": [
       "境外汇款需要 IBAN 和 SWIFT 吗？"
     ],
-    "answer_zh": "演示国际转账需要在银行应用中填写收款人姓名、目的国家、账户或 IBAN，以及 SWIFT/BIC 代码。不要在聊天中提交账户信息。"
+    "answer_zh": "模拟国际转账只需要转账类型、虚构收款人昵称、英镑演示金额和可选附言。打开“转账服务窗口”核对后确认。请勿提供 IBAN、账号、SWIFT/BIC 或真实支付资料。"
   },
   {
     "faq_id": "PAY_CANCEL",
@@ -1088,14 +1088,14 @@
     "aliases": [
       "I see a payment I did not authorise."
     ],
-    "answer": "Use the bank's secure support channel to report suspected fraud and freeze a affected card through the app. This demo cannot inspect, reverse or investigate transactions.",
+    "answer": "For a real account incident, contact your actual bank through its official secure support channel. CampusBank only records a fictional support or lost-card request; it cannot inspect, freeze, reverse or investigate real transactions.",
     "source": "Original fictional CampusBank coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "怎样报告疑似欺诈交易？",
     "aliases_zh": [
       "发现不是我授权的付款怎么办？"
     ],
-    "answer_zh": "请通过银行安全客服渠道报告疑似欺诈，并在应用中冻结受影响的银行卡。本演示不能查看、撤销或调查真实交易。"
+    "answer_zh": "如果涉及真实账户，请通过真实银行的官方安全客服渠道联系银行。本网站只能登记演示客服或挂失请求，不能查看、冻结、撤销或调查真实交易。"
   },
   {
     "faq_id": "SUP_SCOPE",

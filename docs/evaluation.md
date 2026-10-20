@@ -1,8 +1,10 @@
 # Evaluation: what the evidence supports
 
+The [version 2.3.0 review regression](group-review-fixes.md) adds eleven Python checks (93 total), frontend readability/workflow assertions, and ten authored online turns checked on 2026-10-20. The latest frozen offline output is [offline_queries_v2.3.json](evidence/offline_queries_v2.3.json); older files below remain historical evidence for their recorded versions.
+
 ## Automated behavior checks
 
-The 82-test Python suite covers system behavior, bilingual logic, natural dialogue/history regressions, portal accounts, shared support, password recovery, cloud configuration, and customer/staff role separation. Model calls are stubbed in unit/integration tests; these tests do not establish DeepSeek answer quality.
+The 93-test Python suite covers system behavior, bilingual logic, natural dialogue/history regressions, portal accounts, shared support, password recovery, cloud configuration, and customer/staff role separation. Model calls are stubbed in unit/integration tests; these tests do not establish DeepSeek answer quality.
 
 The frontend script uses jsdom and mocked HTTP. It checks that earlier chats/messages remain available; service forms submit after confirmation; support controls respect the active role and status; customer updates preserve staff reply drafts; and user/model HTML is escaped. It is a workflow regression suite, not a visual browser test or a human usability study.
 

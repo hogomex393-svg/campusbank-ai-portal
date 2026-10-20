@@ -21,6 +21,7 @@ from .dialogue import coerce_state
 from .history import repair_display
 from .language import detect_language
 from .ui_runtime import reply_details
+from .errors import public_error
 
 COOKIE='campusbank_session'
 
@@ -43,12 +44,15 @@ class SubmitBody(Body):
     payload:dict
     chat_id:str|None=None
     confirmed:bool=False
+    request_id:str=Field(default_factory=lambda:uuid.uuid4().hex,pattern=r'^[a-f0-9]{32}$')
 class ReplyBody(Body):text:str=Field(min_length=1,max_length=2000)
 class RoleBody(Body):portal_role:str=Field(pattern=r'^(customer|staff)$')
 
 
 def public_chat(chat):
-    return {k:chat[k] for k in ('id','title','created_at','updated_at','messages','ticket')}
+    result={k:chat[k] for k in ('id','title','created_at','updated_at','messages','ticket')}
+    result['service_drafts']=coerce_state(chat['state']).service_drafts
+    return result
 
 
 def create_app(db_path=None,service=None):
@@ -90,7 +94,11 @@ def create_app(db_path=None,service=None):
         response.set_cookie(COOKIE,token,max_age=604800,httponly=True,samesite='strict',secure=settings.cloud_mode or req.url.scheme=='https',path='/')
 
     @app.exception_handler(PortalError)
-    async def portal_error(req,exc):return JSONResponse({'detail':exc.message},status_code=exc.status)
+    async def portal_error(req,exc):
+        retry=getattr(exc,'retry_after',60) if exc.status==429 else None
+        return JSONResponse({'detail':public_error(exc.message,req.headers.get('Accept-Language','zh')),
+                            **({'retry_after':retry} if retry else {})},status_code=exc.status,
+                            headers={'Retry-After':str(retry)} if retry else None)
 
     @app.middleware('http')
     async def security_headers(req,call_next):
@@ -108,7 +116,8 @@ def create_app(db_path=None,service=None):
         if not who:
             token,who=store.new_session();set_cookie(response,token,req)
         return {'user':who['user'],'csrf':who['csrf'],'categories':CATEGORIES,'services':list(SERVICES.values()),
-                'bank_references':BANK_REFERENCES,'api_available':bool(settings.api_key),'version':'2.2.1','portal_role':who['portal_role'],
+                'bank_references':BANK_REFERENCES,'api_available':bool(settings.api_key),'version':'2.3.0','portal_role':who['portal_role'],
+                'today':datetime.now(timezone.utc).date().isoformat(),
                 'requires_login':settings.cloud_mode,'registration_access_code_required':settings.cloud_mode,
                 'first_admin_setup_required':settings.cloud_mode and not store.has_admin()}
 
@@ -201,7 +210,10 @@ def create_app(db_path=None,service=None):
                     if len(recent)>=6 or len(global_recent)>=30:
                         # Release this idempotency reservation so the same message can be retried later.
                         with store.db() as c:c.execute('DELETE FROM sends WHERE chat_id=? AND request_id=?',(id_,body.request_id))
-                        raise PortalError(429,'咨询过于频繁，请稍等一分钟后重试。')
+                        error=PortalError(429,'咨询过于频繁，请稍等一分钟后重试。')
+                        blocked=recent if len(recent)>=6 else global_recent
+                        error.retry_after=max(1,int(60-(stamp-min(blocked)))+1)
+                        raise error
                     send_attempts[who['owner']]=recent+[stamp];send_attempts['*']=global_recent+[stamp]
             store.append_message(id_,'user',body.text)
             if current['title']=='新对话':store.rename_chat(who['owner'],id_,body.text[:30])
@@ -217,7 +229,7 @@ def create_app(db_path=None,service=None):
                     meta['actions']=getattr(reply,'actions',[])
                     for action in meta['actions']:
                         if action['service_id']=='open_account' and reply.state.product in ('student_account','everyday_account'):
-                            action['prefill']={'product':reply.state.product}
+                            action.setdefault('prefill',{})['product']=reply.state.product
                     store.update_state(id_,reply.state)
                 except Exception:
                     answer='处理时发生错误，问题与历史已经保留，请稍后重试。' if detect_language(body.text)=='zh' else 'I could not process this request. Your messages are saved; please try again.'
@@ -243,7 +255,7 @@ def create_app(db_path=None,service=None):
     def submit(body:SubmitBody,req:Request):
         who=mutate(req)
         if not body.confirmed:raise PortalError(400,'请核对信息后确认提交。')
-        return store.submit(who['owner'],body.service_id,body.payload,body.chat_id)
+        return store.submit(who['owner'],body.service_id,body.payload,body.chat_id,body.request_id)
 
     @app.post('/api/tickets/{id_}/resume-ai')
     def resume(id_:str,req:Request):return store.resolve_ticket(id_,mutate(req)['owner'])
@@ -284,7 +296,7 @@ def create_app(db_path=None,service=None):
         return {'imported':store.import_legacy(who['owner'],records)}
 
     @app.get('/api/health')
-    def health():return {'ok':True,'version':'2.2.2'}
+    def health():return {'ok':True,'version':'2.3.0'}
 
     app.mount('/assets',StaticFiles(directory=ROOT/'web'),name='assets')
     @app.get('/')

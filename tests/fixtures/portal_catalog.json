@@ -53,21 +53,25 @@
           "options": [
             {
               "value": "student_account",
-              "label": "学生账户 · 无月费"
+              "label": "学生账户 · 无月费",
+              "label_en": "Student account · no monthly fee"
             },
             {
               "value": "everyday_account",
-              "label": "日常账户 · 月费 £3"
+              "label": "日常账户 · 月费 £3",
+              "label_en": "Everyday account · GBP 3 monthly fee"
             }
           ],
-          "required": true
+          "required": true,
+          "label_en": "Account type"
         },
         {
           "name": "applicant",
           "label": "申请人称呼（演示）",
           "type": "text",
           "options": [],
-          "required": true
+          "required": true,
+          "label_en": "Demo applicant name"
         },
         {
           "name": "channel",
@@ -76,24 +80,30 @@
           "options": [
             {
               "value": "online",
-              "label": "网上申请"
+              "label": "网上申请",
+              "label_en": "Online application"
             },
             {
               "value": "branch",
-              "label": "网点办理"
+              "label": "网点办理",
+              "label_en": "At a branch"
             }
           ],
-          "required": true
+          "required": true,
+          "label_en": "Application channel"
         },
         {
           "name": "documents_ready",
           "label": "已了解身份证件、地址证明及产品材料要求",
           "type": "checkbox",
           "options": [],
-          "required": true
+          "required": true,
+          "label_en": "I have reviewed the ID, address and product document requirements"
         }
       ],
-      "notice": "本窗口登记课程演示申请；提交后等待审核，不会开立真实银行账户。"
+      "notice": "本窗口登记课程演示申请；提交后等待审核，不会开立真实银行账户。",
+      "description_en": "Choose an account, review required documents, and save a demo application.",
+      "notice_en": "This records a fictional application for review; no real account is opened."
     },
     {
       "id": "apply_card",
@@ -110,14 +120,17 @@
           "options": [
             {
               "value": "debit_card",
-              "label": "借记卡"
+              "label": "借记卡",
+              "label_en": "Debit card"
             },
             {
               "value": "credit_card",
-              "label": "信用卡"
+              "label": "信用卡",
+              "label_en": "Credit card"
             }
           ],
-          "required": true
+          "required": true,
+          "label_en": "Card type"
         },
         {
           "name": "linked_product",
@@ -126,31 +139,38 @@
           "options": [
             {
               "value": "student_account",
-              "label": "学生账户"
+              "label": "学生账户",
+              "label_en": "Student account · no monthly fee"
             },
             {
               "value": "everyday_account",
-              "label": "日常账户"
+              "label": "日常账户",
+              "label_en": "Everyday account · GBP 3 monthly fee"
             }
           ],
-          "required": true
+          "required": true,
+          "label_en": "Linked account"
         },
         {
           "name": "purpose",
           "label": "使用用途（演示）",
           "type": "text",
           "options": [],
-          "required": true
+          "required": true,
+          "label_en": "Purpose"
         },
         {
           "name": "reviewed",
           "label": "已核对申请条件与资料要求",
           "type": "checkbox",
           "options": [],
-          "required": true
+          "required": true,
+          "label_en": "I have reviewed the requirements"
         }
       ],
-      "notice": "信用卡申请只登记待审核请求，本系统不会自动批准授信。"
+      "notice": "信用卡申请只登记待审核请求，本系统不会自动批准授信。",
+      "description_en": "Request a linked debit card or submit a demo credit-card application for review.",
+      "notice_en": "Credit applications remain pending review. This system cannot approve credit."
     },
     {
       "id": "replace_card",
@@ -167,18 +187,22 @@
           "options": [
             {
               "value": "lost",
-              "label": "卡片遗失"
+              "label": "卡片遗失",
+              "label_en": "Lost card"
             },
             {
               "value": "stolen",
-              "label": "卡片被盗"
+              "label": "卡片被盗",
+              "label_en": "Stolen card"
             },
             {
               "value": "damaged",
-              "label": "卡片损坏"
+              "label": "卡片损坏",
+              "label_en": "Damaged card"
             }
           ],
-          "required": true
+          "required": true,
+          "label_en": "Reason"
         },
         {
           "name": "action",
@@ -187,24 +211,30 @@
           "options": [
             {
               "value": "freeze",
-              "label": "登记冻结请求"
+              "label": "登记冻结请求",
+              "label_en": "Record a demo freeze request"
             },
             {
               "value": "replace",
-              "label": "申请补卡（演示费 £5）"
+              "label": "申请补卡（演示费 £5）",
+              "label_en": "Demo replacement · GBP 5"
             }
           ],
-          "required": true
+          "required": true,
+          "label_en": "Requested service"
         },
         {
           "name": "note",
           "label": "情况说明",
           "type": "textarea",
           "options": [],
-          "required": false
+          "required": false,
+          "label_en": "Additional notes"
         }
       ],
-      "notice": "不会操作真实银行卡，也不需要填写卡号或 PIN。"
+      "notice": "不会操作真实银行卡，也不需要填写卡号或 PIN。",
+      "description_en": "Record a demo lost-card, freeze, or replacement request.",
+      "notice_en": "No real card is changed. Do not enter a card number or PIN."
     },
     {
       "id": "transfer_demo",
@@ -221,38 +251,46 @@
           "options": [
             {
               "value": "domestic",
-              "label": "国内转账 · 免费"
+              "label": "国内转账 · 免费",
+              "label_en": "Domestic transfer · free"
             },
             {
               "value": "international",
-              "label": "国际转账 · 演示费 £8"
+              "label": "国际转账 · 演示费 £8",
+              "label_en": "International transfer · GBP 8 demo fee"
             }
           ],
-          "required": true
+          "required": true,
+          "label_en": "Transfer type"
         },
         {
           "name": "recipient",
           "label": "演示收款人昵称",
           "type": "text",
           "options": [],
-          "required": true
+          "required": true,
+          "label_en": "Demo recipient nickname"
         },
         {
           "name": "amount",
           "label": "演示金额（GBP）",
           "type": "number",
           "options": [],
-          "required": true
+          "required": true,
+          "label_en": "Demo amount (GBP)"
         },
         {
           "name": "note",
           "label": "附言",
           "type": "textarea",
           "options": [],
-          "required": false
+          "required": false,
+          "label_en": "Additional notes"
         }
       ],
-      "notice": "只记录模拟转账，不扣款，不连接真实支付系统。"
+      "notice": "只记录模拟转账，不扣款，不连接真实支付系统。",
+      "description_en": "Review a nickname, demo amount, and fee before recording a simulated transfer.",
+      "notice_en": "Simulation only: no money moves and no real payment system is connected."
     },
     {
       "id": "open_savings",
@@ -267,24 +305,29 @@
           "label": "申请人称呼（演示）",
           "type": "text",
           "options": [],
-          "required": true
+          "required": true,
+          "label_en": "Demo applicant name"
         },
         {
           "name": "opening_deposit",
           "label": "演示开户存款（GBP，至少 10）",
           "type": "number",
           "options": [],
-          "required": true
+          "required": true,
+          "label_en": "Demo opening deposit (GBP, minimum 10)"
         },
         {
           "name": "reviewed",
           "label": "已了解无月费、演示年利率 2% 与取款规则",
           "type": "checkbox",
           "options": [],
-          "required": true
+          "required": true,
+          "label_en": "I have reviewed the requirements"
         }
       ],
-      "notice": "资金不会实际存入；2% 为本项目虚构政策，并非银行报价。"
+      "notice": "资金不会实际存入；2% 为本项目虚构政策，并非银行报价。",
+      "description_en": "Review the fictional interest rate and record a savings application.",
+      "notice_en": "No money is deposited. The fictional 2% annual rate is a coursework example."
     },
     {
       "id": "apply_loan",
@@ -299,31 +342,37 @@
           "label": "申请人称呼（演示）",
           "type": "text",
           "options": [],
-          "required": true
+          "required": true,
+          "label_en": "Demo applicant name"
         },
         {
           "name": "amount",
           "label": "演示贷款金额（GBP）",
           "type": "number",
           "options": [],
-          "required": true
+          "required": true,
+          "label_en": "Demo amount (GBP)"
         },
         {
           "name": "purpose",
           "label": "贷款用途（演示）",
           "type": "text",
           "options": [],
-          "required": true
+          "required": true,
+          "label_en": "Purpose"
         },
         {
           "name": "reviewed",
           "label": "已了解材料要求与偿还能力审核流程",
           "type": "checkbox",
           "options": [],
-          "required": true
+          "required": true,
+          "label_en": "I have reviewed the requirements"
         }
       ],
-      "notice": "提交不代表审批通过。本窗口不会进行真实信用评估。"
+      "notice": "提交不代表审批通过。本窗口不会进行真实信用评估。",
+      "description_en": "Record an application for the demo review queue.",
+      "notice_en": "Submission does not mean approval. No real credit assessment is performed."
     },
     {
       "id": "branch_appointment",
@@ -340,35 +389,43 @@
           "options": [
             {
               "value": "Lancaster",
-              "label": "兰开斯特"
+              "label": "兰开斯特",
+              "label_en": "Lancaster"
             },
             {
               "value": "London",
-              "label": "伦敦"
+              "label": "伦敦",
+              "label_en": "London"
             },
             {
               "value": "Manchester",
-              "label": "曼彻斯特"
+              "label": "曼彻斯特",
+              "label_en": "Manchester"
             }
           ],
-          "required": true
+          "required": true,
+          "label_en": "City"
         },
         {
           "name": "date",
           "label": "希望到访的日期",
           "type": "date",
           "options": [],
-          "required": true
+          "required": true,
+          "label_en": "Requested visit date"
         },
         {
           "name": "purpose",
           "label": "希望办理的业务",
           "type": "text",
           "options": [],
-          "required": true
+          "required": true,
+          "label_en": "Purpose"
         }
       ],
-      "notice": "预约进入待确认队列；不是实际网点预约。"
+      "notice": "预约进入待确认队列；不是实际网点预约。",
+      "description_en": "Choose a city and visit date for a pending demo appointment.",
+      "notice_en": "The request awaits confirmation; no real branch booking is made."
     },
     {
       "id": "human_support",
@@ -385,51 +442,63 @@
           "options": [
             {
               "value": "accounts",
-              "label": "账户"
+              "label": "账户",
+              "label_en": "Accounts"
             },
             {
               "value": "cards",
-              "label": "银行卡"
+              "label": "银行卡",
+              "label_en": "Cards"
             },
             {
               "value": "payments",
-              "label": "转账"
+              "label": "转账",
+              "label_en": "Payments"
             },
             {
               "value": "savings",
-              "label": "储蓄"
+              "label": "储蓄",
+              "label_en": "Savings"
             },
             {
               "value": "loans",
-              "label": "贷款"
+              "label": "贷款",
+              "label_en": "Loans"
             },
             {
               "value": "digital",
-              "label": "网上银行"
+              "label": "网上银行",
+              "label_en": "Digital banking"
             },
             {
               "value": "other",
-              "label": "其他"
+              "label": "其他",
+              "label_en": "Other"
             }
           ],
-          "required": true
+          "required": true,
+          "label_en": "Issue category"
         },
         {
           "name": "subject",
           "label": "问题标题",
           "type": "text",
           "options": [],
-          "required": true
+          "required": true,
+          "label_en": "Subject"
         },
         {
           "name": "description",
           "label": "需要工作人员帮助的内容",
           "type": "textarea",
           "options": [],
-          "required": true
+          "required": true,
+          "label_en": "Describe your request"
         }
       ],
-      "notice": "转入本地演示客服队列。工作人员可在工作台接单并回复。"
+      "notice": "转入本地演示客服队列。工作人员可在工作台接单并回复。",
+      "description_en": "Send the conversation context to the shared staff queue.",
+      "notice_en": "Demo staff can accept and reply to this ticket in their workspace."
     },
     {
       "id": "digital_help",
@@ -446,50 +515,65 @@
           "options": [
             {
               "value": "login",
-              "label": "无法登录"
+              "label": "无法登录",
+              "label_en": "Sign-in problem"
             },
             {
               "value": "password",
-              "label": "密码找回流程"
+              "label": "密码找回流程",
+              "label_en": "Password recovery guidance"
             },
             {
               "value": "application",
-              "label": "网上申请协助"
+              "label": "网上申请协助",
+              "label_en": "Online application help"
             }
           ],
-          "required": true
+          "required": true,
+          "label_en": "Issue type"
         },
         {
           "name": "description",
           "label": "问题说明",
           "type": "textarea",
           "options": [],
-          "required": true
+          "required": true,
+          "label_en": "Describe your request"
         }
       ],
-      "notice": "请勿填写密码或验证码。本窗口不会修改实际登录凭据。"
+      "notice": "请勿填写密码或验证码。本窗口不会修改实际登录凭据。",
+      "description_en": "Request assistance with signing in, recovery guidance, or online applications.",
+      "notice_en": "Do not enter passwords or verification codes. This form does not change credentials."
     }
   ],
   "bank_references": [
     {
       "name": "HSBC UK",
       "url": "https://www.hsbc.co.uk/",
-      "detail": "账户、储蓄、银行卡与贷款的业务分类"
+      "detail": "账户、储蓄、银行卡与贷款的业务分类",
+      "name_en": "HSBC UK",
+      "detail_en": "Accounts, savings, cards and loans"
     },
     {
       "name": "HSBC 帮助中心",
       "url": "https://www.hsbc.co.uk/help/",
-      "detail": "按问题进入银行卡、支付和数字银行帮助"
+      "detail": "按问题进入银行卡、支付和数字银行帮助",
+      "name_en": "HSBC help centre",
+      "detail_en": "Card, payment and digital-banking help"
     },
     {
       "name": "NatWest Cora",
       "url": "https://www.natwest.com/support-centre/cora.html",
-      "detail": "对话咨询、追问与工作人员转接"
+      "detail": "对话咨询、追问与工作人员转接",
+      "name_en": "NatWest Cora",
+      "detail_en": "Conversational help and staff handoff"
     },
     {
       "name": "中国银行个人金融",
       "url": "https://www.bankofchina.com/pbservice/",
-      "detail": "存款账户、个人贷款、汇兑与银行卡入口"
+      "detail": "存款账户、个人贷款、汇兑与银行卡入口",
+      "name_en": "Bank of China personal banking",
+      "detail_en": "Deposits, loans, exchange and card services"
     }
   ]
 }

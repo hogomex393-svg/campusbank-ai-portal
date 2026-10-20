@@ -70,12 +70,14 @@ class SystemTests(unittest.TestCase):
     def test_topic_switch_to_lost_card(self):
         one = self.service.respond('Open a student account', mode='offline')
         two = self.service.respond('I lost my debit card.', one.state, 'offline')
-        self.assertIn('Freeze', two.answer)
+        self.assertIn('freeze', two.answer.lower())
+        self.assertIn('cannot freeze a real card',two.answer)
         self.assertEqual(two.state.product, 'debit_card')
 
     def test_freeze_is_not_interpreted_as_free_fees(self):
         result = self.service.respond('I need to freeze a lost debit card',mode='offline')
-        self.assertIn('Freeze',result.answer)
+        self.assertIn('freeze',result.answer.lower())
+        self.assertIn('cannot freeze a real card',result.answer)
 
     def test_branch_appointment_keeps_its_question(self):
         result = self.service.respond('How can I book a branch appointment in London?',mode='offline')

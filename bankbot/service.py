@@ -10,7 +10,9 @@ from .dialogue import State, prepare_turn, coerce_state
 from .tools import Tools, TOOL_SCHEMAS
 from .llm_client import DeepSeekClient, APIError
 from .language import detect_language, local_message
-from .catalog import service_action
+from .catalog import service_action, SERVICES
+from .forms import draft_from_message, update_draft
+from .answers import policy_facts, product_comparison
 
 
 def wants_human(text):
@@ -20,6 +22,15 @@ def wants_human(text):
     return bool(re.search(r'(?:转(?:接)?|找|联系|需要|想要|我要|叫|真人).*?(?:人工|真人|客服)|(?:人工|真人)客服|(?:speak|talk|connect|transfer|contact|want|need).*?(?:human|person|live agent|staff|representative)|human support|live agent',text))
 
 SYSTEM_PROMPT = """You are CampusBank's friendly bilingual Chinese and English banking inquiry assistant.
+Answer EVERY part of a compound question before offering a service entry.
+An action button is not a substitute for answering required documents, fees or eligibility.
+This portal only records simulated requests. It has no working banking app, card freeze
+API, payment processing or real account access. Describe actual portal functionality
+accurately. Use the lost-card window to RECORD a demo request, never claim a freeze.
+Transfer forms need ONLY transfer_type, recipient NICKNAME, amount and optional note.
+Never ask for IBAN, real account details, card data, passwords or payment credentials.
+Missing policy information means 'not specified', never 'no minimum' or 'no restriction'.
+When comparing products, use a compact Markdown table; the interface renders it as a readable table.
 Follow the current turn's response language even if earlier messages used another language.
 Understand the customer's goal from the recent conversation before answering.
 Respond in your own words. Knowledge records supply facts, not scripted replies.
@@ -90,6 +101,13 @@ class ChatService:
             return ('可以，点击下方“转接人工客服”，当前对话会随工单交给工作人员。' if language=='zh' else 'Use the human support button below to send this conversation to a staff member.'),[],[]
         if re.fullmatch(r"(?:hi|hello|hey|good morning|thanks|thank you|你好|您好|嗨|谢谢|早上好)[!. 。！]*", text):
             return local_message("greeting", language), [], []
+        comparison=product_comparison(prepared.text,prepared,self.knowledge)
+        if comparison:
+            answer,sources,records=comparison
+            return answer,sources,[{'name':'get_product_info','arguments':{'comparison':True},'result':{'records':records,'source_ids':sources}}]
+        parts,sources,records=policy_facts(prepared.text,prepared,self.knowledge,self.retriever,self.settings.retrieval_threshold)
+        if len(parts)>1 or (parts and re.search(r'最低|minimum',text)):
+            return '\n\n'.join(f'**{label}**\n{value}' for label,value in parts),sources,[{'name':'search_bank_faq','arguments':{'query':prepared.text},'result':{'records':records,'source_ids':sources}}]
         if prepared.branch_lookup and prepared.state.city:
             result = self.tools.execute("find_branch", {"city": prepared.state.city})
             if not result["found"]:
@@ -133,6 +151,8 @@ class ChatService:
         # Deterministic slot rules belong only to the offline emergency path.
         new = coerce_state(old) if online else prepared.state
         new.language = language
+        draft_action=draft_from_message(text,new)
+        explicit_fields=draft_action.pop('_explicit_fields',{}) if draft_action else {}
         if online:
             new.pending = None
         turn = [{"role": "user", "content": text}]
@@ -149,11 +169,20 @@ class ChatService:
         else:
             language_instruction = "\nResponse language for THIS turn: Simplified Chinese. Write the customer-facing answer in Chinese." if language == "zh" else "\nResponse language for THIS turn: English. Write the customer-facing answer in English."
             system = SYSTEM_PROMPT + language_instruction
+            catalog={key:{'fields':[{k:f[k] for k in ('name','type','options')} for f in value['fields']]} for key,value in SERVICES.items()}
+            system+='\nAllowed demo-form catalog (do not request other fields):\n'+json.dumps(catalog,ensure_ascii=False)
+            if new.service_drafts:
+                system+='\nCurrent saved demo drafts (partial values, NOT submitted):\n'+json.dumps(new.service_drafts,ensure_ascii=False)
+            parts,fact_sources,facts=policy_facts(text,prepared,self.knowledge,self.retriever,self.settings.retrieval_threshold)
+            if mode in ('agent','rag') and len(parts)>1:
+                system+='\nFacts for EACH requested question. Answer all, then offer an entry:\n'+json.dumps(parts,ensure_ascii=False)
+                sources.extend(fact_sources)
             if mode == "rag":
                 hits = [h for h in self.retriever.search(text)
                         if h["score"] >= self.settings.retrieval_threshold]
                 system += "\nFAQ evidence:\n" + json.dumps(hits, ensure_ascii=False)
                 sources.extend(h["faq_id"] for h in hits)
+                if facts:system+='\nStructured product/policy evidence:\n'+json.dumps(facts,ensure_ascii=False)
             messages = [{"role": "system", "content": system}, *old.messages(self.settings.history_turns), *turn]
             try:
                 deadline = started + self.settings.timeout_seconds
@@ -203,6 +232,12 @@ class ChatService:
                         fn = call["function"]
                         name, args = fn.get("name", ""), fn.get("arguments", "")
                         result = self.tools.execute(name, args)
+                        if name=='open_service_window' and result.get('ui_action'):
+                            action=result['ui_action']
+                            patch=action.get('prefill',{})
+                            if draft_action and action['service_id']==draft_action['service_id']:
+                                patch={**patch,**explicit_fields}
+                            result['ui_action']=update_draft(new,action['service_id'],patch)
                         if name == "get_product_info" and result.get("record"):
                             new.product = result["record"]["product_name"]
                             new.topic = "products"
@@ -227,6 +262,11 @@ class ChatService:
                 error = exc.code
                 # Discard incomplete provider exchanges; keep a valid plain turn.
                 turn = [{"role": "user", "content": text}]
+        if draft_action and actual_mode=='offline' and re.search(r'改成|改为|换成|change|instead',text,re.I):
+            service=SERVICES[draft_action['service_id']]
+            labels={f['name']:f['label'] if language=='zh' else f['label_en'] for f in service['fields']}
+            summary='; '.join(labels[key]+': '+str(value) for key,value in new.service_drafts[draft_action['service_id']].items())
+            answer=('表单草稿已更新：'+summary+'。请打开下方窗口核对；尚未提交。') if language=='zh' else ('Draft updated: '+summary+'. Open the form below to review; nothing has been submitted.')
         if not turn or turn[-1]["role"] != "assistant":
             turn.append({"role": "assistant", "content": answer})
         new.turns.append(turn)
@@ -235,6 +275,11 @@ class ChatService:
         for trace in traces:
             action=trace.get("result",{}).get("ui_action")
             if action and action not in actions:actions.append(action)
+        if draft_action and not any(a['service_id']==draft_action['service_id'] for a in actions):
+            actions.append(draft_action)
+        for action in actions:
+            if action['service_id'] in new.service_drafts:
+                action['prefill']=new.service_drafts[action['service_id']].copy()
         if wants_human(text) and not any(a['service_id']=='human_support' for a in actions):
             actions.append(service_action('human_support'))
         return Reply(answer, new, actual_mode, list(dict.fromkeys(sources)), traces,

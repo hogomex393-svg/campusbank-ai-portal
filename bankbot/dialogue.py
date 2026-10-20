@@ -5,7 +5,7 @@ import re
 from .language import CITY_ALIASES, canonical_city, detect_language, local_message
 
 PRODUCT_ALIASES = {
-    "student_account": ("student account", "student bank account", "student banking", "学生账户", "学生帐户"),
+    "student_account": ("student account", "student bank account", "student banking", "学生账户", "学生帐户", "学生开户"),
     "everyday_account": ("everyday account", "current account", "checking account", "日常账户", "普通账户", "活期账户"),
     "savings_account": ("savings account", "saving account", "savings", "储蓄账户", "储蓄帐户", "储蓄"),
     "debit_card": ("debit card", "bank card", "借记卡", "储蓄卡", "银行卡"),
@@ -23,6 +23,8 @@ class State:
     city: str | None = None
     pending: str | None = None
     language: str = "en"
+    service_drafts: dict = field(default_factory=dict)
+    active_service: str | None = None
 
     def messages(self, limit: int) -> list[dict]:
         return [deepcopy(m) for turn in self.turns[-limit:] for m in turn]
@@ -36,7 +38,8 @@ def coerce_state(value=None) -> State:
         return value.get(name, default) if isinstance(value, dict) else getattr(value, name, default)
     return State(turns=deepcopy(get("turns", [])), product=get("product"),
                  topic=get("topic"), city=get("city"), pending=get("pending"),
-                 language=get("language", "en"))
+                 language=get("language", "en"),service_drafts=deepcopy(get('service_drafts',{})),
+                 active_service=get('active_service'))
 
 
 @dataclass
@@ -49,8 +52,7 @@ class Prepared:
     branch_lookup: bool = False
 
 
-def attribute_of(text: str) -> str | None:
-    patterns = {
+ATTRIBUTE_PATTERNS = {
         "minimum": r"minimum.*deposit|opening deposit|money.*start|最低.*(?:存款|存入)|起存|开户存款",
         "payment": r"(?:when|how often).*interest|interest.*(?:paid|credited)|利息.*(?:发放|到账|结算)|(?:多久|什么时候).*利息",
         "documents": r"document|paperwork|bring|proof|material|identification|what do i need|材料|证件|证明|需要带|要带什么",
@@ -58,8 +60,13 @@ def attribute_of(text: str) -> str | None:
         "eligibility": r"eligible|eligibility|qualify|age|who can|requirement|年龄|资格|条件|谁能|谁可以|几岁|岁.*(?:能|可以)",
         "rate": r"interest|\brate\b|apr|apy|利率|利息",
         "apply": r"apply|application|sign up|open|set up|申请|开户|开通|办理账户|开个",
-    }
-    return next((a for a, pattern in patterns.items() if re.search(pattern, text)), None)
+}
+
+def attributes_of(text):
+    return [a for a, pattern in ATTRIBUTE_PATTERNS.items() if re.search(pattern,text.lower())]
+
+def attribute_of(text: str) -> str | None:
+    return next(iter(attributes_of(text)),None)
 
 
 def prepare_turn(text: str, old_state: State) -> Prepared:

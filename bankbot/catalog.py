@@ -43,6 +43,40 @@ BANK_REFERENCES = [
     {"name":"中国银行个人金融","url":"https://www.bankofchina.com/pbservice/","detail":"存款账户、个人贷款、汇兑与银行卡入口"},
 ]
 
+SERVICE_EN = {
+ 'open_account':('Choose an account, review required documents, and save a demo application.','This records a fictional application for review; no real account is opened.'),
+ 'apply_card':('Request a linked debit card or submit a demo credit-card application for review.','Credit applications remain pending review. This system cannot approve credit.'),
+ 'replace_card':('Record a demo lost-card, freeze, or replacement request.','No real card is changed. Do not enter a card number or PIN.'),
+ 'transfer_demo':('Review a nickname, demo amount, and fee before recording a simulated transfer.','Simulation only: no money moves and no real payment system is connected.'),
+ 'open_savings':('Review the fictional interest rate and record a savings application.','No money is deposited. The fictional 2% annual rate is a coursework example.'),
+ 'apply_loan':('Record an application for the demo review queue.','Submission does not mean approval. No real credit assessment is performed.'),
+ 'branch_appointment':('Choose a city and visit date for a pending demo appointment.','The request awaits confirmation; no real branch booking is made.'),
+ 'human_support':('Send the conversation context to the shared staff queue.','Demo staff can accept and reply to this ticket in their workspace.'),
+ 'digital_help':('Request assistance with signing in, recovery guidance, or online applications.','Do not enter passwords or verification codes. This form does not change credentials.'),
+}
+FIELD_EN = {'product':'Account type','applicant':'Demo applicant name','channel':'Application channel',
+ 'documents_ready':'I have reviewed the ID, address and product document requirements',
+ 'card_type':'Card type','linked_product':'Linked account','purpose':'Purpose','reviewed':'I have reviewed the requirements',
+ 'reason':'Reason','action':'Requested service','note':'Additional notes','transfer_type':'Transfer type',
+ 'recipient':'Demo recipient nickname','amount':'Demo amount (GBP)','opening_deposit':'Demo opening deposit (GBP, minimum 10)',
+ 'city':'City','date':'Requested visit date','category':'Issue category','subject':'Subject','description':'Describe your request','issue':'Issue type'}
+OPTION_EN = {'student_account':'Student account · no monthly fee','everyday_account':'Everyday account · GBP 3 monthly fee',
+ 'online':'Online application','branch':'At a branch','debit_card':'Debit card','credit_card':'Credit card',
+ 'lost':'Lost card','stolen':'Stolen card','damaged':'Damaged card','freeze':'Record a demo freeze request',
+ 'replace':'Demo replacement · GBP 5','domestic':'Domestic transfer · free','international':'International transfer · GBP 8 demo fee',
+ 'Lancaster':'Lancaster','London':'London','Manchester':'Manchester','accounts':'Accounts','cards':'Cards',
+ 'payments':'Payments','savings':'Savings','loans':'Loans','digital':'Digital banking','other':'Other',
+ 'login':'Sign-in problem','password':'Password recovery guidance','application':'Online application help'}
+for _id,_service in SERVICES.items():
+    _service['description_en'],_service['notice_en']=SERVICE_EN[_id]
+    for _field in _service['fields']:
+        _field['label_en']=FIELD_EN[_field['name']]
+        for _option in _field['options']:_option['label_en']=OPTION_EN[_option['value']]
+for _reference,_en in zip(BANK_REFERENCES,[
+ ('HSBC UK','Accounts, savings, cards and loans'),('HSBC help centre','Card, payment and digital-banking help'),
+ ('NatWest Cora','Conversational help and staff handoff'),('Bank of China personal banking','Deposits, loans, exchange and card services')]):
+    _reference['name_en'],_reference['detail_en']=_en
+
 def service_action(id_):
     s=SERVICES.get(id_)
     if not s:return None

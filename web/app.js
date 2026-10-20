@@ -18,6 +18,8 @@ const S = {
   staffDetailFingerprint: "",
   staffPolling: false,
   handoffBusy: false,
+  formDrafts: new Map(),
+  cooldownUntil: 0,
 };
 const icons = {
   plus: '<path d="M12 5v14M5 12h14"/>',
@@ -108,26 +110,36 @@ function toast(text) {
   toast.timer = setTimeout(() => ($("toast").hidden = true), 3500);
 }
 async function api(path, method = "GET", body) {
-  const headers = { "Content-Type": "application/json" };
+  const headers = { "Content-Type": "application/json", "Accept-Language": S.lang };
   if (S.boot?.csrf) headers["X-CSRF-Token"] = S.boot.csrf;
-  const r = await fetch(path, {
+  let r;
+  try { r = await fetch(path, {
     method,
     headers,
     credentials: "same-origin",
     body: body === undefined ? undefined : JSON.stringify(body),
-  });
+  }); } catch {
+    const error = Error(t("网络连接中断，请检查网络后重试；填写内容已保留。", "Connection interrupted. Check your network and retry; your input is preserved."));
+    error.retryable = true;
+    throw error;
+  }
   let data;
   try {
     data = await r.json();
   } catch {
     throw Error(t("服务暂时不可用", "Service unavailable"));
   }
-  if (!r.ok)
-    throw Error(
+  if (!r.ok) {
+    const error = Error(
       typeof data.detail === "string"
         ? data.detail
         : t("请检查填写内容后重试", "Please check the form"),
     );
+    error.status = r.status;
+    error.retryAfter = r.status === 429 ? Number(data.retry_after || r.headers?.get?.("Retry-After") || 60) : 0;
+    error.retryable = r.status >= 500 || r.status === 429;
+    throw error;
+  }
   return data;
 }
 function setChatUrl(id) {
@@ -141,7 +153,7 @@ function closeMobile() {
 }
 function busy(value) {
   S.busy = value;
-  $("sendButton").disabled = value;
+  $("sendButton").disabled = value || S.cooldownUntil > Date.now();
   $("messageInput").disabled = value;
 }
 function timeText(value) {
@@ -177,11 +189,34 @@ function inline(v) {
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
     .replace(/`([^`]+)`/g, "<code>$1</code>");
 }
+function tableCells(line) {
+  let value = line.trim();
+  if (value.startsWith("|")) value = value.slice(1);
+  if (value.endsWith("|") && !value.endsWith("\\|")) value = value.slice(0, -1);
+  const cells = []; let cell = "", ticks = false;
+  for (let i = 0; i < value.length; i++) {
+    if (value[i] === "\\" && value[i + 1] === "|") { cell += "|"; i++; }
+    else if (value[i] === "`") { ticks = !ticks; cell += value[i]; }
+    else if (value[i] === "|" && !ticks) { cells.push(cell.trim()); cell = ""; }
+    else cell += value[i];
+  }
+  cells.push(cell.trim());
+  return cells;
+}
+function tableSeparator(line) {
+  const cells = tableCells(line || "");
+  return cells.length >= 2 && cells.every(c => /^:?-{3,}:?$/.test(c));
+}
 function markdown(text) {
   const root = el("div");
   let list = null,
-    code = null;
-  for (const line of String(text).split("\n")) {
+    code = null, tableFence = false;
+  const lines = String(text).replaceAll("\r\n", "\n").split("\n");
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index];
+    if (/^```(?:markdown|md)?\s*$/i.test(line) && (tableFence || tableSeparator(lines[index + 2]))) {
+      tableFence = !tableFence; list = null; continue;
+    }
     if (line.startsWith("```")) {
       if (code) {
         code = null;
@@ -197,6 +232,31 @@ function markdown(text) {
     if (code) {
       code.firstChild.textContent += line + "\n";
       continue;
+    }
+    if (line.includes("|") && tableSeparator(lines[index + 1])) {
+      const headers = tableCells(line), separators = tableCells(lines[index + 1]);
+      if (headers.length === separators.length) {
+        list = null;
+        const wrap = el("div", "answer-table-wrap");
+        wrap.tabIndex = 0;
+        wrap.setAttribute("role", "region");
+        wrap.setAttribute("aria-label", t("信息对比表，可横向滚动", "Comparison table; scroll horizontally"));
+        const table = el("table", "answer-table"), head = el("thead"), row = el("tr"), body = el("tbody");
+        headers.forEach((value, col) => {
+          const cell = el("th"); cell.scope = "col"; cell.innerHTML = inline(value);
+          const align = separators[col]; cell.dataset.align = align.startsWith(":") && align.endsWith(":") ? "center" : align.endsWith(":") ? "right" : "left";
+          row.append(cell);
+        });
+        head.append(row); table.append(head, body); index += 2;
+        while (index < lines.length && lines[index].trim() && lines[index].includes("|") && !lines[index].startsWith("```")) {
+          const values = tableCells(lines[index]), tr = el("tr");
+          // Extra separators in malformed content stay visible in the final cell.
+          const normalized = headers.map((_, c) => c === headers.length - 1 ? values.slice(c).join(" | ") : (values[c] || ""));
+          normalized.forEach((value, col) => { const cell = el(col === 0 ? "th" : "td"); if (col === 0) cell.scope = "row"; cell.innerHTML = inline(value); cell.dataset.align = row.children[col].dataset.align; tr.append(cell); });
+          body.append(tr); index++;
+        }
+        index--; wrap.append(table); root.append(wrap, el("p", "table-hint", t("左右滑动查看完整表格", "Swipe horizontally to see the full table"))); continue;
+      }
     }
     if (!line.trim()) {
       list = null;
@@ -274,7 +334,7 @@ function renderHistory() {
       el(
         "p",
         "muted tiny",
-        t(
+        search ? t("没有匹配的对话。", "No matching conversations.") : t(
           "开始一段对话，它会保留在这里。",
           "Your conversations will appear here.",
         ),
@@ -579,6 +639,7 @@ function renderChat(scroll = true) {
 async function sendMessage() {
   const text = $("messageInput").value.trim();
   if (!text || S.busy) return;
+  if (S.cooldownUntil > Date.now()) return;
   if (S.boot.requires_login && !S.boot.user) {
     openAuth("login", sendMessage);
     return;
@@ -590,14 +651,20 @@ async function sendMessage() {
     $("messageInput").value = "";
     S.current.messages.push({ role: "user", content: text, metadata: {} });
     renderChat(true);
+    const retry = S.retryMessage;
+    const requestId = retry?.chatId === S.current.id && retry.text === text ? retry.id : crypto.randomUUID().replaceAll("-", "");
+    S.retryMessage = {chatId:S.current.id, text, id:requestId};
     S.current = await api("/api/chats/" + S.current.id + "/messages", "POST", {
       text,
       mode: S.mode,
-      request_id: crypto.randomUUID().replaceAll("-", ""),
+      request_id: requestId,
     });
+    S.retryMessage = null;
+    $("sendFeedback").hidden = true;
     await refreshHistory();
   } catch (e) {
     toast(e.message);
+    showSendFeedback(e);
     if (!$("messageInput").value) $("messageInput").value = text;
     if (S.current) {
       try {
@@ -610,6 +677,23 @@ async function sendMessage() {
     $("messageInput").focus();
     if (S.pendingIdentityRefresh) await refreshSessionIdentity();
   }
+}
+function showSendFeedback(error) {
+  const root = $("sendFeedback");
+  clearTimeout(S.cooldownTimer);
+  if (error.retryAfter) S.cooldownUntil = Date.now() + Math.min(120, Math.max(1, error.retryAfter)) * 1000;
+  root.hidden = false;
+  const tick = () => {
+    root.replaceChildren();
+    const seconds = Math.max(0, Math.ceil((S.cooldownUntil - Date.now()) / 1000));
+    root.append(el("span", "", seconds ? t(`请等待 ${seconds} 秒后重试，问题已保留。`, `Retry in ${seconds}s; your question is preserved.`) : error.message));
+    const retry = button(t("重试发送", "Retry sending"), "text-button", () => { root.hidden = true; sendMessage(); });
+    retry.disabled = !!seconds || S.busy;
+    root.append(retry);
+    $("sendButton").disabled = S.busy || !!seconds;
+    if (seconds) S.cooldownTimer = setTimeout(tick, 1000);
+  };
+  tick();
 }
 function showServices(category) {
   if (S.busy) return;
@@ -637,7 +721,7 @@ function showServices(category) {
     b.append(
       icon(s.icon),
       el("h3", "", t(s.title, s.en)),
-      el("p", "", s.description),
+      el("p", "", t(s.description, s.description_en || s.en)),
       el("span", "card-link", t("进入服务窗口 →", "Open service window →")),
     );
     grid.append(b);
@@ -715,13 +799,13 @@ async function showRequests() {
           el(
             "div",
             "",
-            f.label +
+            fieldLabel(f) +
               "：" +
               (typeof value === "boolean"
                 ? value
                   ? t("已确认", "Confirmed")
                   : "—"
-                : value),
+                : optionLabel(f, value)),
           ),
         );
       }
@@ -883,7 +967,7 @@ function showReferences() {
     a.target = "_blank";
     a.rel = "noopener noreferrer";
     const body = el("div");
-    body.append(el("strong", "", r.name), el("small", "", r.detail));
+    body.append(el("strong", "", t(r.name,r.name_en || r.name)), el("small", "", t(r.detail,r.detail_en || r.detail)));
     a.append(body, icon("external"));
     list.append(a);
   }
@@ -913,13 +997,24 @@ function fieldLabel(f) {
     subject: "Subject",
     description: "Describe your request",
   };
-  return t(f.label, en[f.name] || f.label);
+  return t(f.label, f.label_en || en[f.name] || f.label);
 }
+function optionLabel(field, value) {
+  const option = field.options?.find(o => o.value === value);
+  return option ? t(option.label, option.label_en || option.value.replaceAll("_", " ")) : value;
+}
+function draftKey(id) { return `${S.boot.user?.id || "guest"}:${S.current?.id || "none"}:${id}`; }
 function openService(id, prefill = {}) {
   const service = serviceBy(id);
   if (!service) return;
   S.service = service;
+  const base = {...prefill, ...(S.current?.service_drafts?.[id] || {})};
+  const signature = JSON.stringify(base);
+  const saved = S.formDrafts.get(draftKey(id));
+  prefill = saved?.signature === signature ? {...base, ...saved.values} : base;
   S.servicePrefill = prefill;
+  S.serviceSignature = signature;
+  S.serviceSubmission = saved?.submission || null;
   $("serviceTitle").textContent = t(service.title, service.en);
   renderServiceForm(prefill);
   if (!$("serviceDialog").open) $("serviceDialog").showModal();
@@ -928,7 +1023,7 @@ function renderServiceForm(prefill) {
   const s = S.service;
   const body = $("serviceBody");
   body.replaceChildren();
-  body.append(el("p", "drawer-desc", s.description));
+  body.append(el("p", "drawer-desc", t(s.description,s.description_en || s.en)));
   const steps = el("div", "steps");
   steps.append(
     el("span", "active", t("01 填写信息", "01 Details")),
@@ -948,7 +1043,7 @@ function renderServiceForm(prefill) {
     if (f.type === "select") {
       input = el("select");
       for (const o of f.options) {
-        const opt = el("option", "", o.label);
+        const opt = el("option", "", optionLabel(f,o.value));
         opt.value = o.value;
         input.append(opt);
       }
@@ -968,6 +1063,7 @@ function renderServiceForm(prefill) {
         input.step = ".01";
         input.max = "1000000";
       }
+      if (f.type === "date") input.min = S.boot.today || new Date().toISOString().slice(0,10);
     }
     input.name = f.name;
     input.required = f.required;
@@ -989,7 +1085,7 @@ function renderServiceForm(prefill) {
       label.append(document.createTextNode(fieldLabel(f)));
     form.append(label);
   }
-  form.append(el("div", "service-notice", s.notice));
+  form.append(el("div", "service-notice", t(s.notice,s.notice_en || s.en)));
   const error = el("p", "form-error");
   form.append(error);
   const submit = el(
@@ -1005,14 +1101,30 @@ function renderServiceForm(prefill) {
     for (const f of s.fields) {
       const i = form.elements[f.name];
       values[f.name] = f.type === "checkbox" ? i.checked : i.value.trim();
+      if (f.required && (f.type === "checkbox" ? !i.checked : !values[f.name])) {
+        error.textContent = t("请填写或确认：", "Please complete or confirm: ") + fieldLabel(f); i.focus(); return;
+      }
+      if (f.type === "date" && values[f.name] < (S.boot.today || new Date().toISOString().slice(0,10))) {
+        error.textContent = t("预约日期不能早于今天。", "The visit date cannot be earlier than today."); i.focus(); return;
+      }
     }
+    if (!form.reportValidity()) return;
+    S.formDrafts.set(draftKey(s.id), {signature:S.serviceSignature, values, submission:S.serviceSubmission});
     renderReview(values);
+  });
+  form.addEventListener("input", () => {
+    const values = Object.fromEntries(s.fields.map(f => [f.name, f.type === "checkbox" ? form.elements[f.name].checked : form.elements[f.name].value]));
+    S.formDrafts.set(draftKey(s.id), {signature:S.serviceSignature, values, submission:S.serviceSubmission});
+    error.textContent = "";
   });
   body.append(form);
 }
 function renderReview(values) {
   const s = S.service;
   const body = $("serviceBody");
+  const fingerprint = JSON.stringify([s.id, values, S.current?.id || null]);
+  if (!S.serviceSubmission || S.serviceSubmission.fingerprint !== fingerprint)
+    S.serviceSubmission = {fingerprint, key:crypto.randomUUID().replaceAll("-", "")};
   body.replaceChildren();
   const steps = el("div", "steps");
   steps.append(
@@ -1025,15 +1137,16 @@ function renderReview(values) {
     let value = values[f.name];
     if (value === "") continue;
     if (f.type === "select")
-      value = f.options.find((o) => o.value === value)?.label || value;
+      value = optionLabel(f,value);
     if (f.type === "checkbox")
       value = value ? t("已确认", "Confirmed") : t("未确认", "Not confirmed");
     const row = el("div", "review-row");
     row.append(el("span", "", fieldLabel(f)), el("span", "", value));
     body.append(row);
   }
-  body.append(el("div", "service-notice", s.notice));
+  body.append(el("div", "service-notice", t(s.notice,s.notice_en || s.en)));
   const actions = el("div", "section-actions");
+  let submitting = false;
   actions.append(
     button(t("返回修改", "Back"), "secondary-button", () =>
       renderServiceForm(values),
@@ -1044,6 +1157,7 @@ function renderReview(values) {
         : t("登录并保存申请", "Sign in and save"),
       "primary-button",
       async () => {
+        if (submitting) return;
         if (!S.boot.user) {
           $("serviceDialog").close();
           openAuth("login", () => {
@@ -1053,6 +1167,10 @@ function renderReview(values) {
           return;
         }
         try {
+          submitting = true;
+          for (const b of actions.querySelectorAll("button")) b.disabled = true;
+          const submission = S.serviceSubmission;
+          S.formDrafts.set(draftKey(s.id), {signature:S.serviceSignature, values, submission});
           let chatId = S.current?.id;
           if (s.id === "human_support" && !chatId)
             chatId = (await ensureChat()).id;
@@ -1061,7 +1179,9 @@ function renderReview(values) {
             payload: values,
             chat_id: chatId || null,
             confirmed: true,
+            request_id: submission.key,
           });
+          S.formDrafts.delete(draftKey(s.id));
           renderReceipt(r);
           if (S.current) {
             S.current = await api("/api/chats/" + S.current.id);
@@ -1069,7 +1189,11 @@ function renderReview(values) {
           }
           await refreshHistory();
         } catch (e) {
+          submitting = false;
+          for (const b of actions.querySelectorAll("button")) b.disabled = false;
           toast(e.message);
+          const alert = el("p", "form-error", e.message); alert.setAttribute("role", "alert");
+          body.querySelector(".form-error")?.remove(); body.append(alert);
         }
       },
     ),
@@ -1659,6 +1783,37 @@ async function staffDetail(id, detail) {
     throw e;
   }
 }
+const STATIC_TEXT = {
+ "你的银行服务助手":"Your banking service assistant", "课程演示":"Coursework demo", "搜索历史":"Search history", "搜索对话标题":"Search conversation titles",
+ "打开侧边栏":"Open sidebar", "对话设置":"Conversation settings", "聊天消息":"Chat message", "发送消息":"Send message",
+ "关闭登录窗口":"Close sign-in window", "关闭服务窗口":"Close service window", "登录身份":"Sign-in role", "客户":"Customer", "工作人员 / 管理员":"Staff / Administrator",
+ "登录":"Sign in", "注册":"Register", "用户名":"Username", "密码":"Password", "怎么称呼你":"Display name", "你的称呼":"Your display name", "至少 8 个字符":"At least 8 characters",
+ "工作人员邀请码":"Staff invitation code", "首次开通工作人员身份时填写":"Required when enabling staff access", "小组测试邀请码":"Group testing access code", "向项目负责人获取":"Ask the project owner",
+ "由部署者提供，供组员注册测试":"Provided privately by the project owner for group testing", "3–32 位字母、数字或下划线":"3–32 letters, digits, or underscores",
+ "这是 CampusBank 课程演示账户，与真实银行账户无关。":"This is a local CampusBank demo account, unrelated to real bank accounts.",
+ "回答方式":"Answer mode", "自然对话 Agent（推荐）":"Conversational agent (recommended)", "离线应急资料":"Offline reference mode", "实验：固定 RAG":"Experiment: retrieval-augmented generation", "实验：无资料 LLM":"Experiment: model without reference records",
+ "显示资料与工具细节":"Show sources and tool details", "导出当前对话":"Export current conversation", "切换方式保留记录。自然对话需要已配置的 DeepSeek API。":"Changing modes preserves history. Conversational mode requires a configured DeepSeek API.",
+ "个人账户":"Your account", "退出登录":"Sign out", "邀请工作人员":"Invite staff", "一次性邀请码":"Single-use invitation code", "复制邀请码":"Copy invitation code",
+ "将邀请码交给组员。对方在注册或登录时选择“工作人员 / 管理员”并填写邀请码，即可进入客服端。":"Share the invitation privately. Choose Staff / Administrator and enter the code when registering or signing in to enable staff access."
+};
+function localizeStatic() {
+  const reverse = Object.fromEntries(Object.entries(STATIC_TEXT).map(([zh,en]) => [en,zh]));
+  const translate = value => {
+    const key = value.trim().replace(/\s+/g," ");
+    const translated = S.lang === "en" ? STATIC_TEXT[key] : reverse[key];
+    return translated ? value.replace(value.trim(),translated) : value;
+  };
+  const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  let node;
+  while ((node = walk.nextNode())) {
+    if (!node.parentElement?.closest(".message-body, .staff-transcript, .request-details, #serviceBody, script, style, pre, code")) node.nodeValue = translate(node.nodeValue);
+  }
+  for (const element of document.querySelectorAll("[placeholder], [aria-label]")) {
+    for (const attribute of ["placeholder","aria-label"]) {
+      const value = element.getAttribute(attribute); if (value) element.setAttribute(attribute,translate(value));
+    }
+  }
+}
 function setLanguage() {
   localStorage.setItem("campusbank_language", S.lang);
   document.documentElement.lang = S.lang === "zh" ? "zh-CN" : "en";
@@ -1711,6 +1866,13 @@ function setLanguage() {
   else if (S.view === "staff") showStaff();
   else if (S.view === "supportHistory") showSupportHistory();
   else if (S.view === "supportDetail") showCustomerTicket(S.supportTicketId);
+  localizeStatic();
+  if ($("serviceDialog").open && S.service) {
+    const form = $("serviceForm");
+    const values = form ? Object.fromEntries(S.service.fields.map(f => [f.name,f.type === "checkbox" ? form.elements[f.name].checked : form.elements[f.name].value])) : S.servicePrefill;
+    $("serviceTitle").textContent = t(S.service.title,S.service.en);
+    if (form) renderServiceForm(values);
+  }
 }
 async function init() {
   document

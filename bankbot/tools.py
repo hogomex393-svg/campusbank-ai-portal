@@ -3,6 +3,7 @@ import json
 from .dialogue import PRODUCT_ALIASES
 from .language import canonical_city
 from .catalog import SERVICES, service_action
+from .forms import clean_prefill
 
 
 def schema(name, description, field):
@@ -18,6 +19,11 @@ TOOL_SCHEMAS = [
 ]
 window_schema=schema("open_service_window", "Prepare a local service window after explaining how the user can apply online, request a card, report a lost card, transfer, open savings, apply for a loan, book a branch or contact human support. This ONLY creates a clickable UI entry, never submits an application or moves money. Choose one approved service ID.", "service_id")
 window_schema["function"]["parameters"]["properties"]["service_id"]["enum"]=list(SERVICES)
+window_schema['function']['description'] += ' Include prefill with explicitly supplied demo form fields, preserving earlier fields when a customer changes one item. Never ask for IBAN, account numbers, PINs or actual payment credentials. Opening does not submit.'
+window_schema['function']['parameters']['properties']['prefill'] = {
+    'type':'object','description':'Partial form values explicitly supplied by the customer. Omit consent checkboxes. Use the catalog fields supplied in system context.',
+    'properties':{f['name']:{'type':['string','number','boolean']} for s in SERVICES.values() for f in s['fields']},
+    'additionalProperties':False}
 TOOL_SCHEMAS.append(window_schema)
 
 
@@ -36,11 +42,15 @@ class Tools:
         except (ValueError, TypeError):
             return {"error": "invalid_arguments", "message": "Arguments must be a JSON object."}
         field = required[name]
-        if not isinstance(args, dict) or set(args) != {field} or not isinstance(args.get(field), str) or not args[field].strip() or len(args[field]) > 2000:
+        allowed={field,'prefill'} if name=='open_service_window' else {field}
+        if not isinstance(args, dict) or set(args)-allowed or field not in args or not isinstance(args.get(field), str) or not args[field].strip() or len(args[field]) > 2000:
             return {"error": "invalid_arguments", "message": f"Supply only a non-empty string field named {field}."}
         value = args[field].strip()
         if name == "open_service_window":
             action=service_action(value)
+            if action:
+                try:action['prefill']=clean_prefill(value,args.get('prefill',{}))
+                except ValueError as exc:return {'error':'invalid_arguments','message':str(exc)}
             return {"ui_action":action,"prepared":True,"message":"A clickable demo service window is ready. The user must open it and confirm any submission."} if action else {"error":"unknown_service","message":"Choose an approved local service window."}
         if name == "search_bank_faq":
             hits = self.retriever.search(value)
