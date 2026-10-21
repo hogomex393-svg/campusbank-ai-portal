@@ -24,6 +24,7 @@ jobs:
         run: |
           npm install --no-save --prefix .build_frontend jsdom@30.1.2
           node scripts/verify_frontend.mjs
+          node scripts/verify_streaming.mjs
       - name: Build the deployment image
         run: docker build -t campusbank-ci .
       - name: Verify Docker workflow and persistent records

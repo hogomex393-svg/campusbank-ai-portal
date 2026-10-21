@@ -562,7 +562,8 @@ function renderMessage(m) {
       ),
     );
   const body = el("div", "message-body");
-  body.append(markdown(m.content));
+  body.append(markdown(m.streaming ? stableStreamMarkdown(m.content) : m.content));
+  if(m.streaming){body.append(el('span','streaming-cursor','▍'));row.append(body);return row;}
   if (m.role !== "user") {
     const actions = el("div", "service-actions");
     for (const action of meta.actions || []) {
@@ -632,14 +633,16 @@ function renderChat(scroll = true) {
   else {
     const list = el("div", "message-list");
     for (const m of S.current.messages) list.append(renderMessage(m));
-    if (S.busy) {
+    if(S.streaming?.chatId===S.current.id && S.streaming.shown){
+      list.append(renderMessage({role:'assistant',content:S.streaming.shown,metadata:{},streaming:true}));
+    }else if (S.busy) {
       const pending = el("article", "message assistant");
       pending.append(
         el("div", "assistant-avatar", "C"),
         el(
           "div",
           "thinking",
-          t("正在理解你的问题", "Thinking about your request"),
+          S.streaming?.status || t("正在理解你的问题", "Thinking about your request"),
         ),
       );
       list.append(pending);
@@ -695,16 +698,22 @@ async function sendMessage() {
     const retry = S.retryMessage;
     const requestId = retry?.chatId === S.current.id && retry.text === text ? retry.id : crypto.randomUUID().replaceAll("-", "");
     S.retryMessage = {chatId:S.current.id, text, id:requestId};
-    S.current = await api("/api/chats/" + S.current.id + "/messages", "POST", {
+    S.streaming={chatId:S.current.id,target:'',shown:'',timer:null,status:''};
+    const finalChat = await requestStream("/api/chats/" + S.current.id, {
       text,
       mode: S.mode,
       bank_mode:S.current?.bank_mode || S.bankMode,
       request_id: requestId,
-    });
+    },handleStreamEvent);
+    const finalAnswer=finalChat.messages?.filter(m=>m.role==='assistant').at(-1)?.content || '';
+    finishStreamText(finalAnswer);
+    await waitForReveal();
+    S.current=finalChat;S.streaming=null;
     S.retryMessage = null;
     $("sendFeedback").hidden = true;
     await refreshHistory();
   } catch (e) {
+    if(S.streaming?.timer)clearTimeout(S.streaming.timer);S.streaming=null;
     toast(e.message);
     showSendFeedback(e);
     if (!$("messageInput").value) $("messageInput").value = text;
@@ -719,6 +728,79 @@ async function sendMessage() {
     $("messageInput").focus();
     if (S.pendingIdentityRefresh) await refreshSessionIdentity();
   }
+}
+function stableStreamMarkdown(text) {
+  const lines=String(text).split('\n');let table=false;
+  for(let i=0;i<lines.length;i++){
+    if(tableSeparator(lines[i])){table=true;continue;}
+    if(!lines[i].trim())table=false;
+    if(!table&&lines[i].trim().startsWith('|')&&(!lines[i+1]||/^\s*[|:\-\s]*$/.test(lines[i+1])&&!tableSeparator(lines[i+1])))return lines.slice(0,i).join('\n');
+  }
+  // Do not briefly flash a bare heading/list marker before its text arrives.
+  if(/^\s*(?:#{1,6}|[-*+] |\d+[.)] )\s*$/.test(lines.at(-1)))lines.pop();
+  return lines.join('\n');
+}
+function handleStreamEvent(event) {
+  const stream=S.streaming;if(!stream)return;
+  if(event.type==='delta'){stream.target+=event.text || '';scheduleReveal();}
+  else if(event.type==='replace'){stream.target=event.text || '';stream.shown='';scheduleReveal();}
+  else if(event.type==='status'){stream.status=event.text || '';if(!stream.shown)renderChat(false);}
+}
+function scheduleReveal() {
+  const stream=S.streaming;if(!stream||stream.timer)return;
+  const step=()=>{
+    stream.timer=null;if(S.streaming!==stream)return;
+    const remaining=stream.target.length-stream.shown.length;
+    if(remaining<=0)return;
+    const amount=Math.min(32,Math.max(3,Math.ceil(remaining/18)));
+    let end=Math.min(stream.target.length,stream.shown.length+amount);
+    if(end<stream.target.length && /[\uD800-\uDBFF]/.test(stream.target[end-1]))end++;
+    stream.shown=stream.target.slice(0,end);
+    const area=$('scrollArea');const atBottom=area.scrollHeight-area.scrollTop-area.clientHeight<100;
+    if(S.view==='chat')renderChat(atBottom);
+    if(stream.shown.length<stream.target.length)stream.timer=setTimeout(step,24);
+  };
+  stream.timer=setTimeout(step,16);
+}
+function finishStreamText(answer) {
+  const stream=S.streaming;if(!stream)return;
+  if(!answer.startsWith(stream.shown))stream.shown='';
+  stream.target=answer;scheduleReveal();
+}
+async function waitForReveal() {
+  while(S.streaming && S.streaming.shown!==S.streaming.target)await new Promise(resolve=>setTimeout(resolve,24));
+}
+async function requestStream(chatPath,body,onEvent) {
+  // Older browsers can still use the original endpoint with the same reveal UI.
+  if(!window.ReadableStream || !window.TextDecoder)return api(chatPath+'/messages','POST',body);
+  const headers={'Content-Type':'application/json','Accept':'text/event-stream','Accept-Language':S.lang};
+  if(S.boot?.csrf)headers['X-CSRF-Token']=S.boot.csrf;
+  let response;
+  try{response=await fetch(chatPath+'/stream',{method:'POST',headers,credentials:'same-origin',body:JSON.stringify(body)});}
+  catch{throw Error(t('网络连接中断，问题已保留，可稍后重试。','Connection interrupted. Your question is preserved; retry shortly.'));}
+  if(!response.ok){const data=await response.json();const error=Error(typeof data.detail==='string'?data.detail:t('请检查填写内容后重试','Please check the form'));error.status=response.status;error.retryAfter=data.retry_after || (response.status===429?60:0);throw error;}
+  if(!response.body?.getReader)return response.json();
+  const reader=response.body.getReader(),decoder=new TextDecoder();let buffer='',result=null;
+  function packet(block){
+    const payload=block.split('\n').filter(line=>line.startsWith('data:')).map(line=>line.slice(5).trim()).join('\n');
+    if(!payload)return;
+    const event=JSON.parse(payload);
+    if(event.type==='error'){const error=Error(event.detail || t('回答中断，请稍后重试。','The answer was interrupted. Please retry.'));error.status=event.status;error.retryAfter=event.retry_after || 0;throw error;}
+    if(event.type==='complete')result=event.chat;else onEvent(event);
+  }
+  try{
+    while(true){
+      const {value,done}=await reader.read();buffer+=decoder.decode(value || new Uint8Array(),{stream:!done});buffer=buffer.replaceAll('\r\n','\n');
+      let split;while((split=buffer.indexOf('\n\n'))>=0){packet(buffer.slice(0,split));buffer=buffer.slice(split+2);}
+      if(done)break;
+    }
+    if(buffer.trim())packet(buffer);
+    if(!result)throw Error(t('回答连接中断，请刷新记录或重试；问题已保留。','The answer connection ended early. Refresh history or retry; your question is preserved.'));
+    return result;
+  }catch(error){
+    if(error.status)throw error;
+    throw Error(t('回答连接中断，请刷新记录或重试；问题已保留。','The answer connection ended early. Refresh history or retry; your question is preserved.'));
+  }finally{reader.releaseLock();}
 }
 function showSendFeedback(error) {
   const root = $("sendFeedback");

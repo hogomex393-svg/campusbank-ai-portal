@@ -466,6 +466,9 @@ body[data-bank-mode="student"] { --accent: #216d86; }
  .staff-tab { font-size: 12px; padding: 9px; }
 }
 .message-body { min-width: 0; }
+.streaming-cursor { display: inline-block; margin: 3px 0; color: var(--accent); animation: stream-blink 1s ease-in-out infinite; }
+@keyframes stream-blink { 0%,100% { opacity: .25; } 50% { opacity: 1; } }
+@media(prefers-reduced-motion:reduce) { .streaming-cursor { animation: none; } }
 .answer-table-wrap {
   width: 100%; max-width: 100%; overflow-x: auto; margin: 18px 0 8px;
   border: 1px solid #dbe5de; border-radius: 12px; background: #fff;

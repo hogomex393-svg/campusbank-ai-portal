@@ -154,7 +154,10 @@ class ChatService:
         answer = best.get("answer_zh", best["answer"]) if language == "zh" else best["answer"]
         return answer, [best["faq_id"]], [{"name": "search_bank_faq", "arguments": {"query": prepared.query}, "result": {"records": reliable, "source_ids": [h["faq_id"] for h in reliable]}}]
 
-    def respond(self, text: str, state=None, mode="agent") -> Reply:
+    def respond_stream(self,text,state=None,mode='agent',on_event=None):
+        return self.respond(text,state,mode,on_event=on_event)
+
+    def respond(self, text: str, state=None, mode="agent",on_event=None) -> Reply:
         if mode not in ("agent", "rag", "llm", "offline"):
             raise ValueError("Mode must be agent, rag, llm or offline")
         old = coerce_state(state)
@@ -164,6 +167,19 @@ class ChatService:
         if len(text) > 2000:
             return Reply(local_message("too_long", language), old, "local", language=language)
         started = time.monotonic()
+        streamed=[]
+        def complete(messages,tools,remaining):
+            if on_event is None or not hasattr(self.client,'complete_stream'):
+                return self.client.complete(messages,tools,timeout=remaining)
+            began=False
+            def delta(value):
+                nonlocal began
+                if not began:
+                    if streamed and not streamed[-1].endswith('\n\n'):
+                        streamed.append('\n\n');on_event({'type':'delta','text':'\n\n'})
+                    began=True
+                streamed.append(value);on_event({'type':'delta','text':value})
+            return self.client.complete_stream(messages,tools,timeout=remaining,on_delta=delta)
         prepared = prepare_turn(text, old)
         online = mode != "offline" and bool(self.settings.api_key)
         # Online intent and clarification come from the model and actual history.
@@ -216,7 +232,7 @@ class ChatService:
                     if remaining <= 0:
                         raise APIError("timeout", "The answer exceeded the waiting time limit.")
                     calls += 1
-                    response = self.client.complete(messages, TOOL_SCHEMAS if mode == "agent" else None, timeout=remaining)
+                    response = complete(messages, TOOL_SCHEMAS if mode == "agent" else None, remaining)
                     for key in ("prompt_tokens", "completion_tokens", "total_tokens"):
                         usage[key] = usage.get(key, 0) + response.get("usage", {}).get(key, 0)
                     message = response["message"]
@@ -267,6 +283,7 @@ class ChatService:
                         raise APIError("tool_limit", "The assistant reached its tool-call limit.")
                     turn.append(message)
                     messages.append(message)
+                    if on_event:on_event({'type':'status','text':'正在核对相关资料…' if language=='zh' else 'Checking relevant information…'})
                     for call in tool_calls:
                         if not isinstance(call, dict) or not isinstance(call.get("id"), str) or not isinstance(call.get("function"), dict):
                             raise APIError("invalid_tool_call", "The model returned an invalid tool request.")
@@ -329,6 +346,9 @@ class ChatService:
             if not any(a['service_id']==target for a in actions):actions.append(service_action(target))
         if wants_human(text) and not any(a['service_id']=='human_support' for a in actions):
             actions.append(service_action('human_support'))
+        if on_event:
+            if not streamed:on_event({'type':'delta','text':answer})
+            elif ''.join(streamed).strip()!=answer.strip():on_event({'type':'replace','text':answer})
         return Reply(answer, new, actual_mode, list(dict.fromkeys(sources)), traces,
                      round((time.monotonic() - started) * 1000), usage, error, calls, language, actions,
                      language_corrections,suggested_questions(text,new,actions,language))

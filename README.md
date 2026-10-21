@@ -11,6 +11,8 @@
 
 [中文介绍](README.zh-CN.md)
 
+**Version 2.4.1:** [live streamed answers](docs/streaming-answers.md), with progressive text, readable tables, and persisted final messages.
+
 **Version 2.4.0:** [general/student modes, richer replies, question chips and the application workbench](docs/dual-banking-and-workbench.md).
 
 **Version 2.3.0:** [dialogue/form consistency and readable-table fixes](docs/group-review-fixes.md), including preserved form drafts, safe repeated submissions, appointment validation, and complete English form text.
@@ -26,6 +28,7 @@ The hosted demo uses invitation-based registration; contact the project owner fo
 | Interaction | Implemented behavior |
 | --- | --- |
 | Natural dialogue | Understands free-form questions and follow-ups, asks focused clarifications, and generates answers from knowledge and tools in online agent mode. |
+| Streamed answers | Displays public answer text as the model generates it. Tables render during generation; service buttons and follow-up chips appear after the final answer is saved. |
 | Bilingual conversation | Detects Chinese or English for each message. Users can change language within a conversation; neutral replies such as a city name inherit context. |
 | Persistent history | New conversations retain earlier chats. Account-linked messages, titles, support context, and service records survive page reloads and server restarts when storage is retained. |
 | Answer-to-action transition | Relevant answers can include approved service buttons. Forms guide users through entry, review, confirmation, and a recorded receipt. |

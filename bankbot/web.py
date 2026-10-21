@@ -10,8 +10,9 @@ import secrets
 import threading
 import time
 import uuid
+import queue
 from fastapi import FastAPI, Request, Response
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 from .config import ROOT, Settings
@@ -116,7 +117,7 @@ def create_app(db_path=None,service=None):
         response.headers['Referrer-Policy']='same-origin'
         response.headers['X-Frame-Options']='DENY'
         response.headers['Content-Security-Policy']="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
-        response.headers['Cache-Control']='no-store'
+        response.headers['Cache-Control']='no-store, no-transform' if response.headers.get('content-type','').startswith('text/event-stream') else 'no-store'
         return response
 
     @app.get('/api/bootstrap')
@@ -125,7 +126,7 @@ def create_app(db_path=None,service=None):
         if not who:
             token,who=store.new_session();set_cookie(response,token,req)
         return {'user':who['user'],'csrf':who['csrf'],'categories':CATEGORIES,'services':list(SERVICES.values()),
-                'bank_references':BANK_REFERENCES,'api_available':bool(settings.api_key),'version':'2.4.0','portal_role':who['portal_role'],
+                'bank_references':BANK_REFERENCES,'api_available':bool(settings.api_key),'version':'2.4.1','portal_role':who['portal_role'],
                 'open_staff_testing':settings.open_staff_testing,'testing_staff':who.get('testing_staff',False),'funding_programs':PROGRAMS,
                 'today':datetime.now(timezone.utc).date().isoformat(),
                 'requires_login':settings.cloud_mode,'registration_access_code_required':settings.cloud_mode,
@@ -218,8 +219,7 @@ def create_app(db_path=None,service=None):
             result=store.submit(who['owner'],'human_support',{'category':'other','subject':current['title'][:80] if current['title']!='新对话' else '聊天转人工客服','description':description},id_)
             return {'ticket':store.ticket(result['id']),'chat':public_chat(store.chat(who['owner'],id_)),'existing':False}
 
-    @app.post('/api/chats/{id_}/messages')
-    def send(id_:str,body:SendBody,req:Request):
+    def perform_send(id_:str,body:SendBody,req:Request,on_event=None):
         who=mutate(req);store.chat(who['owner'],id_)
         if settings.cloud_mode and not who['user']:raise PortalError(401,'请登录后再开始咨询。')
         if not body.text.strip():raise PortalError(400,'请输入问题。')
@@ -253,7 +253,7 @@ def create_app(db_path=None,service=None):
                 state=coerce_state(current['state'])
                 if body.bank_mode:state.bank_mode=body.bank_mode
                 try:
-                    reply=bot.respond(body.text,state,body.mode)
+                    reply=bot.respond_stream(body.text,state,body.mode,on_event=on_event) if on_event is not None and hasattr(bot,'respond_stream') else bot.respond(body.text,state,body.mode)
                     answer=reply.answer;meta=reply_details(reply,body.text,state.language)
                     meta['actions']=getattr(reply,'actions',[])
                     meta['followups']=getattr(reply,'followups',[])
@@ -268,6 +268,34 @@ def create_app(db_path=None,service=None):
             store.append_message(id_,'assistant',answer,meta)
             result=public_chat(store.chat(who['owner'],id_));store.finish_send(id_,body.request_id,result)
             return result
+
+    @app.post('/api/chats/{id_}/messages')
+    def send(id_:str,body:SendBody,req:Request):return perform_send(id_,body,req)
+
+    @app.post('/api/chats/{id_}/stream')
+    def stream_send(id_:str,body:SendBody,req:Request):
+        who=mutate(req);store.chat(who['owner'],id_)
+        if settings.cloud_mode and not who['user']:raise PortalError(401,'请登录后再开始咨询。')
+        if not body.text.strip():raise PortalError(400,'请输入问题。')
+        events=queue.SimpleQueue();abandoned=threading.Event()
+        def emit(event):
+            if not abandoned.is_set():events.put(event)
+        def work():
+            try:emit({'type':'complete','chat':perform_send(id_,body,req,on_event=emit)})
+            except PortalError as exc:emit({'type':'error','status':exc.status,'detail':public_error(exc.message,req.headers.get('Accept-Language','zh')),'retry_after':getattr(exc,'retry_after',60) if exc.status==429 else 0})
+            except Exception:emit({'type':'error','status':500,'detail':'连接中断，请刷新记录后重试。' if req.headers.get('Accept-Language','zh').startswith('zh') else 'The connection was interrupted. Refresh your history before retrying.'})
+            finally:events.put(None)
+        def chunks():
+            try:
+                yield 'data: '+json.dumps({'type':'start'})+'\n\n'
+                threading.Thread(target=work,daemon=True).start()
+                while True:
+                    try:event=events.get(timeout=10)
+                    except queue.Empty:yield ': keepalive\n\n';continue
+                    if event is None:break
+                    yield 'data: '+json.dumps(event,ensure_ascii=False)+'\n\n'
+            finally:abandoned.set()
+        return StreamingResponse(chunks(),media_type='text/event-stream',headers={'X-Accel-Buffering':'no','Cache-Control':'no-store, no-transform'})
 
     @app.get('/api/requests')
     def requests(req:Request):return store.requests(session(req)['owner'])
@@ -335,7 +363,7 @@ def create_app(db_path=None,service=None):
         return {'imported':store.import_legacy(who['owner'],records)}
 
     @app.get('/api/health')
-    def health():return {'ok':True,'version':'2.4.0'}
+    def health():return {'ok':True,'version':'2.4.1'}
 
     app.mount('/assets',StaticFiles(directory=ROOT/'web'),name='assets')
     @app.get('/')

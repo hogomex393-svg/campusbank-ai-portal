@@ -184,6 +184,11 @@ w.eval(
 async function flush() {
   for (let i = 0; i < 20; i++)
     await new Promise((resolve) => setImmediate(resolve));
+  // Click handlers now keep the composer busy until the visible stream catches up.
+  const deadline=Date.now()+5000;
+  while(w.__test?.S.busy && Date.now()<deadline)
+    await new Promise(resolve=>setTimeout(resolve,25));
+  assert(!w.__test?.S.busy,'UI action did not finish within its test budget');
 }
 await flush();
 const ui = w.__test;

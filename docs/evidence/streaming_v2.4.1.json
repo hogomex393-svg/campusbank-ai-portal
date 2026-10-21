@@ -1,0 +1,33 @@
+{
+  "version": "2.4.1",
+  "date": "2026-10-21",
+  "python_tests_passed": 109,
+  "frontend_workflows_passed": true,
+  "streaming_dom_checks_passed": true,
+  "local": {
+    "version": "2.4.1",
+    "target": "local",
+    "actual_api_mode": "agent",
+    "delta_events": 374,
+    "first_text_seconds": 1.027,
+    "complete_seconds": 6.798,
+    "response_characters": 651,
+    "text_received_before_completion": true,
+    "saved_answer_matches_stream": true,
+    "same_send_id_returns_same_record": true,
+    "served_assets_match_source": true
+  },
+  "railway": {
+    "version": "2.4.1",
+    "target": "Railway",
+    "actual_api_mode": "agent",
+    "delta_events": 347,
+    "first_text_seconds": 1.77,
+    "complete_seconds": 8.895,
+    "response_characters": 631,
+    "text_received_before_completion": true,
+    "saved_answer_matches_stream": true,
+    "same_send_id_returns_same_record": true,
+    "served_assets_match_source": true
+  }
+}

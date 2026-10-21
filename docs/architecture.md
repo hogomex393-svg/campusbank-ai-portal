@@ -2,7 +2,7 @@
 
 ## Components
 
-The browser uses plain HTML, CSS, and JavaScript. FastAPI serves the interface and JSON endpoints. A SQLite store holds users, hashed sessions, chats, messages, service requests, tickets, and staff invitations. One server instance is used in the current deployment.
+The browser uses plain HTML, CSS, and JavaScript. FastAPI serves the interface, JSON endpoints, and a POST SSE endpoint for streamed answers. A SQLite store holds users, hashed sessions, chats, messages, service requests, tickets, and staff invitations. One server instance is used in the current deployment.
 
 The model service is separate from the portal. This allows the CLI, web interface, evaluation harness, and test fixtures to use the same dialogue/retrieval/orchestration implementation.
 
@@ -16,6 +16,8 @@ The model service is separate from the portal. This allows the CLI, web interfac
 6. Validate the generated answer's language. If it differs from the target, ask the model once to rewrite the same supported content in that language, without tools and within the remaining time budget. Persist only the final answer; include correction calls in usage metadata. A failed correction uses a labeled fallback.
 7. Return an answer, source identifiers, tool traces, mode, token usage, latency, and approved UI actions. On API failure, expose sanitized failure metadata with a labeled offline fallback.
 8. Persist the user and assistant messages. Duplicate send identifiers do not create repeated turns.
+
+The browser posts to `/api/chats/{id}/stream`. Public model content is forwarded as `delta` events across bounded tool rounds. Tool arguments and reasoning remain private. After validation and persistence, a `complete` event carries the canonical chat and approved actions. A correction or fallback can replace partial text; complete validated records are the source of truth. See [the streaming protocol](streaming-answers.md).
 
 ## Tools and retrieval
 
