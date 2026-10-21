@@ -56,6 +56,7 @@ class DualBankingTests(unittest.TestCase):
         first=bot.respond('助学贷款需要哪些材料？',State(bank_mode='student'),'offline')
         self.assertGreaterEqual(len(first.followups),2);self.assertEqual(len(first.followups),len(set(first.followups)))
         self.assertNotIn('助学贷款需要哪些材料？',first.followups)
+        self.assertTrue(all('材料' not in q for q in first.followups))
         second=bot.respond('What about student loan repayment?',first.state,'offline')
         self.assertTrue(all('?' in q for q in second.followups))
         human=bot.respond('转人工客服',first.state,'offline');self.assertEqual(human.followups,[])

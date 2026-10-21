@@ -21,4 +21,22 @@ def suggested_questions(text,state,actions,language):
     else:
         pairs=[('日常收付款应该选什么账户？','Which account suits everyday payments?'),('我想比较储蓄和贷款服务。','Can I compare savings and loan services?'),('帮我找到合适的在线办理入口。','Help me find the right online service.')]
     previous={m.get('content','').strip() for turn in state.turns for m in turn if m.get('role')=='user'}
-    return [pair[0 if zh else 1] for pair in pairs if pair[0 if zh else 1] not in previous][:3]
+    recent=' '.join(m.get('content','') for turn in state.turns[-2:] for m in turn if m.get('role')=='user')
+    asked_materials=bool(re.search(r'材料|证明|documents?|paperwork',recent,re.I))
+    asked_fees=bool(re.search(r'月费|费用|手续费|fees?|charges?',recent,re.I))
+    asked_repayment=bool(re.search(r'利率|还款|repay|interest',recent,re.I))
+    questions=[]
+    for pair in pairs:
+        question=pair[0 if zh else 1]
+        if question in previous:continue
+        if asked_materials and re.search(r'材料|documents?',question,re.I):continue
+        if asked_fees and re.search(r'费用|月费|fees?',question,re.I):continue
+        if asked_repayment and re.search(r'利率|还款|repay|interest',question,re.I):continue
+        questions.append(question)
+    extras=[('怎样让工作人员继续跟进？','How can staff follow up on my request?'),
+            ('怎样比较其他适合我的服务？','How can I compare other services that might suit my needs?'),
+            ('怎样核对演示表单后再决定是否提交？','How can I review a demo form before deciding whether to submit?')]
+    for pair in extras:
+        question=pair[0 if zh else 1]
+        if question not in previous and question not in questions:questions.append(question)
+    return questions[:3]
