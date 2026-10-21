@@ -35,6 +35,15 @@
       "name": "客服与网点",
       "en": "Support",
       "icon": "support"
+    },
+    {
+      "id": "education",
+      "name": "助学与奖助",
+      "en": "Student finance",
+      "icon": "loan",
+      "modes": [
+        "student"
+      ]
     }
   ],
   "services": [
@@ -544,6 +553,158 @@
       "notice": "请勿填写密码或验证码。本窗口不会修改实际登录凭据。",
       "description_en": "Request assistance with signing in, recovery guidance, or online applications.",
       "notice_en": "Do not enter passwords or verification codes. This form does not change credentials."
+    },
+    {
+      "id": "education_loan",
+      "category": "education",
+      "title": "助学贷款咨询与申请",
+      "en": "Student loan enquiry",
+      "description": "登记学费或生活费贷款的演示需求，交给工作人员跟进。",
+      "icon": "loan",
+      "fields": [
+        {
+          "name": "applicant",
+          "label": "申请人称呼（演示）",
+          "type": "text",
+          "options": [],
+          "required": true,
+          "label_en": "Demo applicant name"
+        },
+        {
+          "name": "institution",
+          "label": "学校名称（演示）",
+          "type": "text",
+          "options": [],
+          "required": true,
+          "label_en": "Institution (demo)"
+        },
+        {
+          "name": "study_level",
+          "label": "学习阶段",
+          "type": "select",
+          "options": [
+            {
+              "value": "undergraduate",
+              "label": "本科",
+              "label_en": "Undergraduate"
+            },
+            {
+              "value": "postgraduate",
+              "label": "研究生",
+              "label_en": "Postgraduate"
+            }
+          ],
+          "required": true,
+          "label_en": "Study level"
+        },
+        {
+          "name": "amount",
+          "label": "演示申请金额（GBP）",
+          "type": "number",
+          "options": [],
+          "required": true,
+          "label_en": "Demo amount (GBP)"
+        },
+        {
+          "name": "purpose",
+          "label": "资金用途及预算说明",
+          "type": "textarea",
+          "options": [],
+          "required": true,
+          "label_en": "Purpose"
+        },
+        {
+          "name": "reviewed",
+          "label": "已了解这是演示申请，利率与还款条款待审核",
+          "type": "checkbox",
+          "options": [],
+          "required": true,
+          "label_en": "I have reviewed the requirements"
+        }
+      ],
+      "notice": "仅登记助学贷款演示咨询。不会真实放款，不保证获批；请勿提交真实证件、学号或银行资料。",
+      "description_en": "Record a fictional tuition or living-cost loan enquiry for staff follow-up.",
+      "notice_en": "Demo only: no real loan or guaranteed approval. Do not submit real IDs, student numbers or account data."
+    },
+    {
+      "id": "funding_enquiry",
+      "category": "education",
+      "title": "奖学金与补助查询",
+      "en": "Scholarship and grant enquiry",
+      "description": "筛选演示项目，查看材料说明，并向工作人员提交咨询。",
+      "icon": "savings",
+      "fields": [
+        {
+          "name": "applicant",
+          "label": "申请人称呼（演示）",
+          "type": "text",
+          "options": [],
+          "required": true,
+          "label_en": "Demo applicant name"
+        },
+        {
+          "name": "study_level",
+          "label": "学习阶段",
+          "type": "select",
+          "options": [
+            {
+              "value": "undergraduate",
+              "label": "本科",
+              "label_en": "Undergraduate"
+            },
+            {
+              "value": "postgraduate",
+              "label": "研究生",
+              "label_en": "Postgraduate"
+            }
+          ],
+          "required": true,
+          "label_en": "Study level"
+        },
+        {
+          "name": "funding_type",
+          "label": "资助类型",
+          "type": "select",
+          "options": [
+            {
+              "value": "all",
+              "label": "全部演示项目",
+              "label_en": "All fictional programs"
+            },
+            {
+              "value": "scholarship",
+              "label": "奖学金",
+              "label_en": "Scholarships"
+            },
+            {
+              "value": "grants",
+              "label": "助学补助",
+              "label_en": "Student grants"
+            }
+          ],
+          "required": true,
+          "label_en": "Funding type"
+        },
+        {
+          "name": "institution",
+          "label": "学校名称（演示）",
+          "type": "text",
+          "options": [],
+          "required": false,
+          "label_en": "Institution (demo)"
+        },
+        {
+          "name": "description",
+          "label": "需要进一步了解的问题",
+          "type": "textarea",
+          "options": [],
+          "required": true,
+          "label_en": "Describe your request"
+        }
+      ],
+      "notice": "目录中的金额、条件和项目均为虚构示例，不代表真实学校或国家政策。真实项目请向学校资助部门核实。",
+      "description_en": "Filter fictional programs, review document guidance and send a question to staff.",
+      "notice_en": "Amounts and criteria are fictional examples, not real university or government policies. Confirm actual programs with the institution."
     }
   ],
   "bank_references": [
@@ -574,6 +735,76 @@
       "detail": "存款账户、个人贷款、汇兑与银行卡入口",
       "name_en": "Bank of China personal banking",
       "detail_en": "Deposits, loans, exchange and card services"
+    }
+  ],
+  "funding_programs": [
+    {
+      "id": "DEMO_EDUCATION_LOAN",
+      "kind": "loan",
+      "title": "学费与生活费支持贷款（演示）",
+      "title_en": "Tuition and living-cost loan (demo)",
+      "summary": "面向年满18岁的在读学生，可登记学费或生活费贷款意向。金额、利率和还款计划需工作人员另行审核；提交不代表获批。",
+      "summary_en": "Students aged 18+ can record a tuition or living-cost loan enquiry. Amount, rate and repayment terms require staff review; submission is not approval.",
+      "documents": "演示身份证明、在读证明、用途及预算说明。无需上传真实证件或账户资料。",
+      "documents_en": "Example identity/student-status evidence and a purpose/budget summary. Do not upload real identity or account documents.",
+      "amount": "按演示申请登记金额，条款待审核",
+      "amount_en": "Requested demo amount; terms subject to review",
+      "levels": [
+        "undergraduate",
+        "postgraduate"
+      ],
+      "service_id": "education_loan"
+    },
+    {
+      "id": "DEMO_MERIT_SCHOLARSHIP",
+      "kind": "scholarship",
+      "title": "学业发展奖学金（演示）",
+      "title_en": "Academic development scholarship (demo)",
+      "summary": "演示目录面向本科和研究生，参考学习计划及学业总结。需要向学校确认实际项目，本目录不代表任何学校真实名额。",
+      "summary_en": "A fictional undergraduate/postgraduate program based on a study plan and academic summary. Confirm real awards with the institution; this directory does not represent actual places.",
+      "documents": "演示在读状态、学业总结及学习计划。",
+      "documents_en": "Example student status, academic summary and study plan.",
+      "amount": "演示参考 £500–£1,500，一次性，非真实承诺",
+      "amount_en": "Fictional GBP 500–1,500 once; no real award commitment",
+      "levels": [
+        "undergraduate",
+        "postgraduate"
+      ],
+      "service_id": "funding_enquiry"
+    },
+    {
+      "id": "DEMO_NEED_GRANT",
+      "kind": "grant",
+      "title": "学习生活补助（演示）",
+      "title_en": "Study and living-cost grant (demo)",
+      "summary": "用于展示按生活预算及学习需要查询补助的流程。工作人员只处理演示咨询，不判断真实助学资格，也不会发放资金。",
+      "summary_en": "Demonstrates enquiries about study needs and living budgets. Staff handle a demo enquiry without determining real eligibility or disbursing money.",
+      "documents": "演示在读状态、预算说明及需要帮助的事项。",
+      "documents_en": "Example student status, budget summary and support needs.",
+      "amount": "演示参考最高 £800，是否符合需另行核实",
+      "amount_en": "Fictional reference up to GBP 800; real eligibility must be checked separately",
+      "levels": [
+        "undergraduate",
+        "postgraduate"
+      ],
+      "service_id": "funding_enquiry"
+    },
+    {
+      "id": "DEMO_EMERGENCY_GRANT",
+      "kind": "emergency",
+      "title": "临时困难援助（演示）",
+      "title_en": "Emergency student support (demo)",
+      "summary": "展示临时困难咨询与人工转接流程；若是实际紧急情况，应直接联系学校正式学生支持部门。",
+      "summary_en": "Demonstrates an urgent-support enquiry and human handoff. For a real urgent situation, contact the institution’s official student-support service.",
+      "documents": "演示情况摘要；无需敏感证明文件。",
+      "documents_en": "An example situation summary; no sensitive evidence files.",
+      "amount": "演示参考最高 £300，不构成实际资助承诺",
+      "amount_en": "Fictional reference up to GBP 300; no real funding commitment",
+      "levels": [
+        "undergraduate",
+        "postgraduate"
+      ],
+      "service_id": "funding_enquiry"
     }
   ]
 }

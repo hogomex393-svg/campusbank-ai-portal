@@ -92,7 +92,8 @@ class OutputLanguageTests(unittest.TestCase):
 
     def test_expired_budget_does_not_start_a_correction(self):
         service, client = self.service([{'role':'assistant','content':'学生账户不收月费。'}])
-        with patch('bankbot.service.time.monotonic', side_effect=[0, 0, 26, 26]):
+        expired=service.settings.timeout_seconds+1
+        with patch('bankbot.service.time.monotonic', side_effect=[0, 0, expired, expired]):
             result = service.respond('Student account monthly fee?')
         self.assertEqual(result.error, 'timeout')
         self.assertEqual(result.mode, 'offline_fallback')

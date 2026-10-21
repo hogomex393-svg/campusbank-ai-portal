@@ -11,6 +11,8 @@
 
 [中文介绍](README.zh-CN.md)
 
+**Version 2.4.0:** [general/student modes, richer replies, question chips and the application workbench](docs/dual-banking-and-workbench.md).
+
 **Version 2.3.0:** [dialogue/form consistency and readable-table fixes](docs/group-review-fixes.md), including preserved form drafts, safe repeated submissions, appointment validation, and complete English form text.
 
 CampusBank explores a practical interaction problem: **how can a user move from asking a question to completing the next service step without losing context or confusing AI with human staff?** The project combines a DeepSeek-powered bilingual agent with a multi-user web portal, an approved service catalog, and a separate staff workbench.
@@ -31,7 +33,7 @@ The hosted demo uses invitation-based registration; contact the project owner fo
 | Role-aware workspaces | Customers view their own support records. Authorized staff claim tickets and send replies; resolved tickets are read-only. Backend checks enforce these distinctions. |
 | Shared support queue | Customers and staff can use different computers. Visible pages synchronize every three seconds; incoming updates preserve a staff member's unfinished reply. |
 
-The sidebar groups nine service windows into **Accounts, Cards, Payments, Savings, Loans, and Support**. Users can enter a service directly or reach it through the conversation.
+General banking groups nine shared service windows into **Accounts, Cards, Payments, Savings, Loans, and Support**; student banking adds **Student finance** with two education-funding windows. Users can enter a service directly or reach it through the conversation.
 
 ## Interface preview
 
@@ -80,7 +82,7 @@ Online **agent**, retrieval-augmented **RAG**, model-only **LLM**, and API-free 
 
 | Check | Recorded result | Scope |
 | --- | --- | --- |
-| Python suite | **93 tests passed** | Account/session behavior, tool and language logic, history, support ownership, roles, cloud settings, quotas, and recovery. |
+| Python suite | **102 tests passed** | Account/session behavior, tool and language logic, history, support ownership, roles, cloud settings, quotas, and recovery. |
 | Frontend workflow checks | Offline DOM assertions passed | History retention, service forms, customer/staff controls, handoff, polling updates, preserved drafts, and escaping; HTTP is mocked. |
 | FAQ retrieval | **72/78 Hit@3 (92.3%)** | Authored benchmark, offline run on 2026-10-20; two of 80 questions are not retrieval-scorable. |
 | Offline response proxy | **57/80 (71.25%)** | Lexical key-point matching; this is not a factual accuracy or usability score. |

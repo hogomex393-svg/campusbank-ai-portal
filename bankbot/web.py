@@ -22,6 +22,7 @@ from .history import repair_display
 from .language import detect_language
 from .ui_runtime import reply_details
 from .errors import public_error
+from .student_finance import PROGRAMS,search_funding
 
 COOKIE='campusbank_session'
 
@@ -38,6 +39,12 @@ class SendBody(Body):
     text:str=Field(min_length=1,max_length=2000)
     mode:str=Field(default='agent',pattern=r'^(agent|rag|llm|offline)$')
     request_id:str=Field(default_factory=lambda:uuid.uuid4().hex,pattern=r'^[a-f0-9]{32}$')
+    bank_mode:str|None=Field(default=None,pattern=r'^(general|student)$')
+class CreateChatBody(Body):
+    bank_mode:str=Field(default='general',pattern=r'^(general|student)$')
+class ReviewRequestBody(Body):
+    status:str=Field(pattern=r'^(processing|completed|needs_info)$')
+    note:str=Field(default='',max_length=2000)
 class RenameBody(Body):title:str=Field(min_length=1,max_length=80)
 class SubmitBody(Body):
     service_id:str
@@ -45,6 +52,7 @@ class SubmitBody(Body):
     chat_id:str|None=None
     confirmed:bool=False
     request_id:str=Field(default_factory=lambda:uuid.uuid4().hex,pattern=r'^[a-f0-9]{32}$')
+    bank_mode:str=Field(default='general',pattern=r'^(general|student)$')
 class ReplyBody(Body):text:str=Field(min_length=1,max_length=2000)
 class RoleBody(Body):portal_role:str=Field(pattern=r'^(customer|staff)$')
 
@@ -52,6 +60,7 @@ class RoleBody(Body):portal_role:str=Field(pattern=r'^(customer|staff)$')
 def public_chat(chat):
     result={k:chat[k] for k in ('id','title','created_at','updated_at','messages','ticket')}
     result['service_drafts']=coerce_state(chat['state']).service_drafts
+    result['bank_mode']=coerce_state(chat['state']).bank_mode
     return result
 
 
@@ -59,7 +68,7 @@ def create_app(db_path=None,service=None):
     from .service import ChatService
     app=FastAPI(title='CampusBank local demo portal',docs_url=None,redoc_url=None)
     settings=Settings.load()
-    store=PortalStore(db_path or settings.database_path or ROOT/'logs/portal.sqlite3',bootstrap_code=settings.bootstrap_code if settings.cloud_mode else '')
+    store=PortalStore(db_path or settings.database_path or ROOT/'logs/portal.sqlite3',bootstrap_code=settings.bootstrap_code if settings.cloud_mode else '',open_staff_testing=settings.open_staff_testing)
     bot=service or ChatService(settings)
     app.state.store=store;app.state.bot=bot
     locks={};locks_guard=threading.Lock();login_attempts={};send_attempts={};quota_guard=threading.Lock()
@@ -116,16 +125,18 @@ def create_app(db_path=None,service=None):
         if not who:
             token,who=store.new_session();set_cookie(response,token,req)
         return {'user':who['user'],'csrf':who['csrf'],'categories':CATEGORIES,'services':list(SERVICES.values()),
-                'bank_references':BANK_REFERENCES,'api_available':bool(settings.api_key),'version':'2.3.0','portal_role':who['portal_role'],
+                'bank_references':BANK_REFERENCES,'api_available':bool(settings.api_key),'version':'2.4.0','portal_role':who['portal_role'],
+                'open_staff_testing':settings.open_staff_testing,'testing_staff':who.get('testing_staff',False),'funding_programs':PROGRAMS,
                 'today':datetime.now(timezone.utc).date().isoformat(),
                 'requires_login':settings.cloud_mode,'registration_access_code_required':settings.cloud_mode,
                 'first_admin_setup_required':settings.cloud_mode and not store.has_admin()}
 
-    def sign_in(req,response,user,old,portal_role='customer'):
-        token,who=store.new_session(user,portal_role)
+    def sign_in(req,response,user,old,portal_role='customer',test_staff=False):
+        token,_=store.new_session(user,portal_role,test_staff)
+        who=store.session(token)
         store.claim_guest(old['owner'],who['owner'])
         store.revoke(req.cookies.get(COOKIE));set_cookie(response,token,req)
-        return {'user':user,'csrf':who['csrf'],'portal_role':portal_role}
+        return {'user':who['user'],'csrf':who['csrf'],'portal_role':portal_role,'testing_staff':who.get('testing_staff',False)}
 
     @app.post('/api/register')
     def register(body:RegisterBody,req:Request,response:Response):
@@ -134,8 +145,9 @@ def create_app(db_path=None,service=None):
         if not body.display_name.strip():raise PortalError(400,'请填写称呼。')
         if settings.cloud_mode and body.portal_role=='customer' and not secrets.compare_digest(body.test_access_code.encode(),settings.test_access_code.encode()):
             raise PortalError(403,'请输入部署者提供的小组测试邀请码。')
-        user=store.register(body.username,body.password,body.display_name.strip(),body.portal_role,body.invite_code.strip())
-        return sign_in(req,response,user,old,body.portal_role)
+        testing=settings.open_staff_testing and body.portal_role=='staff'
+        user=store.register(body.username,body.password,body.display_name.strip(),'customer' if testing else body.portal_role,body.invite_code.strip(),allow_first_admin=not testing)
+        return sign_in(req,response,user,old,body.portal_role,testing)
 
     @app.post('/api/login')
     def login(body:LoginBody,req:Request,response:Response):
@@ -145,11 +157,23 @@ def create_app(db_path=None,service=None):
         if len(attempts)>=8:raise PortalError(429,'登录尝试过于频繁，请稍后再试。')
         try:user=store.login(body.username,body.password)
         except PortalError:login_attempts[key]=attempts+[time.time()];raise
-        if body.portal_role=='staff' and not (user['is_admin'] or user['is_staff']):
+        testing=settings.open_staff_testing and body.portal_role=='staff'
+        if body.portal_role=='staff' and not testing and not (user['is_admin'] or user['is_staff']):
             if not body.invite_code.strip():raise PortalError(403,'此账户尚未开通工作人员权限，请向管理员申请邀请码。')
             user=store.enroll_staff(user,body.invite_code.strip())
         login_attempts.pop(key,None)
-        return sign_in(req,response,user,old,body.portal_role)
+        return sign_in(req,response,user,old,body.portal_role,testing)
+
+    @app.post('/api/testing/staff-session')
+    def testing_staff(req:Request,response:Response):
+        old=mutate(req)
+        if not settings.open_staff_testing:raise PortalError(403,'测试客服入口已关闭，请使用工作人员邀请码。')
+        key=('testing_staff',req.client.host if req.client else 'local')
+        recent=[t for t in login_attempts.get(key,[]) if t>time.time()-60]
+        if len(recent)>=30:raise PortalError(429,'请稍后再进入测试客服。')
+        login_attempts[key]=recent+[time.time()]
+        user=old['user'] or store.register('test_staff_'+secrets.token_hex(4),secrets.token_urlsafe(32),'测试客服-'+secrets.token_hex(2),allow_first_admin=False)
+        return sign_in(req,response,user,old,'staff',True)
 
     @app.post('/api/logout')
     def logout(req:Request,response:Response):
@@ -161,14 +185,18 @@ def create_app(db_path=None,service=None):
     def switch_role(body:RoleBody,req:Request,response:Response):
         who=mutate(req);user=who['user']
         if not user:raise PortalError(401,'请先登录。')
-        if body.portal_role=='staff' and not (user['is_admin'] or user['is_staff']):raise PortalError(403,'此账户尚未开通工作人员权限。')
-        return sign_in(req,response,user,who,body.portal_role)
+        testing=settings.open_staff_testing and body.portal_role=='staff'
+        if body.portal_role=='staff' and not testing and not (user['is_admin'] or user['is_staff']):raise PortalError(403,'此账户尚未开通工作人员权限。')
+        return sign_in(req,response,user,who,body.portal_role,testing)
 
     @app.get('/api/chats')
     def chats(req:Request):return store.chats(session(req)['owner'])
 
     @app.post('/api/chats')
-    def new_chat(req:Request):return public_chat(store.create_chat(mutate(req)['owner']))
+    def new_chat(req:Request,body:CreateChatBody|None=None):return public_chat(store.create_chat(mutate(req)['owner'],bank_mode=body.bank_mode if body else 'general'))
+
+    @app.get('/api/student-funding')
+    def student_funding(level:str|None=None,kind:str|None=None):return {'fictional':True,'programs':search_funding(level=level,kind=kind)}
 
     @app.get('/api/chats/{id_}')
     def chat(id_:str,req:Request):return public_chat(store.chat(session(req)['owner'],id_))
@@ -223,10 +251,12 @@ def create_app(db_path=None,service=None):
                 meta={'sender':'service','ticket_id':current['ticket']['id'],'actions':[],'mode':'human_queue'}
             else:
                 state=coerce_state(current['state'])
+                if body.bank_mode:state.bank_mode=body.bank_mode
                 try:
                     reply=bot.respond(body.text,state,body.mode)
                     answer=reply.answer;meta=reply_details(reply,body.text,state.language)
                     meta['actions']=getattr(reply,'actions',[])
+                    meta['followups']=getattr(reply,'followups',[])
                     for action in meta['actions']:
                         if action['service_id']=='open_account' and reply.state.product in ('student_account','everyday_account'):
                             action.setdefault('prefill',{})['product']=reply.state.product
@@ -255,7 +285,16 @@ def create_app(db_path=None,service=None):
     def submit(body:SubmitBody,req:Request):
         who=mutate(req)
         if not body.confirmed:raise PortalError(400,'请核对信息后确认提交。')
-        return store.submit(who['owner'],body.service_id,body.payload,body.chat_id,body.request_id)
+        return store.submit(who['owner'],body.service_id,body.payload,body.chat_id,body.request_id,body.bank_mode)
+
+    @app.get('/api/admin/requests')
+    def business_requests(req:Request):admin(req);return store.business_requests()
+
+    @app.get('/api/admin/requests/{id_}')
+    def business_request(id_:str,req:Request):admin(req);return store.business_request(id_)
+
+    @app.patch('/api/admin/requests/{id_}')
+    def review_request(id_:str,body:ReviewRequestBody,req:Request):return store.review_request(id_,admin(req,True)['user'],body.status,body.note)
 
     @app.post('/api/tickets/{id_}/resume-ai')
     def resume(id_:str,req:Request):return store.resolve_ticket(id_,mutate(req)['owner'])
@@ -296,7 +335,7 @@ def create_app(db_path=None,service=None):
         return {'imported':store.import_legacy(who['owner'],records)}
 
     @app.get('/api/health')
-    def health():return {'ok':True,'version':'2.3.0'}
+    def health():return {'ok':True,'version':'2.4.0'}
 
     app.mount('/assets',StaticFiles(directory=ROOT/'web'),name='assets')
     @app.get('/')

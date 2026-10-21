@@ -25,6 +25,7 @@ class State:
     language: str = "en"
     service_drafts: dict = field(default_factory=dict)
     active_service: str | None = None
+    bank_mode: str = 'general'
 
     def messages(self, limit: int) -> list[dict]:
         return [deepcopy(m) for turn in self.turns[-limit:] for m in turn]
@@ -39,7 +40,7 @@ def coerce_state(value=None) -> State:
     return State(turns=deepcopy(get("turns", [])), product=get("product"),
                  topic=get("topic"), city=get("city"), pending=get("pending"),
                  language=get("language", "en"),service_drafts=deepcopy(get('service_drafts',{})),
-                 active_service=get('active_service'))
+                 active_service=get('active_service'),bank_mode=get('bank_mode','general') if get('bank_mode','general') in ('general','student') else 'general')
 
 
 @dataclass

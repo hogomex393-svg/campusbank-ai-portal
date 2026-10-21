@@ -65,7 +65,9 @@ def draft_from_message(text, state):
     """Extract explicit common slots; the LLM tool handles broader paraphrases."""
     lower = text.lower()
     service_id = None
-    if re.search(r'预约|appointment|book.*branch|visit.*branch', lower): service_id = 'branch_appointment'
+    if re.search(r'助学贷款|学贷|student loan|education loan|tuition loan',lower):service_id='education_loan'
+    elif re.search(r'奖学金|助学金|补助|scholarship|student grant|financial aid',lower):service_id='funding_enquiry'
+    elif re.search(r'预约|appointment|book.*branch|visit.*branch', lower): service_id = 'branch_appointment'
     elif re.search(r'转账|汇款|transfer|payment', lower): service_id = 'transfer_demo'
     elif re.search(r'挂失|补卡|卡.*丢|lost.*card|replace.*card', lower): service_id = 'replace_card'
     elif re.search(r'申请.*贷款|贷款申请|apply.*loan', lower): service_id = 'apply_loan'
@@ -84,7 +86,7 @@ def draft_from_message(text, state):
         if purpose: patch['purpose'] = purpose[1].strip()
         elif 'purpose' not in state.service_drafts.get(service_id, {}) and re.search(r'学生账户|student account', lower):
             patch['purpose'] = '学生账户咨询' if re.search(r'[\u4e00-\u9fff]', text) else 'Student account enquiry'
-    if service_id in ('transfer_demo', 'apply_loan', 'open_savings'):
+    if service_id in ('transfer_demo', 'apply_loan', 'open_savings','education_loan'):
         if service_id == 'transfer_demo':
             if re.search(r'国际|international', lower): patch['transfer_type'] = 'international'
             elif re.search(r'国内|domestic', lower): patch['transfer_type'] = 'domestic'

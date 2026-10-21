@@ -13,6 +13,8 @@ from .language import detect_language, local_message
 from .catalog import service_action, SERVICES
 from .forms import draft_from_message, update_draft
 from .answers import policy_facts, product_comparison
+from .student_finance import is_funding_question, funding_answer, search_funding
+from .followups import suggested_questions
 
 
 def wants_human(text):
@@ -22,6 +24,19 @@ def wants_human(text):
     return bool(re.search(r'(?:转(?:接)?|找|联系|需要|想要|我要|叫|真人).*?(?:人工|真人|客服)|(?:人工|真人)客服|(?:speak|talk|connect|transfer|contact|want|need).*?(?:human|person|live agent|staff|representative)|human support|live agent',text))
 
 SYSTEM_PROMPT = """You are CampusBank's friendly bilingual Chinese and English banking inquiry assistant.
+Preserve substantive explanations when preparing a form. A prepared button must not
+replace the answer. Our forms accept only listed text/options and confirmation boxes:
+there is no document upload, photo scan, external CampusBank app or real account check.
+Users track this portal's requests under My requests; do not invent outside status pages
+or formal bank notifications. Do not ask whether to open a form if you already prepare it.
+For substantive questions, give a useful explanation rather than a one-line summary.
+Organize the relevant eligibility, documents, fees/unknown terms, practical steps and next
+action into a few readable paragraphs or bullets. Explain differences and consequences
+where useful. Answer follow-ups directly. Respect explicit requests for a short answer;
+keep greetings and genuine clarifications short. Do not pad answers with unrelated facts.
+Student loans, scholarships and grants in this system are fictional demo programs.
+Do not present them as actual government or university policy, guarantee funding, or invent
+loan rates/approval. Explain how users can check actual terms with their institution.
 Answer EVERY part of a compound question before offering a service entry.
 An action button is not a substitute for answering required documents, fees or eligibility.
 This portal only records simulated requests. It has no working banking app, card freeze
@@ -84,6 +99,7 @@ class Reply:
     language: str = "en"
     actions: list[dict] = field(default_factory=list)
     language_corrections: int = 0
+    followups: list[str] = field(default_factory=list)
 
 
 class ChatService:
@@ -97,6 +113,9 @@ class ChatService:
     def _offline(self, prepared):
         text = prepared.text.lower().strip()
         language = prepared.state.language
+        if is_funding_question(prepared.text,prepared.state.bank_mode):
+            answer,sources,rows=funding_answer(prepared.text,language)
+            return answer,sources,[{'name':'search_student_funding','arguments':{'query':prepared.text},'result':{'records':rows,'source_ids':sources,'fictional':True}}]
         if wants_human(text):
             return ('可以，点击下方“转接人工客服”，当前对话会随工单交给工作人员。' if language=='zh' else 'Use the human support button below to send this conversation to a staff member.'),[],[]
         if re.fullmatch(r"(?:hi|hello|hey|good morning|thanks|thank you|你好|您好|嗨|谢谢|早上好)[!. 。！]*", text):
@@ -169,16 +188,22 @@ class ChatService:
         else:
             language_instruction = "\nResponse language for THIS turn: Simplified Chinese. Write the customer-facing answer in Chinese." if language == "zh" else "\nResponse language for THIS turn: English. Write the customer-facing answer in English."
             system = SYSTEM_PROMPT + language_instruction
+            system+='\nCurrent service focus: '+('student banking (student accounts, education loans and funding enquiries).' if new.bank_mode=='student' else 'general retail banking for everyday customers. Student services remain available when asked.')
+            funding_query=is_funding_question(text,new.bank_mode)
+            if funding_query and mode in ('agent','rag'):
+                funding=search_funding(text)
+                system+='\nUse student-finance records for education loans, not Personal Loan product rates. Actual aid policies are not available here.\nVerified fictional student-finance records for this question:\n'+json.dumps(funding,ensure_ascii=False)
+                sources.extend(row['id'] for row in funding)
             catalog={key:{'fields':[{k:f[k] for k in ('name','type','options')} for f in value['fields']]} for key,value in SERVICES.items()}
             system+='\nAllowed demo-form catalog (do not request other fields):\n'+json.dumps(catalog,ensure_ascii=False)
             if new.service_drafts:
                 system+='\nCurrent saved demo drafts (partial values, NOT submitted):\n'+json.dumps(new.service_drafts,ensure_ascii=False)
-            parts,fact_sources,facts=policy_facts(text,prepared,self.knowledge,self.retriever,self.settings.retrieval_threshold)
+            parts,fact_sources,facts=([],[],[]) if funding_query else policy_facts(text,prepared,self.knowledge,self.retriever,self.settings.retrieval_threshold)
             if mode in ('agent','rag') and len(parts)>1:
                 system+='\nFacts for EACH requested question. Answer all, then offer an entry:\n'+json.dumps(parts,ensure_ascii=False)
                 sources.extend(fact_sources)
             if mode == "rag":
-                hits = [h for h in self.retriever.search(text)
+                hits = [] if funding_query else [h for h in self.retriever.search(text)
                         if h["score"] >= self.settings.retrieval_threshold]
                 system += "\nFAQ evidence:\n" + json.dumps(hits, ensure_ascii=False)
                 sources.extend(h["faq_id"] for h in hits)
@@ -197,7 +222,19 @@ class ChatService:
                     message = response["message"]
                     tool_calls = message.get("tool_calls") or []
                     if not tool_calls:
-                        answer = message.get("content") or local_message("empty_answer", language)
+                        # Providers can put the actual explanation in assistant.content on
+                        # a tool-call message, then finish with a short UI acknowledgement.
+                        # Keep that user-facing text; never expose tool JSON or reasoning.
+                        parts=[]
+                        for earlier in [*turn,message]:
+                            content=earlier.get('content') if earlier.get('role')=='assistant' else None
+                            if not isinstance(content,str) or not content.strip():continue
+                            content=content.strip()
+                            if not any(content in previous for previous in parts):
+                                parts=[previous for previous in parts if previous not in content]
+                                parts.append(content)
+                        answer='\n\n'.join(parts) or local_message("empty_answer", language)
+                        message={**message,'content':answer}
                         # A correct language instruction does not guarantee the model follows it.
                         # Correct once without tools, within the same time budget. Only the
                         # corrected answer enters dialogue history, never the repair instruction.
@@ -220,6 +257,10 @@ class ChatService:
                             answer = message.get("content")
                             if message.get("tool_calls") or not answer or detect_language(answer, language) != language:
                                 raise APIError("response_language", "The model did not follow the requested response language.")
+                        # Move public narration to the final answer once, keeping paired
+                        # tool messages and provider reasoning fields valid in history.
+                        for earlier in turn:
+                            if earlier.get('role')=='assistant' and earlier.get('tool_calls'):earlier['content']=None
                         turn.append(message)
                         break
                     if mode != "agent" or round_index >= self.settings.max_tool_rounds or len(tool_calls) > 6:
@@ -282,8 +323,12 @@ class ChatService:
         for action in actions:
             if action['service_id'] in new.service_drafts:
                 action['prefill']=new.service_drafts[action['service_id']].copy()
+        if is_funding_question(text,new.bank_mode):
+            records=search_funding(text)
+            target='education_loan' if records and records[0]['kind']=='loan' else 'funding_enquiry'
+            if not any(a['service_id']==target for a in actions):actions.append(service_action(target))
         if wants_human(text) and not any(a['service_id']=='human_support' for a in actions):
             actions.append(service_action('human_support'))
         return Reply(answer, new, actual_mode, list(dict.fromkeys(sources)), traces,
                      round((time.monotonic() - started) * 1000), usage, error, calls, language, actions,
-                     language_corrections)
+                     language_corrections,suggested_questions(text,new,actions,language))

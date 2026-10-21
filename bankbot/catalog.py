@@ -36,6 +36,14 @@ SERVICES = {
         "fields":[field("issue","问题类型","select",[option("login","无法登录"),option("password","密码找回流程"),option("application","网上申请协助")]),field("description","问题说明","textarea")],"notice":"请勿填写密码或验证码。本窗口不会修改实际登录凭据。"},
 }
 
+CATEGORIES.append({'id':'education','name':'助学与奖助','en':'Student finance','icon':'loan','modes':['student']})
+SERVICES['education_loan']={'id':'education_loan','category':'education','title':'助学贷款咨询与申请','en':'Student loan enquiry','description':'登记学费或生活费贷款的演示需求，交给工作人员跟进。','icon':'loan',
+ 'fields':[field('applicant','申请人称呼（演示）'),field('institution','学校名称（演示）'),field('study_level','学习阶段','select',[option('undergraduate','本科'),option('postgraduate','研究生')]),field('amount','演示申请金额（GBP）','number'),field('purpose','资金用途及预算说明','textarea'),field('reviewed','已了解这是演示申请，利率与还款条款待审核','checkbox')],
+ 'notice':'仅登记助学贷款演示咨询。不会真实放款，不保证获批；请勿提交真实证件、学号或银行资料。'}
+SERVICES['funding_enquiry']={'id':'funding_enquiry','category':'education','title':'奖学金与补助查询','en':'Scholarship and grant enquiry','description':'筛选演示项目，查看材料说明，并向工作人员提交咨询。','icon':'savings',
+ 'fields':[field('applicant','申请人称呼（演示）'),field('study_level','学习阶段','select',[option('undergraduate','本科'),option('postgraduate','研究生')]),field('funding_type','资助类型','select',[option('all','全部演示项目'),option('scholarship','奖学金'),option('grants','助学补助')]),field('institution','学校名称（演示）',required=False),field('description','需要进一步了解的问题','textarea')],
+ 'notice':'目录中的金额、条件和项目均为虚构示例，不代表真实学校或国家政策。真实项目请向学校资助部门核实。'}
+
 BANK_REFERENCES = [
     {"name":"HSBC UK","url":"https://www.hsbc.co.uk/","detail":"账户、储蓄、银行卡与贷款的业务分类"},
     {"name":"HSBC 帮助中心","url":"https://www.hsbc.co.uk/help/","detail":"按问题进入银行卡、支付和数字银行帮助"},
@@ -44,6 +52,8 @@ BANK_REFERENCES = [
 ]
 
 SERVICE_EN = {
+ 'education_loan':('Record a fictional tuition or living-cost loan enquiry for staff follow-up.','Demo only: no real loan or guaranteed approval. Do not submit real IDs, student numbers or account data.'),
+ 'funding_enquiry':('Filter fictional programs, review document guidance and send a question to staff.','Amounts and criteria are fictional examples, not real university or government policies. Confirm actual programs with the institution.'),
  'open_account':('Choose an account, review required documents, and save a demo application.','This records a fictional application for review; no real account is opened.'),
  'apply_card':('Request a linked debit card or submit a demo credit-card application for review.','Credit applications remain pending review. This system cannot approve credit.'),
  'replace_card':('Record a demo lost-card, freeze, or replacement request.','No real card is changed. Do not enter a card number or PIN.'),
@@ -59,14 +69,16 @@ FIELD_EN = {'product':'Account type','applicant':'Demo applicant name','channel'
  'card_type':'Card type','linked_product':'Linked account','purpose':'Purpose','reviewed':'I have reviewed the requirements',
  'reason':'Reason','action':'Requested service','note':'Additional notes','transfer_type':'Transfer type',
  'recipient':'Demo recipient nickname','amount':'Demo amount (GBP)','opening_deposit':'Demo opening deposit (GBP, minimum 10)',
- 'city':'City','date':'Requested visit date','category':'Issue category','subject':'Subject','description':'Describe your request','issue':'Issue type'}
+ 'city':'City','date':'Requested visit date','category':'Issue category','subject':'Subject','description':'Describe your request','issue':'Issue type',
+ 'institution':'Institution (demo)','study_level':'Study level','funding_type':'Funding type'}
 OPTION_EN = {'student_account':'Student account · no monthly fee','everyday_account':'Everyday account · GBP 3 monthly fee',
  'online':'Online application','branch':'At a branch','debit_card':'Debit card','credit_card':'Credit card',
  'lost':'Lost card','stolen':'Stolen card','damaged':'Damaged card','freeze':'Record a demo freeze request',
  'replace':'Demo replacement · GBP 5','domestic':'Domestic transfer · free','international':'International transfer · GBP 8 demo fee',
  'Lancaster':'Lancaster','London':'London','Manchester':'Manchester','accounts':'Accounts','cards':'Cards',
  'payments':'Payments','savings':'Savings','loans':'Loans','digital':'Digital banking','other':'Other',
- 'login':'Sign-in problem','password':'Password recovery guidance','application':'Online application help'}
+ 'login':'Sign-in problem','password':'Password recovery guidance','application':'Online application help',
+ 'undergraduate':'Undergraduate','postgraduate':'Postgraduate','all':'All fictional programs','scholarship':'Scholarships','grants':'Student grants'}
 for _id,_service in SERVICES.items():
     _service['description_en'],_service['notice_en']=SERVICE_EN[_id]
     for _field in _service['fields']:

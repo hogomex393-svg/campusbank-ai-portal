@@ -1,0 +1,164 @@
+{
+  "date": "2026-10-21T01:15:29.694965+00:00",
+  "summary": {
+    "cases": 4,
+    "cases_passed": 4,
+    "api_calls": 4,
+    "max_output_tokens": 1600,
+    "provider": "deepseek",
+    "model": "deepseek-v4-pro"
+  },
+  "note": "Authored synthetic regression; length is not a quality score. No Qwen live comparison is claimed.",
+  "outputs": [
+    {
+      "case": "general_details",
+      "bank_mode": "general",
+      "input": "我想开日常账户，请详细解释费用、年龄要求、需要准备的材料，以及在线办理后如何查看进度。",
+      "answer": "我来为您详细说明开立日常账户的相关信息。\n\n## 日常账户要点\n\n**费用**\n- 月费为 **£3**，按月从账户扣除。\n\n**年龄要求**\n- 面向年满 **18 岁** 的成年人开放。若未满 18 岁，可考虑学生账户（无月费）。\n\n**所需材料**\n- **照片身份证件**（如护照、驾照等带照片的证件）；\n- **地址证明**（如近期水电账单、银行对账单等）。\n\n**在线办理后如何查看进度**\n- 在本门户提交的申请为「模拟申请」，不会真实开立账户或产生真实账户。\n- 提交后，您可以在「**我的请求（My requests）**」中查看这条请求的办理状态。\n- 进度仅在此门户内展示，不会有真正的银行通知或账户生效。如需了解真实开户状态，请通过网点或官方渠道确认。\n\n---\n\n如果您已准备好以上两项材料，我可以为您准备在线申请窗口。您需要我打开网上开户申请表吗？",
+      "answer_characters": 388,
+      "checks": {
+        "online": true,
+        "followups": true,
+        "substantive_length": true
+      },
+      "passed": true,
+      "followups": [
+        "开户需要哪些材料？",
+        "月费和最低存款要注意什么？",
+        "怎样在线办理并查看申请进度？"
+      ],
+      "actions": [
+        {
+          "service_id": "open_account",
+          "title": "在线开户申请",
+          "title_en": "Open an account",
+          "category": "accounts",
+          "description": "选择账户，核对材料，登记演示申请。",
+          "prefill": {
+            "product": "everyday_account",
+            "channel": "online"
+          }
+        }
+      ],
+      "source_ids": [
+        "PRODUCT_EVERYDAY"
+      ],
+      "api_calls": 1,
+      "usage": {
+        "prompt_tokens": 3986,
+        "completion_tokens": 218,
+        "total_tokens": 4204
+      },
+      "error": null,
+      "latency_ms": 3695
+    },
+    {
+      "case": "student_loan",
+      "bank_mode": "student",
+      "input": "请详细介绍演示助学贷款适合什么情况、需要哪些材料、利率和还款怎么确定，以及如何提交咨询。",
+      "answer": "以下是关于演示助学贷款的详细介绍，供你参考。请注意：这里展示的是 CampusBank 的模拟演示项目，并非真实的政府或学校资助政策，内容仅用于演示流程。\n\n## 适合什么情况\n\n- 面向年满 18 岁的**在读学生**，用于登记**学费或生活费**方面的贷款咨询意向。\n- 支持**本科**和**研究生**两个层次。\n- 重点在于「登记意向」——提交并不代表获批，金额、利率、还款计划都需要工作人员另行审核。\n\n## 需要哪些材料\n\n演示项目要求的材料为示意性材料，**无需上传真实证件或账户资料**：\n\n- 身份证明（演示）\n- 在读证明\n- 用途及预算说明\n\n在实际申请时，具体的身份证明和在读证明要求，请向你所在学校或机构核实。\n\n## 利率和还款怎么确定\n\n这一点很关键，也容易误解：\n\n- **金额**：按你登记的申请金额记录，最终条款待审核。\n- **利率**：是否计息、费率多少均**待审核**，既不默认免息，也不默认必定收息。\n- **还款**：本金按最终演示条款偿还；期限、费用同样待审核。\n- 也就是说，目前系统**不提供预设利率或保证审批结果**，一切以工作人员审核后的条款为准。\n\n## 如何提交咨询\n\n你可以通过本门户的教育贷款（education_loan）表单登记咨询意向，需要填写以下信息：\n\n- 申请人姓名\n- 就读院校\n- 学习层次（本科 / 研究生）\n- 申请金额\n- 用途说明\n- 确认已阅读条款\n\n我这边可以帮你直接打开登记窗口，你填写后提交即可（提交仅为模拟咨询记录，不代表获批）。\n\n如需我帮你打开该登记窗口，请告诉我，或直接说「帮忙打开教育贷款登记」。",
+      "answer_characters": 701,
+      "checks": {
+        "online": true,
+        "followups": true,
+        "substantive_length": true,
+        "student_sources": true,
+        "no_personal_loan_apr": true
+      },
+      "passed": true,
+      "followups": [
+        "助学贷款需要准备哪些材料？",
+        "贷款还款和利率要怎么确认？",
+        "贷款和奖学金补助有什么区别？"
+      ],
+      "actions": [
+        {
+          "service_id": "education_loan",
+          "title": "助学贷款咨询与申请",
+          "title_en": "Student loan enquiry",
+          "category": "education",
+          "description": "登记学费或生活费贷款的演示需求，交给工作人员跟进。"
+        }
+      ],
+      "source_ids": [
+        "DEMO_EDUCATION_LOAN"
+      ],
+      "api_calls": 1,
+      "usage": {
+        "prompt_tokens": 4196,
+        "completion_tokens": 386,
+        "total_tokens": 4582
+      },
+      "error": null,
+      "latency_ms": 5434
+    },
+    {
+      "case": "scholarship_grants",
+      "bank_mode": "student",
+      "input": "Please compare scholarships and student grants in this demo, including eligibility, documents and practical next steps.",
+      "answer": "Here's how scholarships and student grants compare in this fictional demo directory.\n\n**Eligibility (study level)**\n\n| | Scholarship | Student grants |\n|---|---|---|\n| Undergraduate | ✅ | ✅ |\n| Postgraduate | ✅ | ✅ |\n\nBoth categories are open to undergraduate and postgraduate students in the demo. The scholarship (\"Academic development scholarship\") is framed around academic progress, while grants relate to financial need or living/study costs.\n\n**Documents needed**\n\n- **Scholarship (demo):** example status as a student, an academic summary, and a study plan.\n- **Grants (demo):** example status as a student, a budget/summary of needs, and a description of what support is requested. For the emergency variant, only a brief situation summary is needed — no sensitive evidence files.\n\n**Amounts (fictional references)**\n\n| Program | Reference amount |\n|---|---|\n| Academic development scholarship | £500–£1,500, one-off |\n| Study and living-cost grant | up to £800 (eligibility checked separately) |\n| Emergency student support | up to £300 (no real commitment) |\n\n**Practical next steps**\n\n1. Check all figures and requirements with your own university's official financial-aid office — these are demo records only and do not represent real places, rates, or funding commitments.\n2. Prepare the relevant documents for the category you want: study plan/academic summary (scholarship) or budget and support-needs summary (grant).\n3. Ask for a funding enquiry through the portal to record a demo request.\n\nImportant to note: none of these represent actual aid, guarantee funding, or involve real disbursement. For a real situation — especially the emergency support — contact your institution's official student-support service directly.\n\nWould you like me to open a funding enquiry form so you can record a demo request (scholarship, grants, or all programs)?",
+      "answer_characters": 1864,
+      "checks": {
+        "online": true,
+        "followups": true,
+        "substantive_length": true,
+        "awards_sources": true
+      },
+      "passed": true,
+      "followups": [
+        "Should I compare scholarships or need-based grants first?",
+        "Can I filter programs by undergraduate or postgraduate level?",
+        "What documents do these programs need?"
+      ],
+      "actions": [
+        {
+          "service_id": "funding_enquiry",
+          "title": "奖学金与补助查询",
+          "title_en": "Scholarship and grant enquiry",
+          "category": "education",
+          "description": "筛选演示项目，查看材料说明，并向工作人员提交咨询。"
+        }
+      ],
+      "source_ids": [
+        "DEMO_MERIT_SCHOLARSHIP",
+        "DEMO_NEED_GRANT",
+        "DEMO_EMERGENCY_GRANT"
+      ],
+      "api_calls": 1,
+      "usage": {
+        "prompt_tokens": 4503,
+        "completion_tokens": 384,
+        "total_tokens": 4887
+      },
+      "error": null,
+      "latency_ms": 4921
+    },
+    {
+      "case": "purpose_guidance",
+      "bank_mode": "general",
+      "input": "我想办张银行卡，但用途还不太确定，你能帮我了解一下吗？",
+      "answer": "我可以帮您了解。CampusBank 的银行卡主要分两种，用途差别挺大的：\n\n- **借记卡（Debit card）**：直接关联您的账户，花的是账户里已有的钱，日常取现、消费、网购都很方便，适合当主力卡用。\n- **信用卡（Credit card）**：银行给的消费额度，先消费后还款。适合建立信用记录、应急或分期，但要注意按时还款，否则会产生费用和利息。\n\n简单说一下，如果您主要想收日常开销、生活费，借记卡就够用；如果想积累信用或有临时周转需求，可以考虑信用卡。\n\n请问您办卡主要是为了收工资/生活费、日常消费，还是要建立信用记录、方便分期付款？我根据您的用途再帮您对号入座。",
+      "answer_characters": 291,
+      "checks": {
+        "online": true,
+        "followups": true
+      },
+      "passed": true,
+      "followups": [
+        "主要用于日常消费，应该怎么选？",
+        "学生用于学费和生活费，应该怎么选？",
+        "借记卡和信用卡有什么区别？"
+      ],
+      "actions": [],
+      "source_ids": [],
+      "api_calls": 1,
+      "usage": {
+        "prompt_tokens": 3867,
+        "completion_tokens": 162,
+        "total_tokens": 4029
+      },
+      "error": null,
+      "latency_ms": 3264
+    }
+  ]
+}

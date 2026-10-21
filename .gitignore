@@ -2,6 +2,7 @@
 .env.*
 !.env.example
 !.env.cloud.example
+!.env.qwen.example
 .venv/
 __pycache__/
 *.py[cod]

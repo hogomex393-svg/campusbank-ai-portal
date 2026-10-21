@@ -27,4 +27,5 @@ def reply_details(reply, user_text, previous_language="en"):
         "tool_calls": [{"name": t.get("name", ""), "arguments": t.get("arguments", {})} for t in getattr(reply, "tools", [])],
         "latency_ms": getattr(reply, "latency_ms", 0), "api_calls": getattr(reply, "api_calls", 0),
         "usage": getattr(reply, "usage", {}), "error": getattr(reply, "error", None),
-        "language_corrections": getattr(reply, "language_corrections", 0)}
+        "language_corrections": getattr(reply, "language_corrections", 0),
+        "followups":getattr(reply,'followups',[])}

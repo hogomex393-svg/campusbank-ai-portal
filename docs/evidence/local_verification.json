@@ -1,10 +1,10 @@
 {
-  "observed_date": "2026-10-20",
+  "observed_date": "2026-10-21",
   "source": "curated public repository snapshot, separate from the private running project",
   "python": "3.13.3",
   "python_suite": {
     "command": "python -m unittest discover -v",
-    "tests_run": 93,
+    "tests_run": 102,
     "passed": true
   },
   "frontend": {
@@ -15,5 +15,5 @@
   },
   "private_config_published": false,
   "live_accounts_or_chat_database_published": false,
-  "note": "Version 2.3.0: synthetic regression checks. See evaluation.md and group-review-fixes.md for scope and limits."
+  "note": "Version 2.4.0 dual-mode, staff-session and application-workbench checks; see dual-banking-and-workbench.md."
 }

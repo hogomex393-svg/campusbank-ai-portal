@@ -420,6 +420,51 @@ a {
   margin: auto;
   padding-bottom: 20px;
 }
+.bank-mode-switch { display: flex; gap: 4px; margin: 0 16px; padding: 4px; border-radius: 12px; background: #e5ebe6; flex-shrink: 0; }
+.bank-mode-switch button { flex: 1; padding: 9px 5px; border: 0; border-radius: 9px; background: transparent; font-size: 12px; color: #62766a; }
+.bank-mode-switch button.active { background: #fff; color: var(--accent); box-shadow: 0 1px 5px #143d1810; font-weight: 650; }
+.bank-mode-hint { padding: 0 21px; margin: 8px 0 12px; color: #728176; font-size: 10px; flex-shrink: 0; }
+body[data-bank-mode="student"] { --accent: #216d86; }
+.followup-suggestions { margin: 15px 0 7px; display: flex; flex-wrap: wrap; gap: 7px; }
+.followup-heading { width: 100%; color: #718476; font-size: 11px !important; margin: 0 0 2px !important; }
+.answer-note { margin: 14px 0; padding: 11px 14px; border-left: 3px solid #9dbfa9; background: #f3f7f2; border-radius: 0 9px 9px 0; color: #556b5d; font-size: 13px; line-height: 1.8; }
+.followup-chip { padding: 9px 13px; border: 1px solid #d9e6dd; background: #f4f8f4; border-radius: 18px; color: #36634b; font-size: 12px; text-align: left; line-height: 1.5; }
+.followup-chip:hover { border-color: var(--accent); background: #ecf4ee; }
+.staff-test-entry { padding: 12px; border: 1px solid #d6e5dc; border-radius: 12px; background: #f4f9f5; margin-bottom: 15px; }
+.staff-test-entry p { font-size: 12px; line-height: 1.6; margin: 0 0 8px; color: #586f60; }
+.testing-banner { padding: 11px 14px; border-radius: 10px; background: #fff8e8; color: #806329; font-size: 12px; }
+.staff-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--line); padding-bottom: 9px; margin: 18px 0; }
+.staff-tab { padding: 10px 15px; border: 1px solid var(--line); background: #fff; border-radius: 10px; }
+.staff-tab.active { color: #fff; background: var(--accent); border-color: var(--accent); }
+.business-filters { display: flex; gap: 9px; flex-wrap: wrap; align-items: center; margin: 15px 0; }
+.business-filters select { width: auto; min-width: 145px; }
+.business-layout { display: grid; grid-template-columns: minmax(210px,280px) minmax(0,1fr); gap: 18px; }
+.business-request-list { max-height: 75vh; overflow-y: auto; }
+.business-request-item { width: 100%; display: grid; gap: 7px; text-align: left; padding: 14px; margin-bottom: 9px; border: 1px solid var(--line); background: #fff; border-radius: 12px; }
+.business-request-item.active { border-color: var(--accent); background: #f0f7f2; }
+.business-request-item span { font-size: 12px; color: #617668; }
+.business-request-item small { color: #819085; font-size: 10px; overflow-wrap: anywhere; }
+.business-request-detail { min-width: 0; background: #fff; border: 1px solid var(--line); border-radius: 15px; padding: 20px; }
+.business-request-detail h2 { margin-top: 0; font-size: 22px; }
+.request-form-table { border-collapse: collapse; width: 100%; margin: 17px 0; font-size: 13px; line-height: 1.6; }
+.request-form-table th,.request-form-table td { text-align: left; vertical-align: top; border-bottom: 1px solid #e6ede7; padding: 12px 10px; overflow-wrap: anywhere; }
+.request-form-table th { width: 35%; color: #5f7567; font-weight: 550; background: #f7f9f6; }
+.business-review-note { width: 100%; min-height: 100px; margin-top: 12px; padding: 12px; resize: vertical; }
+.business-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.staff-review-note { padding: 12px 15px; background: #f0f7f2; border-radius: 9px; font-size: 13px; line-height: 1.7; }
+.request-review-history { margin-top: 15px; line-height: 1.7; }
+.funding-directory { margin: 15px 0; }
+.funding-directory h3 { font-size: 17px; }
+.funding-program { border: 1px solid #dce7df; border-radius: 12px; padding: 13px 15px; margin: 10px 0; background: #f6faf6; }
+.funding-program p { font-size: 12px; line-height: 1.7; margin: 8px 0; }
+.funding-amount { color: #28664b; font-weight: 600; }
+@media(max-width:720px) {
+ .business-layout { grid-template-columns: 1fr; }
+ .business-request-list { display: flex; overflow-x: auto; max-height: 160px; gap: 10px; }
+ .business-request-item { min-width: 210px; margin-bottom: 4px; }
+ .business-request-detail { padding: 15px; }
+ .staff-tab { font-size: 12px; padding: 9px; }
+}
 .message-body { min-width: 0; }
 .answer-table-wrap {
   width: 100%; max-width: 100%; overflow-x: auto; margin: 18px 0 8px;

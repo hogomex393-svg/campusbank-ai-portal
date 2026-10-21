@@ -23,8 +23,11 @@ class DeepSeekClient:
         parsed = urlparse(settings.base_url)
         if parsed.scheme != "https" and parsed.hostname not in ("localhost", "127.0.0.1"):
             raise APIError("invalid_url", "The API base URL must use HTTPS.")
-        payload = {"model": settings.model, "messages": messages, "max_tokens": settings.max_tokens,
-                   "stream": False, "thinking": {"type": "disabled"}}
+        wire_messages=messages if settings.provider=='deepseek' else [{k:v for k,v in m.items() if k!='reasoning_content'} for m in messages]
+        payload = {"model": settings.model, "messages": wire_messages, "max_tokens": settings.max_tokens,
+                   "stream": False}
+        if settings.provider=='deepseek':payload['thinking']={'type':'disabled'}
+        elif settings.provider=='qwen':payload['enable_thinking']=False
         if tools:
             payload["tools"] = tools
         req = Request(settings.base_url.rstrip("/") + "/chat/completions",

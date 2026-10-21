@@ -4,6 +4,7 @@ from .dialogue import PRODUCT_ALIASES
 from .language import canonical_city
 from .catalog import SERVICES, service_action
 from .forms import clean_prefill
+from .student_finance import search_funding
 
 
 def schema(name, description, field):
@@ -25,6 +26,7 @@ window_schema['function']['parameters']['properties']['prefill'] = {
     'properties':{f['name']:{'type':['string','number','boolean']} for s in SERVICES.values() for f in s['fields']},
     'additionalProperties':False}
 TOOL_SCHEMAS.append(window_schema)
+TOOL_SCHEMAS.append(schema('search_student_funding','Look up fictional student loans, scholarships and grants. These are demo records, never real university or government policy. Return eligibility guidance, documents and next steps.','query'))
 
 
 class Tools:
@@ -34,7 +36,7 @@ class Tools:
         self.threshold = threshold
 
     def execute(self, name: str, arguments: str | dict) -> dict:
-        required = {"search_bank_faq": "query", "get_product_info": "product_name", "find_branch": "city", "open_service_window":"service_id"}
+        required = {"search_bank_faq": "query", "get_product_info": "product_name", "find_branch": "city", "open_service_window":"service_id",'search_student_funding':'query'}
         if not isinstance(name, str) or name not in required:
             return {"error": "unknown_tool", "message": "This tool is not available."}
         try:
@@ -46,6 +48,9 @@ class Tools:
         if not isinstance(args, dict) or set(args)-allowed or field not in args or not isinstance(args.get(field), str) or not args[field].strip() or len(args[field]) > 2000:
             return {"error": "invalid_arguments", "message": f"Supply only a non-empty string field named {field}."}
         value = args[field].strip()
+        if name=='search_student_funding':
+            records=search_funding(value)
+            return {'records':records,'source_ids':[r['id'] for r in records],'found':bool(records),'fictional':True}
         if name == "open_service_window":
             action=service_action(value)
             if action:

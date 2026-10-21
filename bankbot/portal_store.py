@@ -26,8 +26,9 @@ def digest(token):return hashlib.sha256(token.encode()).hexdigest()
 
 
 class PortalStore:
-    def __init__(self,path,bootstrap_code=''):
+    def __init__(self,path,bootstrap_code='',open_staff_testing=False):
         self.bootstrap_code=bootstrap_code
+        self.open_staff_testing=open_staff_testing
         self.path=Path(path);self.path.parent.mkdir(parents=True,exist_ok=True)
         with self.db() as c:
             c.execute('PRAGMA journal_mode=WAL')
@@ -46,6 +47,8 @@ class PortalStore:
                 chat_id TEXT, payload TEXT NOT NULL, status TEXT NOT NULL, created_at TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS request_submissions(owner TEXT NOT NULL, request_key TEXT NOT NULL,
                 fingerprint TEXT NOT NULL, result TEXT NOT NULL, PRIMARY KEY(owner,request_key));
+            CREATE TABLE IF NOT EXISTS request_events(id INTEGER PRIMARY KEY AUTOINCREMENT,request_id TEXT NOT NULL,
+                actor TEXT NOT NULL,status TEXT NOT NULL,note TEXT NOT NULL,created_at TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS tickets(id TEXT PRIMARY KEY, owner TEXT NOT NULL, chat_id TEXT,
                 subject TEXT NOT NULL, description TEXT NOT NULL, category TEXT NOT NULL,
                 status TEXT NOT NULL, assigned_to TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
@@ -58,6 +61,11 @@ class PortalStore:
                 c.execute('ALTER TABLE users ADD COLUMN is_staff INTEGER NOT NULL DEFAULT 0')
             if 'portal_role' not in {r['name'] for r in c.execute('PRAGMA table_info(sessions)')}:
                 c.execute("ALTER TABLE sessions ADD COLUMN portal_role TEXT NOT NULL DEFAULT 'customer'")
+            if 'test_staff' not in {r['name'] for r in c.execute('PRAGMA table_info(sessions)')}:
+                c.execute('ALTER TABLE sessions ADD COLUMN test_staff INTEGER NOT NULL DEFAULT 0')
+            columns={r['name'] for r in c.execute('PRAGMA table_info(requests)')}
+            for name,default in [('bank_mode','general'),('staff_note','')]:
+                if name not in columns:c.execute(f"ALTER TABLE requests ADD COLUMN {name} TEXT NOT NULL DEFAULT '{default}'")
 
     @contextmanager
     def db(self):
@@ -66,10 +74,10 @@ class PortalStore:
         except Exception:c.rollback();raise
         finally:c.close()
 
-    def new_session(self,user=None,portal_role='customer'):
+    def new_session(self,user=None,portal_role='customer',test_staff=False):
         token=secrets.token_urlsafe(32);csrf=secrets.token_urlsafe(32)
         owner='u:'+user['id'] if user else 'g:'+ident()
-        with self.db() as c:c.execute('INSERT INTO sessions(token_hash,owner,user_id,csrf,expires,portal_role) VALUES(?,?,?,?,?,?)',(digest(token),owner,user['id'] if user else None,csrf,time.time()+604800,portal_role))
+        with self.db() as c:c.execute('INSERT INTO sessions(token_hash,owner,user_id,csrf,expires,portal_role,test_staff) VALUES(?,?,?,?,?,?,?)',(digest(token),owner,user['id'] if user else None,csrf,time.time()+604800,portal_role,int(test_staff)))
         return token,{'owner':owner,'user':user,'csrf':csrf,'portal_role':portal_role}
 
     def session(self,token):
@@ -77,14 +85,17 @@ class PortalStore:
         with self.db() as c:
             row=c.execute('SELECT * FROM sessions WHERE token_hash=? AND expires>?',(digest(token),time.time())).fetchone()
             if not row:return None
+            if row['test_staff'] and not self.open_staff_testing:return None
             user=c.execute('SELECT id,username,display_name,is_admin,is_staff FROM users WHERE id=?',(row['user_id'],)).fetchone() if row['user_id'] else None
-        return {'owner':row['owner'],'user':dict(user) if user else None,'csrf':row['csrf'],'portal_role':row['portal_role']}
+        user=dict(user) if user else None
+        if user and row['test_staff']:user['is_staff']=1
+        return {'owner':row['owner'],'user':user,'csrf':row['csrf'],'portal_role':row['portal_role'],'testing_staff':bool(row['test_staff'])}
 
     def revoke(self,token):
         if token:
             with self.db() as c:c.execute('DELETE FROM sessions WHERE token_hash=?',(digest(token),))
 
-    def register(self,username,password,display_name,portal_role='customer',invite_code=''):
+    def register(self,username,password,display_name,portal_role='customer',invite_code='',allow_first_admin=True):
         username=username.casefold();salt=secrets.token_hex(16)
         hashed=hashlib.pbkdf2_hmac('sha256',password.encode(),bytes.fromhex(salt),600000).hex()
         id_=ident()
@@ -93,7 +104,7 @@ class PortalStore:
             staff=portal_role=='staff'
             if self.bootstrap_code:
                 admin=staff and not bool(c.execute('SELECT 1 FROM users WHERE is_admin=1 LIMIT 1').fetchone()) and secrets.compare_digest(invite_code.encode(),self.bootstrap_code.encode())
-            else:admin=not bool(c.execute('SELECT 1 FROM users LIMIT 1').fetchone())
+            else:admin=allow_first_admin and not bool(c.execute('SELECT 1 FROM users LIMIT 1').fetchone())
             if staff and not admin:self._consume_invite(c,invite_code,id_)
             try:c.execute('INSERT INTO users(id,username,display_name,password_hash,salt,is_admin,created_at,is_staff) VALUES(?,?,?,?,?,?,?,?)',(id_,username,display_name,hashed,salt,int(admin),now(),int(staff)))
             except sqlite3.IntegrityError:raise PortalError(409,'该用户名已被使用。') from None
@@ -148,9 +159,10 @@ class PortalStore:
         if not guest.startswith('g:'):return
         with self.db() as c:c.execute('UPDATE chats SET owner=? WHERE owner=?',(owner,guest))
 
-    def create_chat(self,owner,title='新对话'):
+    def create_chat(self,owner,title='新对话',bank_mode='general'):
         id_=ident();stamp=now()
-        with self.db() as c:c.execute('INSERT INTO chats VALUES(?,?,?,?,?,?)',(id_,owner,title,json.dumps(asdict(coerce_state())),stamp,stamp))
+        state=coerce_state();state.bank_mode=bank_mode
+        with self.db() as c:c.execute('INSERT INTO chats VALUES(?,?,?,?,?,?)',(id_,owner,title,json.dumps(asdict(state)),stamp,stamp))
         return self.chat(owner,id_)
 
     def chat(self,owner,id_):
@@ -219,7 +231,7 @@ class PortalStore:
             clean[f['name']]=value
         return clean
 
-    def submit(self,owner,service_id,payload,chat_id=None,request_id=None):
+    def submit(self,owner,service_id,payload,chat_id=None,request_id=None,bank_mode='general'):
         if not owner.startswith('u:'):raise PortalError(401,'请登录后保存办理请求。')
         if chat_id:self.chat(owner,chat_id)
         fingerprint=hashlib.sha256(json.dumps([service_id,payload,chat_id],sort_keys=True,ensure_ascii=False).encode()).hexdigest()
@@ -235,7 +247,8 @@ class PortalStore:
             clean=self.validate_form(service_id,payload)
             if service_id=='human_support' and chat_id and c.execute("SELECT 1 FROM tickets WHERE chat_id=? AND status IN ('waiting','active')",(chat_id,)).fetchone():
                 raise PortalError(409,'当前对话已有人工客服工单，请返回对话继续补充问题。')
-            c.execute('INSERT INTO requests VALUES(?,?,?,?,?,?,?)',(id_,owner,service_id,chat_id,json.dumps(clean,ensure_ascii=False),'pending',stamp))
+            mode='student' if service_id in ('education_loan','funding_enquiry') else coerce_state(self.chat(owner,chat_id)['state']).bank_mode if chat_id else bank_mode
+            c.execute('INSERT INTO requests(id,owner,service_id,chat_id,payload,status,created_at,bank_mode) VALUES(?,?,?,?,?,?,?,?)',(id_,owner,service_id,chat_id,json.dumps(clean,ensure_ascii=False),'pending',stamp,mode))
             if service_id=='human_support':
                 c.execute('INSERT INTO tickets VALUES(?,?,?,?,?,?,?,?,?,?)',(id_,owner,chat_id,clean['subject'],clean['description'],clean['category'],'waiting',None,stamp,stamp))
             result={'id':id_,'service_id':service_id,'title':SERVICES[service_id]['title'],'status':'pending','created_at':stamp,'payload':clean,'demo':True}
@@ -252,6 +265,31 @@ class PortalStore:
         with self.db() as c:rows=[dict(r) for r in c.execute('SELECT * FROM requests WHERE owner=? ORDER BY created_at DESC',(owner,))]
         for r in rows:r['payload']=json.loads(r['payload']);r['title']=SERVICES[r['service_id']]['title']
         return rows
+
+    def business_requests(self):
+        with self.db() as c:
+            rows=[dict(r) for r in c.execute("SELECT r.*,u.display_name AS customer_name FROM requests r LEFT JOIN users u ON r.owner='u:'||u.id WHERE r.service_id!='human_support' ORDER BY r.created_at DESC")]
+        for row in rows:
+            row['payload']=json.loads(row['payload']);row['title']=SERVICES[row['service_id']]['title']
+        return rows
+
+    def business_request(self,id_):
+        row=next((r for r in self.business_requests() if r['id']==id_),None)
+        if not row:raise PortalError(404,'业务申请不存在。')
+        with self.db() as c:row['events']=[dict(r) for r in c.execute('SELECT actor,status,note,created_at FROM request_events WHERE request_id=? ORDER BY id',(id_,))]
+        return row
+
+    def review_request(self,id_,user,status,note):
+        if status not in ('processing','completed','needs_info'):raise PortalError(400,'请选择有效的业务处理状态。')
+        if not isinstance(note,str) or len(note)>2000:raise PortalError(400,'处理备注最长2000字。')
+        if status=='needs_info' and not note.strip():raise PortalError(400,'请说明需要客户补充哪些材料。')
+        with self.db() as c:
+            c.execute('BEGIN IMMEDIATE')
+            row=c.execute("SELECT * FROM requests WHERE id=? AND service_id!='human_support'",(id_,)).fetchone()
+            if not row:raise PortalError(404,'业务申请不存在。')
+            c.execute('UPDATE requests SET status=?,staff_note=? WHERE id=?',(status,note.strip(),id_))
+            c.execute('INSERT INTO request_events(request_id,actor,status,note,created_at) VALUES(?,?,?,?,?)',(id_,user['display_name'],status,note.strip(),now()))
+        return self.business_request(id_)
 
     def tickets(self,owner=None):
         query='''SELECT t.*,u.display_name AS customer_name,u.username AS customer_username,

@@ -14,6 +14,11 @@
           <span class="brand-mark">C</span
           ><span>CampusBank<small>你的银行服务助手</small></span>
         </button>
+        <div class="bank-mode-switch" role="group" aria-label="银行模式">
+          <button id="generalBankMode" type="button">社会银行</button>
+          <button id="studentBankMode" type="button">学生银行</button>
+        </div>
+        <p id="bankModeHint" class="bank-mode-hint">日常生活与个人金融服务</p>
         <button class="new-chat" id="newChat">
           <span class="icon" data-icon="plus"></span><span>新建对话</span
           ><kbd>＋</kbd>
@@ -145,6 +150,10 @@
       <div class="auth-tabs">
         <button type="button" id="loginTab" class="active">登录</button
         ><button type="button" id="registerTab">注册</button>
+      </div>
+      <div id="staffTestEntry" class="staff-test-entry" hidden>
+        <p id="staffTestNotice">测试期间可免邀请码进入客服端，不具备管理员权限。</p>
+        <button id="staffTestLogin" type="button" class="secondary-button full">一键进入测试客服</button>
       </div>
       <form id="authForm">
         <label id="groupTestCodeField" hidden

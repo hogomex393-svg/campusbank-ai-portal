@@ -38,8 +38,8 @@ class PortalTests(unittest.TestCase):
 
     def test_bootstrap_and_static_assets(self):
         b=self.bootstrap(self.client)
-        self.assertEqual(len(b['categories']),6)
-        self.assertEqual(len(b['services']),9)
+        self.assertEqual(len(b['categories']),7)
+        self.assertEqual(len(b['services']),11)
         self.assertEqual(self.client.get('/').status_code,200)
         self.assertEqual(self.client.get('/assets/app.js').status_code,200)
 
@@ -99,7 +99,7 @@ class PortalTests(unittest.TestCase):
         self.assertEqual(r.status_code,200);self.assertTrue(r.json()['demo'])
         self.assertEqual(len(self.client.get('/api/requests').json()),1)
 
-    def test_all_nine_service_forms_can_submit_demo_records(self):
+    def test_all_catalog_service_forms_can_submit_demo_records(self):
         self.register(self.client)
         from bankbot.catalog import SERVICES
         for id_,service in SERVICES.items():
@@ -108,7 +108,7 @@ class PortalTests(unittest.TestCase):
                 payload[f['name']]=True if f['type']=='checkbox' else f['options'][0]['value'] if f['type']=='select' else '100.00' if f['type']=='number' else '2026-12-01' if f['type']=='date' else '演示填写内容'
             r=self.client.post('/api/requests',json={'service_id':id_,'payload':payload,'confirmed':True})
             self.assertEqual(r.status_code,200,(id_,r.text))
-        self.assertEqual(len(self.client.get('/api/requests').json()),9)
+        self.assertEqual(len(self.client.get('/api/requests').json()),11)
 
     def test_human_queue_and_actual_staff_reply(self):
         admin=self.register(self.client,'staff','演示工作人员',role='staff')

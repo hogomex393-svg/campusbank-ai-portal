@@ -23,10 +23,12 @@ class Settings:
     api_key: str = field(default="", repr=False)
     base_url: str = "https://api.deepseek.com"
     model: str = "deepseek-flash"
-    timeout_seconds: float = 25
+    timeout_seconds: float = 45
     max_tool_rounds: int = 3
     history_turns: int = 6
-    max_tokens: int = 500
+    max_tokens: int = 1600
+    provider: str = 'deepseek'
+    open_staff_testing: bool = False
     retrieval_threshold: float = 0.18
     data_dir: Path = ROOT / "data"
     database_path: Path | None = None
@@ -52,6 +54,11 @@ class Settings:
         cloud=deployment=='cloud'
         bootstrap=val('BANKBOT_BOOTSTRAP_CODE','')
         access=val('BANKBOT_TEST_ACCESS_CODE','')
+        provider=val('LLM_PROVIDER','deepseek').lower()
+        if provider not in ('deepseek','qwen','openai_compatible'):raise ValueError('Unsupported LLM_PROVIDER.')
+        fallback_key=val('DEEPSEEK_API_KEY','') if provider=='deepseek' else val('DASHSCOPE_API_KEY','') if provider=='qwen' else ''
+        fallback_base=val('DEEPSEEK_BASE_URL','https://api.deepseek.com') if provider=='deepseek' else val('DASHSCOPE_BASE_URL','https://dashscope.aliyuncs.com/compatible-mode/v1') if provider=='qwen' else ''
+        fallback_model=val('DEEPSEEK_MODEL','deepseek-v4-pro') if provider=='deepseek' else 'qwen3.7-plus' if provider=='qwen' else ''
         if cloud:
             if not database or not Path(database).is_absolute():
                 raise ValueError('Cloud mode requires an absolute BANKBOT_DB_PATH on a persistent volume.')
@@ -62,10 +69,12 @@ class Settings:
                 if parsed.scheme!='https' or not parsed.hostname or parsed.username or parsed.password or parsed.path or parsed.query or parsed.fragment:
                     raise ValueError('BANKBOT_PUBLIC_URL must be a bare HTTPS origin, without a path or credentials.')
         return cls(
-            api_key=val("DEEPSEEK_API_KEY", ""),
-            base_url=val("DEEPSEEK_BASE_URL", "https://api.deepseek.com").rstrip("/"),
-            model=val("DEEPSEEK_MODEL", "deepseek-flash"),
-            timeout_seconds=max(1, min(float(val("BANKBOT_TIMEOUT_SECONDS", "25")), 120)),
+            api_key=val('LLM_API_KEY',fallback_key),
+            base_url=val('LLM_BASE_URL',fallback_base).rstrip("/"),
+            model=val('LLM_MODEL',fallback_model),
+            provider=provider,max_tokens=max(300,min(int(val('LLM_MAX_TOKENS','1600')),6000)),
+            open_staff_testing=val('BANKBOT_OPEN_STAFF_TESTING','false').lower() in ('true','1','yes'),
+            timeout_seconds=max(1, min(float(val("BANKBOT_TIMEOUT_SECONDS", "45")), 120)),
             max_tool_rounds=max(1, min(int(val("BANKBOT_MAX_TOOL_ROUNDS", "3")), 5)),
             history_turns=max(1, min(int(val("BANKBOT_HISTORY_TURNS", "6")), 20)),
             database_path=Path(database) if database else None,

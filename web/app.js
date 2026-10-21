@@ -7,6 +7,8 @@ const S = {
   view: "chat",
   busy: false,
   mode: "agent",
+  bankMode: localStorage.getItem("campusbank_bank_mode") || "general",
+  staffTab: "tickets",
   debug: false,
   lang: localStorage.getItem("campusbank_language") || "zh",
   afterLogin: null,
@@ -170,6 +172,7 @@ function statusText(value) {
       pending: t("待审核", "Pending"),
       processing: t("处理中", "Processing"),
       completed: t("已完成", "Completed"),
+      needs_info: t("待补充材料", "More information needed"),
       waiting: t("等待接单", "Waiting"),
       active: t("客服处理中", "Active"),
       resolved: t("已结束", "Resolved"),
@@ -262,6 +265,8 @@ function markdown(text) {
       list = null;
       continue;
     }
+    const quote=line.match(/^\s*>\s?(.*)$/);
+    if(quote){list=null;const note=el('blockquote','answer-note');note.innerHTML=inline(quote[1]);root.append(note);continue;}
     const item = line.match(/^\s*(?:[-*]|\d+\.)\s+(.*)$/);
     if (item) {
       const ordered = /^\s*\d+\./.test(line);
@@ -287,6 +292,23 @@ function markdown(text) {
 }
 function servicesFor(category) {
   return S.boot.services.filter((s) => s.category === category);
+}
+function updateBankModeUI() {
+  const student=S.bankMode==='student';
+  $("generalBankMode").textContent=t("社会银行","General banking");
+  $("studentBankMode").textContent=t("学生银行","Student banking");
+  $("generalBankMode").classList.toggle("active",!student);
+  $("studentBankMode").classList.toggle("active",student);
+  $("generalBankMode").setAttribute("aria-pressed",String(!student));
+  $("studentBankMode").setAttribute("aria-pressed",String(student));
+  $("bankModeHint").textContent=student?t("账户、学费与学习生活支持","Accounts, tuition and student support"):t("日常生活与个人金融服务","Everyday and personal finance");
+  document.body.dataset.bankMode=S.bankMode;
+  localStorage.setItem("campusbank_bank_mode",S.bankMode);
+}
+async function switchBankMode(mode) {
+  if (S.busy || S.bankMode===mode) return;
+  S.bankMode=mode;updateBankModeUI();renderSidebar();
+  await newChat();
 }
 function serviceBy(id) {
   return S.boot.services.find((s) => s.id === id);
@@ -317,6 +339,7 @@ function renderSidebar() {
   const nav = $("businessNav");
   nav.replaceChildren();
   for (const c of S.boot.categories) {
+    if (c.modes && !c.modes.includes(S.bankMode)) continue;
     const b = button("", "", () => showServices(c.id));
     b.append(icon(c.icon), document.createTextNode(t(c.name, c.en)));
     nav.append(b);
@@ -403,6 +426,7 @@ async function selectChat(id) {
   if (S.busy) return;
   try {
     S.current = await api("/api/chats/" + id);
+    S.bankMode=S.current.bank_mode || 'general';updateBankModeUI();renderSidebar();
     setChatUrl(id);
     showChat();
   } catch (e) {
@@ -413,7 +437,7 @@ async function newChat() {
   if (S.busy) return;
   busy(true);
   try {
-    S.current = await api("/api/chats", "POST");
+    S.current = await api("/api/chats", "POST", {bank_mode:S.bankMode});
     setChatUrl(S.current.id);
     await refreshHistory();
     showChat();
@@ -426,7 +450,7 @@ async function newChat() {
 }
 async function ensureChat() {
   if (!S.current) {
-    S.current = await api("/api/chats", "POST");
+    S.current = await api("/api/chats", "POST", {bank_mode:S.bankMode});
     setChatUrl(S.current.id);
     await refreshHistory();
   }
@@ -468,7 +492,7 @@ function renderWelcome() {
     el(
       "div",
       "greeting",
-      t("你好，让办理变得更简单", "Hello, let’s make banking simpler"),
+      S.bankMode==='student'?t("从账户到学费，一起规划学生生活","From accounts to tuition: plan student life"):t("你好，让办理变得更简单", "Hello, let’s make banking simpler"),
     ),
     el("h1", "", t("今天有什么可以帮你？", "How can I help you today?")),
     el(
@@ -481,8 +505,15 @@ function renderWelcome() {
     ),
   );
   const suggestions = el("div", "suggestions");
-  const items = [
-    ["wallet", "我要开学生账户", "Open a student account", "open_account"],
+  const items = S.bankMode==='student' ? [
+    ["wallet","我要开学生账户","Open a student account","open_account"],
+    ["loan","助学贷款需要什么条件？","What are the student loan requirements?","education_loan"],
+    ["savings","查询奖学金项目","Find scholarship programs","funding_enquiry"],
+    ["support","学费和生活费有哪些补助？","What grants support tuition and living costs?","funding_enquiry"],
+    ["transfer","国际转账费用是多少？","What are international transfer fees?","transfer_demo"],
+    ["location","预约网点咨询学生业务","Book a student banking visit","branch_appointment"],
+  ] : [
+    ["wallet", "我想开日常账户", "Open an everyday account", "open_account"],
     ["card", "银行卡丢了怎么办", "Help with a lost card", "replace_card"],
     ["transfer", "了解网上转账费用", "Online transfer fees", "transfer_demo"],
     ["savings", "看看储蓄账户", "Explore savings", "open_savings"],
@@ -553,6 +584,16 @@ function renderMessage(m) {
       actions.append(b);
     }
     if (actions.childNodes.length) body.append(actions);
+    const latest=S.current?.messages?.filter(x=>x.role==='assistant').at(-1);
+    if (meta.followups?.length && latest===m && !S.current?.ticket) {
+      const suggestions=el("div","followup-suggestions");
+      suggestions.append(el("p","followup-heading",meta.response_language==='en'?"You may also want to ask":"你可能还想了解"));
+      for (const question of meta.followups.slice(0,3)) {
+        const chip=button(question,"followup-chip",()=>{ if(S.busy)return; $("messageInput").value=question; sendMessage(); });
+        chip.disabled=S.busy;suggestions.append(chip);
+      }
+      body.append(suggestions);
+    }
     const foot = el("div", "message-meta");
     if (meta.sender === "staff")
       foot.append(
@@ -633,7 +674,7 @@ function renderChat(scroll = true) {
   }
   if (scroll)
     requestAnimationFrame(
-      () => ($("scrollArea").scrollTop = $("scrollArea").scrollHeight),
+      () => ($("scrollArea").scrollTop = S.current?.messages?.length ? $("scrollArea").scrollHeight : 0),
     );
 }
 async function sendMessage() {
@@ -657,6 +698,7 @@ async function sendMessage() {
     S.current = await api("/api/chats/" + S.current.id + "/messages", "POST", {
       text,
       mode: S.mode,
+      bank_mode:S.current?.bank_mode || S.bankMode,
       request_id: requestId,
     });
     S.retryMessage = null;
@@ -810,6 +852,7 @@ async function showRequests() {
         );
       }
       wrap.append(d);
+      if (r.staff_note) wrap.append(el("p","staff-review-note",t("工作人员备注：","Staff note: ")+r.staff_note));
       page.append(wrap);
     }
   } catch (e) {
@@ -1009,6 +1052,8 @@ function openService(id, prefill = {}) {
   if (!service) return;
   S.service = service;
   const base = {...prefill, ...(S.current?.service_drafts?.[id] || {})};
+  if(id==='open_account'&&!base.product)base.product=S.bankMode==='student'?'student_account':'everyday_account';
+  if(id==='apply_card'&&!base.linked_product)base.linked_product=S.bankMode==='student'?'student_account':'everyday_account';
   const signature = JSON.stringify(base);
   const saved = S.formDrafts.get(draftKey(id));
   prefill = saved?.signature === signature ? {...base, ...saved.values} : base;
@@ -1118,6 +1163,21 @@ function renderServiceForm(prefill) {
     error.textContent = "";
   });
   body.append(form);
+  if (s.id==='funding_enquiry') {
+    const directory=el('section','funding-directory');
+    directory.append(el('h3','',t('奖学金与补助目录（演示）','Scholarship and grant directory (demo)')));
+    const cards=el('div','funding-programs');directory.append(cards);body.prepend(directory);
+    const renderPrograms=()=>{
+      cards.replaceChildren();const level=form.elements.study_level.value;const kind=form.elements.funding_type.value;
+      for(const p of S.boot.funding_programs || []) {
+        if(p.kind==='loan'||!p.levels.includes(level)||kind!=='all'&&!(kind==='grants'?['grant','emergency'].includes(p.kind):p.kind===kind))continue;
+        const card=el('article','funding-program');
+        card.append(el('strong','',t(p.title,p.title_en)),el('p','',t(p.summary,p.summary_en)),el('p','funding-amount',t(p.amount,p.amount_en)),el('p','muted small',t(p.documents,p.documents_en)));
+        cards.append(card);
+      }
+    };
+    form.elements.study_level.addEventListener('change',renderPrograms);form.elements.funding_type.addEventListener('change',renderPrograms);renderPrograms();
+  }
 }
 function renderReview(values) {
   const s = S.service;
@@ -1180,6 +1240,7 @@ function renderReview(values) {
             chat_id: chatId || null,
             confirmed: true,
             request_id: submission.key,
+            bank_mode:S.bankMode,
           });
           S.formDrafts.delete(draftKey(s.id));
           renderReceipt(r);
@@ -1280,7 +1341,8 @@ function authKind(kind) {
 }
 function updateAuthRole() {
   const staff = $("portalRole").value === "staff";
-  $("staffInviteField").hidden = !staff;
+  $("staffInviteField").hidden = !staff || !!S.boot?.open_staff_testing;
+  $("staffTestEntry").hidden=!S.boot?.open_staff_testing;
   const groupCode =
     S.authKind === "register" &&
     !staff &&
@@ -1291,7 +1353,9 @@ function updateAuthRole() {
     staff && S.authKind === "register" && S.boot?.first_admin_setup_required
       ? t("管理员初始化邀请码", "Administrator setup invitation")
       : t("工作人员邀请码", "Staff invitation");
-  $("authSubtitle").textContent = staff
+  $("authSubtitle").textContent = staff && S.boot?.open_staff_testing
+    ? t('当前为测试阶段，工作人员注册和登录无需邀请码，也可一键进入测试客服。','Staff registration and sign-in need no invitation during testing. You can also use the one-click test entry.')
+    : staff
     ? t(
         "工作人员进入客服端。首次开通需要管理员邀请码；已开通的账户无需再次填写。",
         "Staff enter the support workspace. An invitation is required only when first enabling staff access.",
@@ -1400,6 +1464,7 @@ function showProfile() {
           ),
       ),
     );
+  else if(S.boot.open_staff_testing)p.append(button(t('一键进入测试客服','Enter test staff workspace'),'secondary-button full',enterTestStaff));
   $("profileDialog").showModal();
 }
 async function switchPortalRole(role) {
@@ -1448,19 +1513,19 @@ async function showStaff() {
   title(t("工作人员演示台", "Staff workspace"));
   const page = el("section", "page-section");
   page.append(
-    el("h1", "", t("客服接单与回复", "Support queue")),
+    el("h1", "", t("工作人员工作台", "Staff workspace")),
     el(
       "p",
       "page-subtitle",
       t(
-        "客户提交与新消息每 3 秒同步。回复会在客户原对话中标记为人工客服（演示）。",
-        "Customer tickets and messages sync every 3 seconds. Manual replies appear in the customer's original chat.",
+        "业务申请、客服工单和客户新消息每 3 秒同步。表单处理状态与备注会保存供客户查看。",
+        "Applications, support tickets and messages sync every 3 seconds. Application review status and notes are saved for customers to view.",
       ),
     ),
   );
   const toolbar = el("div", "staff-toolbar");
   toolbar.append(
-    button(t("刷新工单", "Refresh tickets"), "secondary-button", () =>
+    button(t("刷新工作台", "Refresh workspace"), "secondary-button", () =>
       refreshStaff(),
     ),
   );
@@ -1476,6 +1541,11 @@ async function showStaff() {
   status.id = "staffSyncStatus";
   toolbar.append(status);
   page.append(toolbar);
+  const tabs=el('div','staff-tabs');
+  for(const [id,zh,en] of [['tickets','人工客服工单','Support tickets'],['requests','业务申请与表单','Applications and forms']])
+    tabs.append(button(t(zh,en),'staff-tab'+(S.staffTab===id?' active':''),()=>{S.staffTab=id;showStaff();}));
+  page.append(tabs);
+  if(S.boot.open_staff_testing)page.append(el('p','testing-banner',t('测试客服入口已开放。仅处理演示数据；关闭测试开关后恢复邀请码限制。','Open staff testing is enabled. Use demonstration data only; switching testing off restores invitation requirements.')));
   const layout = el("div", "staff-layout");
   const list = el("div");
   list.id = "staffTicketList";
@@ -1492,11 +1562,77 @@ async function showStaff() {
     ),
   );
   layout.append(list, detail);
+  layout.hidden=S.staffTab==='requests';
   page.append(layout);
+  const business=el('section','business-workbench');business.id='businessWorkbench';business.hidden=S.staffTab!=='requests';
+  page.append(business);
   $("content").replaceChildren(page);
   S.staffFingerprint = "";
+  $('scrollArea').scrollTop=0;
   S.staffDetailFingerprint = "";
   await refreshStaff();
+}
+async function enterTestStaff() {
+  if(S.busy)return;
+  const buttonEl=$('staffTestLogin');buttonEl.disabled=true;
+  try {
+    const data=await api('/api/testing/staff-session','POST',{});
+    Object.assign(S.boot,data);S.current=null;S.staffTab='requests';S.afterLogin=null;
+    $('authDialog').close();if($('profileDialog').open)$('profileDialog').close();setChatUrl(null);renderSidebar();await refreshHistory();await showStaff();
+    identityChannel?.postMessage('identity-changed');
+  }catch(e){$('authError').textContent=e.message;}finally{buttonEl.disabled=false;}
+}
+async function refreshBusinessRequests() {
+  if(S.view!=='staff'||!hasStaffAccess()||S.businessPolling)return;
+  S.businessPolling=true;
+  try {
+    const rows=await api('/api/admin/requests');
+    if(S.view!=='staff'||S.staffTab!=='requests')return;
+    S.businessData=rows;const root=$('businessWorkbench');if(!root)return;
+    let list=$('businessRequestList'),detail=$('businessRequestDetail');
+    if(!list){
+      const filters=el('div','business-filters');
+      const mode=el('select');mode.id='businessModeFilter';mode.setAttribute('aria-label',t('筛选银行模式','Filter banking mode'));
+      for(const [value,zh,en] of [['all','全部模式','All modes'],['general','社会银行','General banking'],['student','学生银行','Student banking']]){const o=el('option','',t(zh,en));o.value=value;mode.append(o);}
+      const status=el('select');status.id='businessStatusFilter';status.setAttribute('aria-label',t('筛选处理状态','Filter status'));
+      for(const value of ['all','pending','processing','needs_info','completed']){const o=el('option','',value==='all'?t('全部状态','All statuses'):statusText(value));o.value=value;status.append(o);}
+      mode.value=S.businessModeFilter||'all';status.value=S.businessStatusFilter||'all';
+      mode.onchange=()=>{S.businessModeFilter=mode.value;refreshBusinessRequests();};status.onchange=()=>{S.businessStatusFilter=status.value;refreshBusinessRequests();};
+      const stats=el('span','muted small');stats.id='businessRequestStats';filters.append(mode,status,stats);
+      list=el('div','business-request-list');list.id='businessRequestList';detail=el('section','business-request-detail');detail.id='businessRequestDetail';
+      const layout=el('div','business-layout');layout.append(list,detail);root.append(filters,layout);
+    }
+    $('businessRequestStats').textContent=t(`共 ${rows.length} 条业务申请，${rows.filter(x=>x.status==='pending').length} 条待处理`,` ${rows.length} applications; ${rows.filter(x=>x.status==='pending').length} pending`);
+    const filtered=rows.filter(r=>(!S.businessModeFilter||S.businessModeFilter==='all'||r.bank_mode===S.businessModeFilter)&&(!S.businessStatusFilter||S.businessStatusFilter==='all'||r.status===S.businessStatusFilter));
+    list.replaceChildren();
+    if(!filtered.length){detail.replaceChildren(el('h3','',t('暂无匹配的业务申请','No matching applications')),el('p','muted',t('客户提交开户、转账、贷款或学生资助咨询后，表单内容会在这里自动同步。','Customer account, transfer, loan and student-finance submissions appear here automatically.')));S.businessId=null;return;}
+    if(!filtered.some(r=>r.id===S.businessId))S.businessId=filtered[0].id;
+    for(const row of filtered){
+      const item=button('','business-request-item'+(S.businessId===row.id?' active':''),()=>{S.businessId=row.id;S.businessFingerprint='';refreshBusinessRequests();});
+      const service=serviceBy(row.service_id);item.append(el('strong','',t(service?.title||row.title,service?.en||row.title)),el('span','',row.customer_name||t('演示客户','Demo customer')),el('small','',row.id+' · '+statusText(row.status)));list.append(item);
+    }
+    const row=await api('/api/admin/requests/'+S.businessId);
+    if(S.view!=='staff'||S.staffTab!=='requests'||S.businessId!==row.id)return;
+    const fingerprint=JSON.stringify(row);if(S.businessFingerprint===fingerprint&&detail.dataset.id===row.id)return;
+    const focused=detail.contains(document.activeElement);const selection=focused&&document.activeElement.selectionStart!==undefined?[document.activeElement.selectionStart,document.activeElement.selectionEnd]:null;
+    S.businessDrafts ||= {};detail.dataset.id=row.id;detail.replaceChildren();
+    const service=serviceBy(row.service_id);detail.append(el('h2','',t(service.title,service.en)),el('p','muted small',row.id+' · '+timeText(row.created_at)),el('p','',t('客户：','Customer: ')+(row.customer_name||'—')+' · '+(row.bank_mode==='student'?t('学生银行','Student banking'):t('社会银行','General banking'))),el('span','status '+row.status,statusText(row.status)));
+    const table=el('table','request-form-table');const tbody=el('tbody');
+    for(const field of service.fields){const value=row.payload[field.name];if(value===undefined||value==='')continue;const tr=el('tr');tr.append(el('th','',fieldLabel(field)),el('td','',typeof value==='boolean'?(value?t('已确认','Confirmed'):'—'):optionLabel(field,value)));tbody.append(tr);}
+    table.append(tbody);detail.append(table,el('p','service-notice',t(service.notice,service.notice_en||service.en)));
+    const note=el('textarea','business-review-note');note.setAttribute('aria-label',t('业务处理备注','Application review note'));note.placeholder=t('填写演示处理说明或需要客户补充的内容','Add a demo review note or explain what the customer should supplement');note.value=S.businessDrafts[row.id]??row.staff_note??'';note.oninput=()=>S.businessDrafts[row.id]=note.value;
+    const feedback=el('p','form-error');feedback.setAttribute('role','status');detail.append(note,feedback);
+    const actions=el('div','business-actions');let sending=false;
+    for(const [value,zh,en] of [['processing','标记处理中','Mark processing'],['needs_info','请客户补充','Request information'],['completed','演示核对完成','Complete demo review']])actions.append(button(t(zh,en),'secondary-button',async()=>{
+      if(sending)return;if(value==='needs_info'&&!note.value.trim()){feedback.textContent=t('请说明需要补充什么材料。','Explain what information is needed.');return;}
+      sending=true;for(const b of actions.querySelectorAll('button'))b.disabled=true;
+      try{await api('/api/admin/requests/'+row.id,'PATCH',{status:value,note:note.value.trim()});delete S.businessDrafts[row.id];S.businessFingerprint='';feedback.textContent=t('处理状态已保存，客户可在办理记录中查看。','Review saved; the customer can see it under My requests.');await refreshBusinessRequests();}
+      catch(e){feedback.textContent=e.message;}finally{sending=false;for(const b of actions.querySelectorAll('button'))b.disabled=false;}
+    }));detail.append(actions);
+    if(row.events?.length){const history=el('details','request-review-history');history.append(el('summary','',t('处理记录','Review history')));for(const e of row.events)history.append(el('p','small',timeText(e.created_at)+' · '+e.actor+' · '+statusText(e.status)+(e.note?' · '+e.note:'')));detail.append(history);}
+    S.businessFingerprint=fingerprint;if(focused){note.focus();if(selection)note.setSelectionRange(...selection);}
+    if($('staffSyncStatus'))$('staffSyncStatus').textContent=t('业务申请每 3 秒同步','Applications sync every 3 seconds');
+  }catch(e){toast(e.message);}finally{S.businessPolling=false;}
 }
 function staffEmpty(detail) {
   detail.replaceChildren(
@@ -1539,6 +1675,7 @@ function staffEmpty(detail) {
   );
 }
 async function refreshStaff(quiet = false) {
+  if(S.staffTab==='requests') {await refreshBusinessRequests();return;}
   if (S.staffPolling || S.view !== "staff" || !hasStaffAccess()) return;
   S.staffPolling = true;
   try {
@@ -1858,6 +1995,9 @@ function setLanguage() {
     "Import legacy chats",
   );
   $("staffNav").lastChild.textContent = t("工作人员演示台", "Staff workspace");
+  updateBankModeUI();
+  $('staffTestNotice').textContent=t('测试期间可免邀请码进入客服端，不额外授予管理员权限。','Test staff can enter without an invitation; no additional administrator permissions are granted.');
+  $('staffTestLogin').textContent=t('一键进入测试客服','Enter test staff workspace');
   renderSidebar();
   if (S.view === "chat") showChat(false);
   else if (S.view === "requests") showRequests();
@@ -1884,6 +2024,9 @@ async function init() {
       b.addEventListener("click", () => $(b.dataset.close).close()),
     );
   $("newChat").onclick = newChat;
+  $('generalBankMode').onclick=()=>switchBankMode('general');
+  $('studentBankMode').onclick=()=>switchBankMode('student');
+  $('staffTestLogin').onclick=enterTestStaff;
   $("brandHome").onclick = () => showChat();
   $("homeNav").onclick = () => showChat();
   $("requestsNav").onclick = showRequests;

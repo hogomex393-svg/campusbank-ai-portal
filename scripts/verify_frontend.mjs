@@ -71,6 +71,7 @@ w.fetch = async (url, options = {}) => {
     value = {
       id: crypto.randomUUID().replaceAll("-", ""),
       title: "新对话",
+      bank_mode:body?.bank_mode || 'general',
       messages: [],
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -86,7 +87,7 @@ w.fetch = async (url, options = {}) => {
       {
         role: "assistant",
         content: "请从开户窗口核对信息。",
-        metadata: { actions: [{ service_id: "open_account" }] },
+        metadata: { actions: [{ service_id: "open_account" }],response_language:'zh',followups:['开户需要哪些材料？','月费和最低存款要注意什么？','怎样在线办理并查看申请进度？'] },
       },
     );
   } else if (/^\/api\/chats\/[^/]+$/.test(url))
@@ -154,15 +155,23 @@ w.fetch = async (url, options = {}) => {
     ticket.updated_at = new Date().toISOString();
     ticket.message_count = chat.messages.length;
     value = ticket;
+  } else if(url==='/api/testing/staff-session') {
+    user={id:'test',username:'test_staff',display_name:'Test staff',is_admin:0,is_staff:1};value={user,csrf:'test-staff-csrf',portal_role:'staff',testing_staff:true};
+  } else if(url==='/api/admin/requests')value=requests.filter(r=>r.service_id!=='human_support');
+  else if(/^\/api\/admin\/requests\/[^/]+$/.test(url)) {
+    const row=requests.find(r=>r.id===url.split('/')[4]);
+    if(method==='PATCH'){row.status=body.status;row.staff_note=body.note;row.events||=[];row.events.push({actor:'Test staff',status:body.status,note:body.note,created_at:new Date().toISOString()});}
+    value={...row,events:row.events||[]};
   } else if (url === "/api/requests" && method === "GET") value = requests;
   else if (url === "/api/requests" && method === "POST") {
     value = {
-      id: "CB-DOM-TEST",
+      id: "CB-DOM-TEST-"+(requests.length+1),
       service_id: body.service_id,
       title: "在线开户申请",
       status: "pending",
       payload: body.payload,
       created_at: new Date().toISOString(),
+      bank_mode:body.bank_mode || 'general',customer_name:'Demo customer',staff_note:'',
     };
     requests.push(value);
   } else throw new Error("Unexpected mocked route " + method + " " + url);
@@ -170,7 +179,7 @@ w.fetch = async (url, options = {}) => {
 };
 w.eval(
   (await fs.readFile(path.join(root, "web/app.js"), "utf8")) +
-    "\nwindow.__test={S,showChat,showStaff,switchPortalRole,showSupportHistory,showCustomerTicket,startHandoff,newChat,selectChat,sendMessage,showServices,openService,showRequests,showReferences,renderChat,openAuth,authKind,markdown,setLanguage};",
+    "\nwindow.__test={S,showChat,showStaff,switchPortalRole,showSupportHistory,showCustomerTicket,startHandoff,newChat,selectChat,sendMessage,showServices,openService,showRequests,showReferences,renderChat,openAuth,authKind,markdown,setLanguage,switchBankMode,enterTestStaff,refreshBusinessRequests};",
 );
 async function flush() {
   for (let i = 0; i < 20; i++)
@@ -404,7 +413,45 @@ w.document.getElementById("messageInput").value="Please wait"; await ui.sendMess
 assert(w.document.getElementById("sendFeedback").textContent.includes("Retry in"));
 assert(w.document.getElementById("sendButton").disabled);
 w.clearTimeout(ui.S.cooldownTimer); w.fetch=originalFetch;
+ui.S.cooldownUntil=0;ui.S.lang='zh';ui.setLanguage();
+await ui.switchBankMode('student');
+assert.equal(ui.S.current.bank_mode,'student');
+assert.equal(w.document.querySelectorAll('#businessNav button').length,7);
+assert(w.document.getElementById('content').textContent.includes('助学贷款'));
+const studentChatId=ui.S.current.id;
+w.document.getElementById('messageInput').value='助学贷款需要哪些材料？';await ui.sendMessage();
+assert.equal(w.document.querySelectorAll('.followup-chip').length,3);
+const followup=w.document.querySelector('.followup-chip');const suggested=followup.textContent;
+followup.click();await flush();assert.equal(calls.filter(c=>c.url.endsWith('/messages')).at(-1).body.text,suggested);
+assert.equal(calls.filter(c=>c.url.endsWith('/messages')).at(-1).body.bank_mode,'student');
+ui.openService('funding_enquiry');assert.equal(w.document.querySelectorAll('.funding-program').length,3);
+w.document.getElementById('serviceForm').elements.funding_type.value='scholarship';
+w.document.getElementById('serviceForm').elements.funding_type.dispatchEvent(new w.Event('change'));
+assert.equal(w.document.querySelectorAll('.funding-program').length,1);
+w.document.getElementById('serviceDialog').close();
+await ui.switchBankMode('general');assert.equal(w.document.querySelectorAll('#businessNav button').length,6);
+await ui.selectChat(studentChatId);assert.equal(ui.S.bankMode,'student');
+assert(w.document.getElementById('studentBankMode').classList.contains('active'));
+
+ui.S.boot.open_staff_testing=true;ui.openAuth('login');
+w.document.getElementById('portalRole').value='staff';w.document.getElementById('portalRole').dispatchEvent(new w.Event('change'));
+assert(w.document.getElementById('staffInviteField').hidden);assert(!w.document.getElementById('staffTestEntry').hidden);
+await ui.enterTestStaff();assert.equal(ui.S.boot.user.is_admin,0);assert.equal(ui.S.staffTab,'requests');
+assert(w.document.getElementById('businessRequestDetail').querySelector('table'));
+const reviewNote=w.document.querySelector('.business-review-note');reviewNote.value='Please add a demo document summary.';reviewNote.dispatchEvent(new w.Event('input'));
+await supportSync();assert.equal(w.document.querySelector('.business-review-note').value,'Please add a demo document summary.');
+[...w.document.querySelectorAll('.business-actions button')].find(b=>b.textContent.includes('请客户补充')).click();await flush();
+assert.equal(requests[0].status,'needs_info');assert.equal(requests[0].staff_note,'Please add a demo document summary.');
+await ui.switchPortalRole('customer');await ui.showRequests();
+assert(w.document.querySelector('.staff-review-note').textContent.includes('demo document summary'));
 const summary = {
+  dual_mode_navigation_and_history:true,
+  student_funding_directory_filters:true,
+  followup_bubbles_send_contextual_question:true,
+  invitation_free_test_staff_entry:true,
+  business_forms_visible_to_staff:true,
+  business_review_draft_survives_polling:true,
+  review_note_and_status_reach_customer:true,
   readable_tables_and_safe_cells:true,
   latest_chat_draft_prefills_form:true,
   confirmation_double_click_only_posts_once:true,
