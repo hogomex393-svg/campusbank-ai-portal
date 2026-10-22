@@ -19,6 +19,8 @@ MESSAGES = {
 def public_error(message, language):
     if not language.lower().startswith('en'):return message
     if message in MESSAGES:return MESSAGES[message]
+    from .scenarios import ERRORS
+    if message in ERRORS:return ERRORS[message]
     from .catalog import SERVICES
     for prefix,translated in [('请填写有效的 ','Enter a valid value for: '),('请填写 ','Please complete: '),('请选择有效的 ','Please select: '),('请核对并勾选：','Please review and confirm: ')]:
         if message.startswith(prefix):

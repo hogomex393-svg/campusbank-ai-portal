@@ -933,6 +933,7 @@ async function showRequests() {
           ),
         );
       }
+      if(r.scenario)d.append(scenarioTable(r.scenario));
       wrap.append(d);
       if (r.staff_note) wrap.append(el("p","staff-review-note",t("工作人员备注：","Staff note: ")+r.staff_note));
       page.append(wrap);
@@ -1129,6 +1130,123 @@ function optionLabel(field, value) {
   return option ? t(option.label, option.label_en || option.value.replaceAll("_", " ")) : value;
 }
 function draftKey(id) { return `${S.boot.user?.id || "guest"}:${S.current?.id || "none"}:${id}`; }
+function scenarioDefaults(service,base) {
+  if(!service.scenario)return null;
+  const values=Object.fromEntries(service.scenario.fields.map(f=>[f.name,f.default]));
+  if(service.id==='open_account' && base.product==='student_account')Object.assign(values,{profile:'student_demo',employment:'student',account_purpose:'study',funding_source:'family'});
+  if(service.id==='transfer_demo') {
+    if(S.bankMode==='student')values.payer='student_demo';
+    if(base.transfer_type==='international')Object.assign(values,{payee_profile:'europe_demo',payee_name:'Example EU College'});
+  }
+  return values;
+}
+function scenarioTable(record,compact=false) {
+  const wrap=el('section','scenario-summary');
+  wrap.append(el('h3','',t('场景核对明细','Scenario review details')));
+  if(record?.quote){
+    const q=record.quote;const hero=el('div','payment-amounts');
+    for(const [zh,en,amount] of [['预计总扣款（模拟）','Estimated debit (simulation)','GBP '+q.total],['预计到账（模拟）','Estimated recipient amount',q.receive_currency+' '+q.receive_amount]]){
+      const cell=el('div');cell.append(el('small','',t(zh,en)),el('strong','',amount));hero.append(cell);
+    }
+    hero.append(el('p','',t('本金 ','Amount ')+q.amount+' GBP · '+t('演示手续费 ','Fictional fee ')+q.fee+' GBP'));wrap.append(hero);
+  }
+  const table=el('table','request-form-table');const rows=el('tbody');
+  for(const item of record?.summary || []){
+    if(compact && !['付款账户','收款账户名称','名称核对（仅演示数据）','转账本金','演示手续费','预计总扣款（模拟）','预计剩余余额（模拟）','预计到账（模拟）','演示固定汇率','预约日期','材料状态'].includes(item.label))continue;
+    const row=el('tr');row.append(el('th','',t(item.label,item.label_en)),el('td','',t(item.value,item.value_en)));rows.append(row);
+  }
+  table.append(rows);wrap.append(table);return wrap;
+}
+function mountScenario(form,service) {
+  const schema=service.scenario;if(!schema)return null;
+  const values=S.serviceScenario || scenarioDefaults(service,{});
+  const section=el('section','scenario-section');
+  section.append(el('h3','',service.id==='open_account'?t('2 · 申请人资料与材料','2 · Applicant and documents'):t('2 · 付款账户与收款资料','2 · Payer and payee details')),
+    el('p','muted small',t('使用预设演示档案；DEMO 标识不是真实银行资料。','Use the fictional profiles below. DEMO identifiers are not real banking details.')));
+  const profile=el('div','scenario-profile');const grid=el('div','scenario-grid');const preview=el('div','scenario-preview');
+  preview.setAttribute('aria-live','polite');
+  const controls={},labels={};
+  for(const f of schema.fields){
+    const label=el('label',f.type==='checkbox'?'check-label':'',f.type==='checkbox'?'':t(f.label,f.label_en));
+    const input=el(f.type==='select'?'select':'input');input.name='scenario_'+f.name;
+    if(f.type==='select')for(const o of f.options){const option=el('option','',t(o.label,o.label_en));option.value=o.value;input.append(option);}
+    else input.type=f.type;
+    if(f.type==='checkbox')input.checked=!!values[f.name];else input.value=values[f.name]??'';
+    if(f.type==='date')input.min=S.boot.today;
+    if(f.type==='text')input.maxLength=100;
+    input.required=!f.when && f.type!=='checkbox';
+    label.append(input);if(f.type==='checkbox')label.append(document.createTextNode(t(f.label,f.label_en)));
+    if(f.name==='declaration')label.classList.add('scenario-declaration');
+    controls[f.name]=input;labels[f.name]=label;grid.append(label);
+  }
+  section.append(profile,grid,preview);form.append(section);
+  let sequence=0,timer,lastRecord=null;
+  const read=()=>Object.fromEntries(schema.fields.map(f=>[f.name,f.type==='checkbox'?controls[f.name].checked:controls[f.name].value.trim()]));
+  const save=()=>{
+    S.serviceScenario=read();
+    const current=S.formDrafts.get(draftKey(service.id)) || {signature:S.serviceSignature,values:S.servicePrefill};
+    S.formDrafts.set(draftKey(service.id),{...current,scenario:read()});
+  };
+  const baseValues=()=>Object.fromEntries(service.fields.map(f=>[f.name,f.type==='checkbox'?form.elements[f.name].checked:form.elements[f.name].value.trim()]));
+  function detail(zh,en,value){const row=el('div');row.append(el('small','',t(zh,en)),el('strong','',value));profile.append(row);}
+  function update(changed){
+    profile.replaceChildren();
+    if(service.id==='open_account'){
+      const student=form.elements.product.value==='student_account';
+      if(changed==='product'){
+        controls.profile.value=student?'student_demo':'adult_demo';controls.employment.value=student?'student':'employed';
+        controls.account_purpose.value=student?'study':'daily';controls.funding_source.value=student?'family':'salary';
+      }
+      const person=schema.profiles.find(p=>p.id===controls.profile.value);
+      if(changed==='profile' || changed==='product')form.elements.applicant.value=person.name;
+      if(!form.elements.applicant.value.trim())form.elements.applicant.value=person.name;
+      detail('演示法定姓名','Fictional legal name',person.name);detail('演示出生日期','Fictional birth date',person.birth_date);
+      detail('演示邮箱','Fictional email',person.email);detail('演示居住地址','Fictional address',person.address);
+      detail('身份记录','Identity record',person.identity);if(student&&person.institution)detail('演示学校','Fictional institution',person.institution);
+      labels.student_document.hidden=!student;controls.student_document.disabled=!student;
+    }else{
+      const type=form.elements.transfer_type.value;
+      for(const o of controls.payee_profile.options){const p=schema.payees.find(p=>p.id===o.value);o.hidden=p.type!==type;o.disabled=p.type!==type;}
+      if(schema.payees.find(p=>p.id===controls.payee_profile.value)?.type!==type){controls.payee_profile.value=type==='international'?'europe_demo':'alex_demo';changed='payee_profile';}
+      const payee=schema.payees.find(p=>p.id===controls.payee_profile.value);const payer=schema.payers.find(p=>p.id===controls.payer.value);
+      if(changed==='payee_profile'){controls.payee_name.value=payee.name;controls.payee_ack.checked=false;form.elements.recipient.value=payee.name;}
+      if(!form.elements.recipient.value.trim())form.elements.recipient.value=payee.name;
+      detail('演示付款账户','Fictional payer',t(payer.label,payer.label_en));detail('场景可用余额（不实际扣减）','Scenario balance (no actual debit)','GBP '+payer.balance);
+      detail('演示收款银行／国家','Fictional payee bank / country',payee.bank+' / '+payee.country);
+      detail('演示路由标识','Fictional routing ID',payee.routing);detail('演示收款标识','Fictional payee ID',payee.account);
+      detail('收款币种','Recipient currency',payee.currency);
+      const scheduled=controls.execution.value==='scheduled';labels.execution_date.hidden=!scheduled;controls.execution_date.disabled=!scheduled;controls.execution_date.required=scheduled;
+      if(!scheduled)controls.execution_date.value='';
+      labels.payee_ack.hidden=lastRecord?.payee_match!=='close';controls.payee_ack.disabled=labels.payee_ack.hidden;
+    }
+  }
+  async function calculate(){
+    clearTimeout(timer);const n=++sequence;
+    if(service.id==='transfer_demo'&&!form.elements.amount.value.trim()){
+      preview.replaceChildren(el('p','muted small',t('输入金额后，这里会显示收款名称核对、费用和预计到账明细。','Enter an amount to see the payee check, fees and estimated recipient amount.')));return null;
+    }
+    try{
+      const record=await api('/api/scenarios/preview','POST',{service_id:service.id,payload:baseValues(),scenario:read()});
+      if(n!==sequence||!form.isConnected)return null;
+      lastRecord=record;preview.replaceChildren(scenarioTable(record,true));
+      if(service.id==='transfer_demo'){
+        const close=record.payee_match==='close';labels.payee_ack.hidden=!close;controls.payee_ack.disabled=!close;
+        if(close)preview.prepend(el('p','scenario-warning',t('收款名称存在细微差异，请核对后勾选确认。','There is a minor name difference. Review it and confirm below.')));
+      }
+      if(record.needs_info)preview.prepend(el('p','scenario-warning',t('有材料待补充：可登记申请，工作人员会跟进。','Some information is missing. You can submit for staff follow-up.')));
+      return record;
+    }catch(e){
+      if(n!==sequence||!form.isConnected)return null;
+      lastRecord=null;preview.replaceChildren(el('p','form-error',e.message));
+      if(service.id==='transfer_demo'){labels.payee_ack.hidden=true;controls.payee_ack.disabled=true;}
+      return null;
+    }
+  }
+  form.addEventListener('input',e=>{update(e.target.name.replace('scenario_',''));save();clearTimeout(timer);timer=setTimeout(calculate,250);});
+  form.addEventListener('change',e=>{update(e.target.name.replace('scenario_',''));save();clearTimeout(timer);timer=setTimeout(calculate,80);});
+  update();save();timer=setTimeout(calculate,80);
+  return {read,calculate,get record(){return lastRecord;}};
+}
 function openService(id, prefill = {}) {
   const service = serviceBy(id);
   if (!service) return;
@@ -1142,6 +1260,8 @@ function openService(id, prefill = {}) {
   S.servicePrefill = prefill;
   S.serviceSignature = signature;
   S.serviceSubmission = saved?.submission || null;
+  S.scenarioRecord=null;
+  S.serviceScenario=saved?.signature===signature&&saved.scenario?{...saved.scenario}:scenarioDefaults(service,prefill);
   $("serviceTitle").textContent = t(service.title, service.en);
   renderServiceForm(prefill);
   if (!$("serviceDialog").open) $("serviceDialog").showModal();
@@ -1212,6 +1332,7 @@ function renderServiceForm(prefill) {
       label.append(document.createTextNode(fieldLabel(f)));
     form.append(label);
   }
+  const scenarioUI=mountScenario(form,s);
   form.append(el("div", "service-notice", t(s.notice,s.notice_en || s.en)));
   const error = el("p", "form-error");
   form.append(error);
@@ -1222,7 +1343,7 @@ function renderServiceForm(prefill) {
   );
   submit.type = "submit";
   form.append(submit);
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const values = {};
     for (const f of s.fields) {
@@ -1236,12 +1357,21 @@ function renderServiceForm(prefill) {
       }
     }
     if (!form.reportValidity()) return;
-    S.formDrafts.set(draftKey(s.id), {signature:S.serviceSignature, values, submission:S.serviceSubmission});
+    if(scenarioUI){
+      const scenario=scenarioUI.read();
+      if(!scenario.declaration){error.textContent=t('请勾选演示资料核对声明。','Confirm that you reviewed the fictional details.');return;}
+      submit.disabled=true;
+      const record=await scenarioUI.calculate();submit.disabled=false;
+      if(!record){error.textContent=t('请先修正场景核对中显示的问题。','Resolve the scenario checks before continuing.');return;}
+      if(record.payee_match==='close'&&!scenario.payee_ack){error.textContent=t('请确认收款名称的细微差异。','Confirm the minor payee name difference.');return;}
+      S.scenarioRecord=record;S.serviceScenario=scenario;
+    }
+    S.formDrafts.set(draftKey(s.id), {signature:S.serviceSignature, values, submission:S.serviceSubmission,scenario:S.serviceScenario});
     renderReview(values);
   });
   form.addEventListener("input", () => {
     const values = Object.fromEntries(s.fields.map(f => [f.name, f.type === "checkbox" ? form.elements[f.name].checked : form.elements[f.name].value]));
-    S.formDrafts.set(draftKey(s.id), {signature:S.serviceSignature, values, submission:S.serviceSubmission});
+    S.formDrafts.set(draftKey(s.id), {signature:S.serviceSignature, values, submission:S.serviceSubmission,scenario:scenarioUI?.read() || null});
     error.textContent = "";
   });
   body.append(form);
@@ -1264,7 +1394,9 @@ function renderServiceForm(prefill) {
 function renderReview(values) {
   const s = S.service;
   const body = $("serviceBody");
-  const fingerprint = JSON.stringify([s.id, values, S.current?.id || null]);
+  const scenario=S.serviceScenario?{...S.serviceScenario}:null;
+  const record=S.scenarioRecord;
+  const fingerprint = JSON.stringify([s.id, values, S.current?.id || null,scenario]);
   if (!S.serviceSubmission || S.serviceSubmission.fingerprint !== fingerprint)
     S.serviceSubmission = {fingerprint, key:crypto.randomUUID().replaceAll("-", "")};
   body.replaceChildren();
@@ -1286,13 +1418,14 @@ function renderReview(values) {
     row.append(el("span", "", fieldLabel(f)), el("span", "", value));
     body.append(row);
   }
+  if(s.scenario && record)body.append(scenarioTable(record));
   body.append(el("div", "service-notice", t(s.notice,s.notice_en || s.en)));
   const actions = el("div", "section-actions");
   let submitting = false;
   actions.append(
-    button(t("返回修改", "Back"), "secondary-button", () =>
-      renderServiceForm(values),
-    ),
+    button(t("返回修改", "Back"), "secondary-button", () => {
+      S.serviceScenario=scenario;renderServiceForm(values);
+    }),
     button(
       S.boot.user
         ? t("确认提交演示请求", "Confirm demo request")
@@ -1304,6 +1437,7 @@ function renderReview(values) {
           $("serviceDialog").close();
           openAuth("login", () => {
             openService(s.id, values);
+            S.serviceScenario=scenario;S.scenarioRecord=record;
             renderReview(values);
           });
           return;
@@ -1312,7 +1446,7 @@ function renderReview(values) {
           submitting = true;
           for (const b of actions.querySelectorAll("button")) b.disabled = true;
           const submission = S.serviceSubmission;
-          S.formDrafts.set(draftKey(s.id), {signature:S.serviceSignature, values, submission});
+          S.formDrafts.set(draftKey(s.id), {signature:S.serviceSignature, values, submission,scenario});
           let chatId = S.current?.id;
           if (s.id === "human_support" && !chatId)
             chatId = (await ensureChat()).id;
@@ -1323,6 +1457,7 @@ function renderReview(values) {
             confirmed: true,
             request_id: submission.key,
             bank_mode:S.bankMode,
+            scenario,
           });
           S.formDrafts.delete(draftKey(s.id));
           renderReceipt(r);
@@ -1362,7 +1497,7 @@ function renderReceipt(r) {
     el(
       "p",
       "",
-      t("当前状态：待审核 / 待确认", "Status: pending review / confirmation"),
+      t('当前状态：','Status: ')+statusText(r.status),
     ),
     button(
       t("查看我的办理记录", "View my requests"),
@@ -1373,6 +1508,7 @@ function renderReceipt(r) {
       },
     ),
   );
+  if(r.scenario)receipt.append(scenarioTable(r.scenario),el('p','muted small',t('以上余额、姓名核对和汇率仅用于本次场景演示，不代表真实扣款、身份验证或支付成功。','Balances, name checks and exchange rates are scenario examples only. No real debit, identity verification or successful payment is implied.')));
   if (r.service_id === "human_support") {
     receipt.append(
       button(
@@ -1701,7 +1837,9 @@ async function refreshBusinessRequests() {
     const service=serviceBy(row.service_id);detail.append(el('h2','',t(service.title,service.en)),el('p','muted small',row.id+' · '+timeText(row.created_at)),el('p','',t('客户：','Customer: ')+(row.customer_name||'—')+' · '+(row.bank_mode==='student'?t('学生银行','Student banking'):t('社会银行','General banking'))),el('span','status '+row.status,statusText(row.status)));
     const table=el('table','request-form-table');const tbody=el('tbody');
     for(const field of service.fields){const value=row.payload[field.name];if(value===undefined||value==='')continue;const tr=el('tr');tr.append(el('th','',fieldLabel(field)),el('td','',typeof value==='boolean'?(value?t('已确认','Confirmed'):'—'):optionLabel(field,value)));tbody.append(tr);}
-    table.append(tbody);detail.append(table,el('p','service-notice',t(service.notice,service.notice_en||service.en)));
+    table.append(tbody);detail.append(table);
+    if(row.scenario)detail.append(scenarioTable(row.scenario));
+    detail.append(el('p','service-notice',t(service.notice,service.notice_en||service.en)));
     const note=el('textarea','business-review-note');note.setAttribute('aria-label',t('业务处理备注','Application review note'));note.placeholder=t('填写演示处理说明或需要客户补充的内容','Add a demo review note or explain what the customer should supplement');note.value=S.businessDrafts[row.id]??row.staff_note??'';note.oninput=()=>S.businessDrafts[row.id]=note.value;
     const feedback=el('p','form-error');feedback.setAttribute('role','status');detail.append(note,feedback);
     const actions=el('div','business-actions');let sending=false;

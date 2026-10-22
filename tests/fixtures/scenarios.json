@@ -1,0 +1,490 @@
+{
+  "open_account": {
+    "kind": "account",
+    "fields": [
+      {
+        "name": "profile",
+        "label": "选择演示申请人",
+        "label_en": "Choose a fictional applicant",
+        "type": "select",
+        "options": [
+          {
+            "value": "adult_demo",
+            "label": "Taylor Demo · 社会人士",
+            "label_en": "Taylor Demo · working adult"
+          },
+          {
+            "value": "student_demo",
+            "label": "Jamie Demo · 学生",
+            "label_en": "Jamie Demo · student"
+          },
+          {
+            "value": "international_demo",
+            "label": "Robin Demo · 学生",
+            "label_en": "Robin Demo · student"
+          }
+        ],
+        "default": "adult_demo",
+        "when": null
+      },
+      {
+        "name": "employment",
+        "label": "职业／学习状态",
+        "label_en": "Employment / study status",
+        "type": "select",
+        "options": [
+          {
+            "value": "employed",
+            "label": "在职",
+            "label_en": "Employed"
+          },
+          {
+            "value": "student",
+            "label": "在读学生",
+            "label_en": "Student"
+          },
+          {
+            "value": "self_employed",
+            "label": "自雇",
+            "label_en": "Self-employed"
+          },
+          {
+            "value": "other",
+            "label": "其他／暂未就业",
+            "label_en": "Other / not employed"
+          }
+        ],
+        "default": "employed",
+        "when": null
+      },
+      {
+        "name": "account_purpose",
+        "label": "账户主要用途",
+        "label_en": "Main purpose",
+        "type": "select",
+        "options": [
+          {
+            "value": "daily",
+            "label": "日常收付款",
+            "label_en": "Everyday payments"
+          },
+          {
+            "value": "salary",
+            "label": "工资收入",
+            "label_en": "Salary income"
+          },
+          {
+            "value": "study",
+            "label": "学习与生活支出",
+            "label_en": "Study and living costs"
+          }
+        ],
+        "default": "daily",
+        "when": null
+      },
+      {
+        "name": "funding_source",
+        "label": "主要资金来源",
+        "label_en": "Main source of funds",
+        "type": "select",
+        "options": [
+          {
+            "value": "salary",
+            "label": "工资／工作收入",
+            "label_en": "Employment income"
+          },
+          {
+            "value": "savings",
+            "label": "已有储蓄",
+            "label_en": "Existing savings"
+          },
+          {
+            "value": "family",
+            "label": "家庭支持",
+            "label_en": "Family support"
+          },
+          {
+            "value": "scholarship",
+            "label": "奖学金／助学支持",
+            "label_en": "Scholarship / study support"
+          }
+        ],
+        "default": "salary",
+        "when": null
+      },
+      {
+        "name": "tax_residence",
+        "label": "税务居住地（演示）",
+        "label_en": "Tax residence (demo)",
+        "type": "select",
+        "options": [
+          {
+            "value": "UK",
+            "label": "英国（演示）",
+            "label_en": "United Kingdom (demo)"
+          },
+          {
+            "value": "other",
+            "label": "其他地区（待人工补充）",
+            "label_en": "Other jurisdiction (staff follow-up)"
+          }
+        ],
+        "default": "UK",
+        "when": null
+      },
+      {
+        "name": "identity_document",
+        "label": "身份证明材料",
+        "label_en": "Identity document",
+        "type": "select",
+        "options": [
+          {
+            "value": "passport",
+            "label": "演示护照资料已就绪",
+            "label_en": "Demo passport record ready"
+          },
+          {
+            "value": "identity_card",
+            "label": "演示身份证明已就绪",
+            "label_en": "Demo identity record ready"
+          },
+          {
+            "value": "missing",
+            "label": "需要协助补充",
+            "label_en": "Need help providing this"
+          }
+        ],
+        "default": "passport",
+        "when": null
+      },
+      {
+        "name": "address_document",
+        "label": "地址证明材料",
+        "label_en": "Proof of address",
+        "type": "select",
+        "options": [
+          {
+            "value": "statement",
+            "label": "演示银行对账单已就绪",
+            "label_en": "Demo bank statement ready"
+          },
+          {
+            "value": "utility",
+            "label": "演示公共事业账单已就绪",
+            "label_en": "Demo utility bill ready"
+          },
+          {
+            "value": "missing",
+            "label": "需要协助补充",
+            "label_en": "Need help providing this"
+          }
+        ],
+        "default": "statement",
+        "when": null
+      },
+      {
+        "name": "student_document",
+        "label": "在读证明材料",
+        "label_en": "Proof of enrolment",
+        "type": "select",
+        "options": [
+          {
+            "value": "letter",
+            "label": "演示在读证明已就绪",
+            "label_en": "Demo enrolment letter ready"
+          },
+          {
+            "value": "missing",
+            "label": "需要协助补充",
+            "label_en": "Need help providing this"
+          }
+        ],
+        "default": "letter",
+        "when": "student"
+      },
+      {
+        "name": "debit_card",
+        "label": "是否需要配套借记卡",
+        "label_en": "Linked debit card",
+        "type": "select",
+        "options": [
+          {
+            "value": "yes",
+            "label": "需要演示借记卡",
+            "label_en": "Request a demo debit card"
+          },
+          {
+            "value": "no",
+            "label": "暂不需要",
+            "label_en": "Not now"
+          }
+        ],
+        "default": "yes",
+        "when": null
+      },
+      {
+        "name": "declaration",
+        "label": "我已核对演示资料及开户条件，了解申请需要审核",
+        "label_en": "I reviewed the fictional details and eligibility; the application requires review",
+        "type": "checkbox",
+        "options": [],
+        "default": false,
+        "when": null
+      }
+    ],
+    "profiles": [
+      {
+        "id": "adult_demo",
+        "name": "Taylor Demo",
+        "birth_date": "1998-05-12",
+        "email": "taylor@example.invalid",
+        "address": "1 Example Walk, Demo City, ZZ1 1ZZ",
+        "residence": "UK",
+        "student": false,
+        "identity": "DEMO-ID-ADULT"
+      },
+      {
+        "id": "student_demo",
+        "name": "Jamie Demo",
+        "birth_date": "2004-06-15",
+        "email": "jamie@example.invalid",
+        "address": "Room DEMO-12, Example Halls, ZZ1 1ZZ",
+        "residence": "UK",
+        "student": true,
+        "identity": "DEMO-ID-STUDENT",
+        "institution": "Example University"
+      },
+      {
+        "id": "international_demo",
+        "name": "Robin Demo",
+        "birth_date": "2002-03-10",
+        "email": "robin@example.invalid",
+        "address": "Room DEMO-24, Example Halls, ZZ1 1ZZ",
+        "residence": "UK",
+        "student": true,
+        "identity": "DEMO-ID-INTERNATIONAL",
+        "institution": "Example College"
+      }
+    ]
+  },
+  "transfer_demo": {
+    "kind": "transfer",
+    "fields": [
+      {
+        "name": "payer",
+        "label": "付款账户（演示）",
+        "label_en": "Pay from (demo)",
+        "type": "select",
+        "options": [
+          {
+            "value": "everyday_demo",
+            "label": "日常账户 · DEMO-CUR-01",
+            "label_en": "Everyday · DEMO-CUR-01"
+          },
+          {
+            "value": "student_demo",
+            "label": "学生账户 · DEMO-STU-01",
+            "label_en": "Student · DEMO-STU-01"
+          }
+        ],
+        "default": "everyday_demo",
+        "when": null
+      },
+      {
+        "name": "payee_profile",
+        "label": "选择演示收款资料",
+        "label_en": "Choose a fictional payee",
+        "type": "select",
+        "options": [
+          {
+            "value": "alex_demo",
+            "label": "Alex · 个人收款人",
+            "label_en": "Alex · individual"
+          },
+          {
+            "value": "tuition_demo",
+            "label": "示例大学 · 学费账户",
+            "label_en": "Example University · tuition"
+          },
+          {
+            "value": "europe_demo",
+            "label": "欧洲示例学院 · EUR",
+            "label_en": "Example EU College · EUR"
+          },
+          {
+            "value": "us_demo",
+            "label": "美国示例学院 · USD",
+            "label_en": "Example US College · USD"
+          }
+        ],
+        "default": "alex_demo",
+        "when": null
+      },
+      {
+        "name": "payee_name",
+        "label": "收款账户名称（可修改以测试核对）",
+        "label_en": "Payee account name (editable for matching tests)",
+        "type": "text",
+        "options": [],
+        "default": "Alex Morgan",
+        "when": null
+      },
+      {
+        "name": "payment_purpose",
+        "label": "付款用途",
+        "label_en": "Payment purpose",
+        "type": "select",
+        "options": [
+          {
+            "value": "living",
+            "label": "生活费用",
+            "label_en": "Living costs"
+          },
+          {
+            "value": "family",
+            "label": "亲友往来",
+            "label_en": "Family / friends"
+          },
+          {
+            "value": "tuition",
+            "label": "学费",
+            "label_en": "Tuition"
+          },
+          {
+            "value": "bill",
+            "label": "账单",
+            "label_en": "Bill"
+          },
+          {
+            "value": "other",
+            "label": "其他",
+            "label_en": "Other"
+          }
+        ],
+        "default": "living",
+        "when": null
+      },
+      {
+        "name": "execution",
+        "label": "执行安排",
+        "label_en": "Payment timing",
+        "type": "select",
+        "options": [
+          {
+            "value": "now",
+            "label": "确认后登记待处理请求",
+            "label_en": "Record for processing"
+          },
+          {
+            "value": "scheduled",
+            "label": "预约日期（模拟）",
+            "label_en": "Schedule a date (simulated)"
+          }
+        ],
+        "default": "now",
+        "when": null
+      },
+      {
+        "name": "execution_date",
+        "label": "预约日期",
+        "label_en": "Scheduled date",
+        "type": "date",
+        "options": [],
+        "default": "",
+        "when": "scheduled"
+      },
+      {
+        "name": "payee_ack",
+        "label": "我已核对名称存在细微差异，仍使用所选演示收款资料",
+        "label_en": "I reviewed the minor name difference and will use the selected demo payee",
+        "type": "checkbox",
+        "options": [],
+        "default": false,
+        "when": "close_match"
+      },
+      {
+        "name": "declaration",
+        "label": "我已核对收款资料、金额及费用，了解本次不会实际扣款",
+        "label_en": "I reviewed the payee, amount and fees; no real money will move",
+        "type": "checkbox",
+        "options": [],
+        "default": false,
+        "when": null
+      }
+    ],
+    "payers": [
+      {
+        "id": "everyday_demo",
+        "label": "日常账户 · DEMO-CUR-01",
+        "label_en": "Everyday · DEMO-CUR-01",
+        "balance": "2500.00",
+        "currency": "GBP"
+      },
+      {
+        "id": "student_demo",
+        "label": "学生账户 · DEMO-STU-01",
+        "label_en": "Student · DEMO-STU-01",
+        "balance": "1200.00",
+        "currency": "GBP"
+      }
+    ],
+    "payees": [
+      {
+        "id": "alex_demo",
+        "name": "Alex Morgan",
+        "label": "Alex · 个人收款人",
+        "label_en": "Alex · individual",
+        "type": "domestic",
+        "account_type": "personal",
+        "bank": "CampusBank Demo",
+        "country": "UK",
+        "currency": "GBP",
+        "rate": "1",
+        "routing": "DEMO-SORT-01",
+        "account": "DEMO-ACCT-ALEX"
+      },
+      {
+        "id": "tuition_demo",
+        "name": "Example University",
+        "label": "示例大学 · 学费账户",
+        "label_en": "Example University · tuition",
+        "type": "domestic",
+        "account_type": "business",
+        "bank": "CampusBank Demo",
+        "country": "UK",
+        "currency": "GBP",
+        "rate": "1",
+        "routing": "DEMO-SORT-02",
+        "account": "DEMO-ACCT-TUITION"
+      },
+      {
+        "id": "europe_demo",
+        "name": "Example EU College",
+        "label": "欧洲示例学院 · EUR",
+        "label_en": "Example EU College · EUR",
+        "type": "international",
+        "account_type": "business",
+        "bank": "Example EU Demo Bank",
+        "country": "DE",
+        "currency": "EUR",
+        "rate": "1.17",
+        "routing": "DEMO-BIC-EU",
+        "account": "DEMO-IBAN-EU-NOT-VALID"
+      },
+      {
+        "id": "us_demo",
+        "name": "Example US College",
+        "label": "美国示例学院 · USD",
+        "label_en": "Example US College · USD",
+        "type": "international",
+        "account_type": "business",
+        "bank": "Example US Demo Bank",
+        "country": "US",
+        "currency": "USD",
+        "rate": "1.28",
+        "routing": "DEMO-ROUTING-US",
+        "account": "DEMO-ACCT-US-NOT-VALID"
+      }
+    ]
+  }
+}

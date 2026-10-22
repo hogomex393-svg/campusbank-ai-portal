@@ -1,0 +1,359 @@
+{
+  "domestic": {
+    "version": 1,
+    "kind": "transfer",
+    "details": {
+      "payer": "everyday_demo",
+      "payee_profile": "alex_demo",
+      "payee_name": "Alex Morgan",
+      "payment_purpose": "living",
+      "execution": "now",
+      "execution_date": "",
+      "payee_ack": false,
+      "declaration": true
+    },
+    "summary": [
+      {
+        "label": "付款账户",
+        "label_en": "Pay from",
+        "value": "日常账户 · DEMO-CUR-01",
+        "value_en": "Everyday · DEMO-CUR-01"
+      },
+      {
+        "label": "演示可用余额",
+        "label_en": "Fictional available balance",
+        "value": "GBP 2500.00",
+        "value_en": "GBP 2500.00"
+      },
+      {
+        "label": "收款账户名称",
+        "label_en": "Payee account name",
+        "value": "Alex Morgan",
+        "value_en": "Alex Morgan"
+      },
+      {
+        "label": "收款银行／国家",
+        "label_en": "Payee bank / country",
+        "value": "CampusBank Demo / UK",
+        "value_en": "CampusBank Demo / UK"
+      },
+      {
+        "label": "收款账户类型",
+        "label_en": "Payee account type",
+        "value": "个人账户",
+        "value_en": "Personal"
+      },
+      {
+        "label": "演示路由标识",
+        "label_en": "Fictional routing identifier",
+        "value": "DEMO-SORT-01",
+        "value_en": "DEMO-SORT-01"
+      },
+      {
+        "label": "演示收款账户标识",
+        "label_en": "Fictional payee identifier",
+        "value": "DEMO-ACCT-ALEX",
+        "value_en": "DEMO-ACCT-ALEX"
+      },
+      {
+        "label": "名称核对（仅演示数据）",
+        "label_en": "Name check (fictional records only)",
+        "value": "名称一致",
+        "value_en": "Match"
+      },
+      {
+        "label": "付款用途",
+        "label_en": "Payment purpose",
+        "value": "生活费用",
+        "value_en": "Living costs"
+      },
+      {
+        "label": "执行安排",
+        "label_en": "Payment timing",
+        "value": "确认后登记待处理请求",
+        "value_en": "Record for processing"
+      },
+      {
+        "label": "转账本金",
+        "label_en": "Transfer amount",
+        "value": "GBP 100.00",
+        "value_en": "GBP 100.00"
+      },
+      {
+        "label": "演示手续费",
+        "label_en": "Fictional fee",
+        "value": "GBP 0.00",
+        "value_en": "GBP 0.00"
+      },
+      {
+        "label": "预计总扣款（模拟）",
+        "label_en": "Estimated total debit (simulation)",
+        "value": "GBP 100.00",
+        "value_en": "GBP 100.00"
+      },
+      {
+        "label": "预计剩余余额（模拟）",
+        "label_en": "Estimated remaining balance (simulation)",
+        "value": "GBP 2400.00",
+        "value_en": "GBP 2400.00"
+      },
+      {
+        "label": "预计到账（模拟）",
+        "label_en": "Estimated recipient amount (simulation)",
+        "value": "GBP 100.00",
+        "value_en": "GBP 100.00"
+      }
+    ],
+    "fictional": true,
+    "quote": {
+      "currency": "GBP",
+      "amount": "100.00",
+      "fee": "0.00",
+      "total": "100.00",
+      "available": "2500.00",
+      "estimated_after": "2400.00",
+      "receive_currency": "GBP",
+      "receive_amount": "100.00",
+      "rate": "1",
+      "fictional": true
+    },
+    "payee_match": "match"
+  },
+  "international": {
+    "version": 1,
+    "kind": "transfer",
+    "details": {
+      "payer": "everyday_demo",
+      "payee_profile": "europe_demo",
+      "payee_name": "Example EU College",
+      "payment_purpose": "living",
+      "execution": "now",
+      "execution_date": "",
+      "payee_ack": false,
+      "declaration": true
+    },
+    "summary": [
+      {
+        "label": "付款账户",
+        "label_en": "Pay from",
+        "value": "日常账户 · DEMO-CUR-01",
+        "value_en": "Everyday · DEMO-CUR-01"
+      },
+      {
+        "label": "演示可用余额",
+        "label_en": "Fictional available balance",
+        "value": "GBP 2500.00",
+        "value_en": "GBP 2500.00"
+      },
+      {
+        "label": "收款账户名称",
+        "label_en": "Payee account name",
+        "value": "Example EU College",
+        "value_en": "Example EU College"
+      },
+      {
+        "label": "收款银行／国家",
+        "label_en": "Payee bank / country",
+        "value": "Example EU Demo Bank / DE",
+        "value_en": "Example EU Demo Bank / DE"
+      },
+      {
+        "label": "收款账户类型",
+        "label_en": "Payee account type",
+        "value": "机构账户",
+        "value_en": "Business / institution"
+      },
+      {
+        "label": "演示路由标识",
+        "label_en": "Fictional routing identifier",
+        "value": "DEMO-BIC-EU",
+        "value_en": "DEMO-BIC-EU"
+      },
+      {
+        "label": "演示收款账户标识",
+        "label_en": "Fictional payee identifier",
+        "value": "DEMO-IBAN-EU-NOT-VALID",
+        "value_en": "DEMO-IBAN-EU-NOT-VALID"
+      },
+      {
+        "label": "名称核对（仅演示数据）",
+        "label_en": "Name check (fictional records only)",
+        "value": "名称一致",
+        "value_en": "Match"
+      },
+      {
+        "label": "付款用途",
+        "label_en": "Payment purpose",
+        "value": "生活费用",
+        "value_en": "Living costs"
+      },
+      {
+        "label": "执行安排",
+        "label_en": "Payment timing",
+        "value": "确认后登记待处理请求",
+        "value_en": "Record for processing"
+      },
+      {
+        "label": "转账本金",
+        "label_en": "Transfer amount",
+        "value": "GBP 100.05",
+        "value_en": "GBP 100.05"
+      },
+      {
+        "label": "演示手续费",
+        "label_en": "Fictional fee",
+        "value": "GBP 8.00",
+        "value_en": "GBP 8.00"
+      },
+      {
+        "label": "预计总扣款（模拟）",
+        "label_en": "Estimated total debit (simulation)",
+        "value": "GBP 108.05",
+        "value_en": "GBP 108.05"
+      },
+      {
+        "label": "预计剩余余额（模拟）",
+        "label_en": "Estimated remaining balance (simulation)",
+        "value": "GBP 2391.95",
+        "value_en": "GBP 2391.95"
+      },
+      {
+        "label": "演示固定汇率",
+        "label_en": "Fictional fixed exchange rate",
+        "value": "1 GBP = 1.17 EUR",
+        "value_en": "1 GBP = 1.17 EUR"
+      },
+      {
+        "label": "预计到账（模拟）",
+        "label_en": "Estimated recipient amount (simulation)",
+        "value": "EUR 117.06",
+        "value_en": "EUR 117.06"
+      }
+    ],
+    "fictional": true,
+    "quote": {
+      "currency": "GBP",
+      "amount": "100.05",
+      "fee": "8.00",
+      "total": "108.05",
+      "available": "2500.00",
+      "estimated_after": "2391.95",
+      "receive_currency": "EUR",
+      "receive_amount": "117.06",
+      "rate": "1.17",
+      "fictional": true
+    },
+    "payee_match": "match"
+  },
+  "student": {
+    "version": 1,
+    "kind": "account",
+    "details": {
+      "profile": "student_demo",
+      "employment": "student",
+      "account_purpose": "daily",
+      "funding_source": "salary",
+      "tax_residence": "UK",
+      "identity_document": "passport",
+      "address_document": "statement",
+      "student_document": "letter",
+      "debit_card": "yes",
+      "declaration": true
+    },
+    "summary": [
+      {
+        "label": "演示法定姓名",
+        "label_en": "Fictional legal name",
+        "value": "Jamie Demo",
+        "value_en": "Jamie Demo"
+      },
+      {
+        "label": "演示出生日期",
+        "label_en": "Fictional date of birth",
+        "value": "2004-06-15",
+        "value_en": "2004-06-15"
+      },
+      {
+        "label": "演示联系邮箱",
+        "label_en": "Fictional contact email",
+        "value": "jamie@example.invalid",
+        "value_en": "jamie@example.invalid"
+      },
+      {
+        "label": "演示居住地址",
+        "label_en": "Fictional residential address",
+        "value": "Room DEMO-12, Example Halls, ZZ1 1ZZ",
+        "value_en": "Room DEMO-12, Example Halls, ZZ1 1ZZ"
+      },
+      {
+        "label": "演示身份记录",
+        "label_en": "Fictional identity record",
+        "value": "DEMO-ID-STUDENT",
+        "value_en": "DEMO-ID-STUDENT"
+      },
+      {
+        "label": "演示学校",
+        "label_en": "Fictional institution",
+        "value": "Example University",
+        "value_en": "Example University"
+      },
+      {
+        "label": "职业／学习状态",
+        "label_en": "Employment / study status",
+        "value": "在读学生",
+        "value_en": "Student"
+      },
+      {
+        "label": "账户主要用途",
+        "label_en": "Main purpose",
+        "value": "日常收付款",
+        "value_en": "Everyday payments"
+      },
+      {
+        "label": "主要资金来源",
+        "label_en": "Main source of funds",
+        "value": "工资／工作收入",
+        "value_en": "Employment income"
+      },
+      {
+        "label": "税务居住地（演示）",
+        "label_en": "Tax residence (demo)",
+        "value": "英国（演示）",
+        "value_en": "United Kingdom (demo)"
+      },
+      {
+        "label": "身份证明材料",
+        "label_en": "Identity document",
+        "value": "演示护照资料已就绪",
+        "value_en": "Demo passport record ready"
+      },
+      {
+        "label": "地址证明材料",
+        "label_en": "Proof of address",
+        "value": "演示银行对账单已就绪",
+        "value_en": "Demo bank statement ready"
+      },
+      {
+        "label": "在读证明材料",
+        "label_en": "Proof of enrolment",
+        "value": "演示在读证明已就绪",
+        "value_en": "Demo enrolment letter ready"
+      },
+      {
+        "label": "是否需要配套借记卡",
+        "label_en": "Linked debit card",
+        "value": "需要演示借记卡",
+        "value_en": "Request a demo debit card"
+      },
+      {
+        "label": "材料状态",
+        "label_en": "Document status",
+        "value": "演示材料已准备，等待工作人员审核",
+        "value_en": "Demo documents ready; awaiting staff review"
+      }
+    ],
+    "fictional": true,
+    "needs_info": false,
+    "missing_fields": []
+  }
+}

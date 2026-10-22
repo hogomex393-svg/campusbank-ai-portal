@@ -11,6 +11,8 @@
 
 [中文介绍](README.zh-CN.md)
 
+**Version 2.5.0:** [richer account/transfer scenarios and blue/green banking themes](docs/realistic-scenarios-and-themes.md), including fictional applicant profiles, document readiness, name checks, fee/FX review and staff-visible details.
+
 **Version 2.4.1:** [live streamed answers](docs/streaming-answers.md), with progressive text, readable tables, and persisted final messages.
 
 **Version 2.4.0:** [general/student modes, richer replies, question chips and the application workbench](docs/dual-banking-and-workbench.md).
@@ -85,7 +87,7 @@ Online **agent**, retrieval-augmented **RAG**, model-only **LLM**, and API-free 
 
 | Check | Recorded result | Scope |
 | --- | --- | --- |
-| Python suite | **109 tests passed** | Account/session behavior, tools, language, streamed answers, history, support ownership, roles, cloud settings, quotas, and recovery. |
+| Python suite | **119 tests passed** | Account/session behavior, tools, language, streamed answers, realistic fictional forms, history, support ownership, roles, cloud settings, quotas, and recovery. |
 | Frontend workflow checks | Offline DOM assertions passed | History retention, service forms, customer/staff controls, handoff, polling updates, preserved drafts, and escaping; HTTP is mocked. |
 | FAQ retrieval | **72/78 Hit@3 (92.3%)** | Authored benchmark, offline run on 2026-10-20; two of 80 questions are not retrieval-scorable. |
 | Offline response proxy | **57/80 (71.25%)** | Lexical key-point matching; this is not a factual accuracy or usability score. |
@@ -142,6 +144,7 @@ Frontend checks additionally require Node.js 24:
 npm install --no-save --prefix .build_frontend jsdom@30.1.2
 node scripts/verify_frontend.mjs
 node scripts/verify_streaming.mjs
+node scripts/verify_scenarios.mjs
 ```
 
 The [GitHub workflow](.github/workflows/cloud-ci.yml) also builds the Docker image and verifies account, support, and persistence behavior in a disposable container. Online evaluation is opt-in and uses your configured API account.

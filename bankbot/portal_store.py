@@ -14,6 +14,7 @@ from .catalog import SERVICES
 from .dialogue import coerce_state
 from dataclasses import asdict
 from .language import detect_language
+from .scenarios import validate_scenario
 
 
 class PortalError(Exception):
@@ -64,7 +65,7 @@ class PortalStore:
             if 'test_staff' not in {r['name'] for r in c.execute('PRAGMA table_info(sessions)')}:
                 c.execute('ALTER TABLE sessions ADD COLUMN test_staff INTEGER NOT NULL DEFAULT 0')
             columns={r['name'] for r in c.execute('PRAGMA table_info(requests)')}
-            for name,default in [('bank_mode','general'),('staff_note','')]:
+            for name,default in [('bank_mode','general'),('staff_note',''),('scenario_json','null')]:
                 if name not in columns:c.execute(f"ALTER TABLE requests ADD COLUMN {name} TEXT NOT NULL DEFAULT '{default}'")
 
     @contextmanager
@@ -231,10 +232,12 @@ class PortalStore:
             clean[f['name']]=value
         return clean
 
-    def submit(self,owner,service_id,payload,chat_id=None,request_id=None,bank_mode='general'):
+    def submit(self,owner,service_id,payload,chat_id=None,request_id=None,bank_mode='general',scenario=None):
         if not owner.startswith('u:'):raise PortalError(401,'请登录后保存办理请求。')
         if chat_id:self.chat(owner,chat_id)
-        fingerprint=hashlib.sha256(json.dumps([service_id,payload,chat_id],sort_keys=True,ensure_ascii=False).encode()).hexdigest()
+        signature=[service_id,payload,chat_id]
+        if scenario is not None:signature.append(scenario)
+        fingerprint=hashlib.sha256(json.dumps(signature,sort_keys=True,ensure_ascii=False).encode()).hexdigest()
         id_='CB'+datetime.now().strftime('%y%m%d')+'-'+secrets.token_hex(4).upper()
         stamp=now()
         with self.db() as c:
@@ -245,13 +248,16 @@ class PortalStore:
                     if previous['fingerprint']!=fingerprint:raise PortalError(409,'提交标识已用于其他内容，请重新打开服务窗口。')
                     return json.loads(previous['result'])
             clean=self.validate_form(service_id,payload)
+            try:scenario_record=validate_scenario(service_id,scenario,clean,today=datetime.now(timezone.utc).date())
+            except ValueError as exc:raise PortalError(400,str(exc)) from None
             if service_id=='human_support' and chat_id and c.execute("SELECT 1 FROM tickets WHERE chat_id=? AND status IN ('waiting','active')",(chat_id,)).fetchone():
                 raise PortalError(409,'当前对话已有人工客服工单，请返回对话继续补充问题。')
             mode='student' if service_id in ('education_loan','funding_enquiry') else coerce_state(self.chat(owner,chat_id)['state']).bank_mode if chat_id else bank_mode
-            c.execute('INSERT INTO requests(id,owner,service_id,chat_id,payload,status,created_at,bank_mode) VALUES(?,?,?,?,?,?,?,?)',(id_,owner,service_id,chat_id,json.dumps(clean,ensure_ascii=False),'pending',stamp,mode))
+            status='needs_info' if scenario_record and scenario_record.get('needs_info') else 'pending'
+            c.execute('INSERT INTO requests(id,owner,service_id,chat_id,payload,status,created_at,bank_mode,scenario_json) VALUES(?,?,?,?,?,?,?,?,?)',(id_,owner,service_id,chat_id,json.dumps(clean,ensure_ascii=False),status,stamp,mode,json.dumps(scenario_record,ensure_ascii=False)))
             if service_id=='human_support':
                 c.execute('INSERT INTO tickets VALUES(?,?,?,?,?,?,?,?,?,?)',(id_,owner,chat_id,clean['subject'],clean['description'],clean['category'],'waiting',None,stamp,stamp))
-            result={'id':id_,'service_id':service_id,'title':SERVICES[service_id]['title'],'status':'pending','created_at':stamp,'payload':clean,'demo':True}
+            result={'id':id_,'service_id':service_id,'title':SERVICES[service_id]['title'],'status':status,'created_at':stamp,'payload':clean,'scenario':scenario_record,'demo':True}
             if request_id:c.execute('INSERT INTO request_submissions VALUES(?,?,?,?)',(owner,request_id,fingerprint,json.dumps(result,ensure_ascii=False)))
         if service_id=='human_support' and chat_id:
             chat=self.chat(owner,chat_id)
@@ -263,14 +269,14 @@ class PortalStore:
 
     def requests(self,owner):
         with self.db() as c:rows=[dict(r) for r in c.execute('SELECT * FROM requests WHERE owner=? ORDER BY created_at DESC',(owner,))]
-        for r in rows:r['payload']=json.loads(r['payload']);r['title']=SERVICES[r['service_id']]['title']
+        for r in rows:r['payload']=json.loads(r['payload']);r['scenario']=json.loads(r.pop('scenario_json'));r['title']=SERVICES[r['service_id']]['title']
         return rows
 
     def business_requests(self):
         with self.db() as c:
             rows=[dict(r) for r in c.execute("SELECT r.*,u.display_name AS customer_name FROM requests r LEFT JOIN users u ON r.owner='u:'||u.id WHERE r.service_id!='human_support' ORDER BY r.created_at DESC")]
         for row in rows:
-            row['payload']=json.loads(row['payload']);row['title']=SERVICES[row['service_id']]['title']
+            row['payload']=json.loads(row['payload']);row['scenario']=json.loads(row.pop('scenario_json'));row['title']=SERVICES[row['service_id']]['title']
         return rows
 
     def business_request(self,id_):

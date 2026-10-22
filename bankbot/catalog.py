@@ -51,6 +51,9 @@ BANK_REFERENCES = [
     {"name":"中国银行个人金融","url":"https://www.bankofchina.com/pbservice/","detail":"存款账户、个人贷款、汇兑与银行卡入口"},
 ]
 
+from .scenarios import SCENARIOS
+for _id,_scenario in SCENARIOS.items():SERVICES[_id]['scenario']=_scenario
+
 SERVICE_EN = {
  'education_loan':('Record a fictional tuition or living-cost loan enquiry for staff follow-up.','Demo only: no real loan or guaranteed approval. Do not submit real IDs, student numbers or account data.'),
  'funding_enquiry':('Filter fictional programs, review document guidance and send a question to staff.','Amounts and criteria are fictional examples, not real university or government policies. Confirm actual programs with the institution.'),

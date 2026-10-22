@@ -24,6 +24,7 @@ from .language import detect_language
 from .ui_runtime import reply_details
 from .errors import public_error
 from .student_finance import PROGRAMS,search_funding
+from .scenarios import validate_scenario
 
 COOKIE='campusbank_session'
 
@@ -54,6 +55,11 @@ class SubmitBody(Body):
     confirmed:bool=False
     request_id:str=Field(default_factory=lambda:uuid.uuid4().hex,pattern=r'^[a-f0-9]{32}$')
     bank_mode:str=Field(default='general',pattern=r'^(general|student)$')
+    scenario:dict|None=None
+class ScenarioBody(Body):
+    service_id:str
+    payload:dict
+    scenario:dict
 class ReplyBody(Body):text:str=Field(min_length=1,max_length=2000)
 class RoleBody(Body):portal_role:str=Field(pattern=r'^(customer|staff)$')
 
@@ -126,7 +132,7 @@ def create_app(db_path=None,service=None):
         if not who:
             token,who=store.new_session();set_cookie(response,token,req)
         return {'user':who['user'],'csrf':who['csrf'],'categories':CATEGORIES,'services':list(SERVICES.values()),
-                'bank_references':BANK_REFERENCES,'api_available':bool(settings.api_key),'version':'2.4.1','portal_role':who['portal_role'],
+                'bank_references':BANK_REFERENCES,'api_available':bool(settings.api_key),'version':'2.5.0','portal_role':who['portal_role'],
                 'open_staff_testing':settings.open_staff_testing,'testing_staff':who.get('testing_staff',False),'funding_programs':PROGRAMS,
                 'today':datetime.now(timezone.utc).date().isoformat(),
                 'requires_login':settings.cloud_mode,'registration_access_code_required':settings.cloud_mode,
@@ -300,6 +306,17 @@ def create_app(db_path=None,service=None):
     @app.get('/api/requests')
     def requests(req:Request):return store.requests(session(req)['owner'])
 
+    @app.post('/api/scenarios/preview')
+    def scenario_preview(body:ScenarioBody,req:Request):
+        mutate(req)
+        service=SERVICES.get(body.service_id)
+        if not service or not service.get('scenario'):raise PortalError(400,'没有对应服务窗口。')
+        # Preview calculates the scenario; final submission checks every actual consent.
+        preview={**body.payload,**{f['name']:True for f in service['fields'] if f['type']=='checkbox'}}
+        clean=store.validate_form(body.service_id,preview)
+        try:return validate_scenario(body.service_id,body.scenario,clean,today=datetime.now(timezone.utc).date(),confirm=False)
+        except ValueError as exc:raise PortalError(400,str(exc)) from None
+
     @app.get('/api/support-tickets')
     def customer_tickets(req:Request):return store.tickets(session(req)['owner'])
 
@@ -313,7 +330,7 @@ def create_app(db_path=None,service=None):
     def submit(body:SubmitBody,req:Request):
         who=mutate(req)
         if not body.confirmed:raise PortalError(400,'请核对信息后确认提交。')
-        return store.submit(who['owner'],body.service_id,body.payload,body.chat_id,body.request_id,body.bank_mode)
+        return store.submit(who['owner'],body.service_id,body.payload,body.chat_id,body.request_id,body.bank_mode,scenario=body.scenario)
 
     @app.get('/api/admin/requests')
     def business_requests(req:Request):admin(req);return store.business_requests()
@@ -363,7 +380,7 @@ def create_app(db_path=None,service=None):
         return {'imported':store.import_legacy(who['owner'],records)}
 
     @app.get('/api/health')
-    def health():return {'ok':True,'version':'2.4.1'}
+    def health():return {'ok':True,'version':'2.5.0'}
 
     app.mount('/assets',StaticFiles(directory=ROOT/'web'),name='assets')
     @app.get('/')
