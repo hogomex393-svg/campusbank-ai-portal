@@ -8,7 +8,8 @@ const S = {
   busy: false,
   mode: "agent",
   bankMode: localStorage.getItem("campusbank_bank_mode") || "general",
-  generalTheme:localStorage.getItem('campusbank_general_theme') || 'ruby',
+  generalTheme:localStorage.getItem('campusbank_palette_version')==='navy-20261022'
+    ? localStorage.getItem('campusbank_general_theme') || 'navy' : 'navy',
   staffTab: "tickets",
   debug: false,
   lang: localStorage.getItem("campusbank_language") || "zh",
@@ -309,7 +310,9 @@ function updateBankModeUI() {
 }
 function updateGeneralTheme() {
   const labels={blue:['亮蓝','Blue'],ruby:['酒红','Ruby'],violet:['紫色','Violet'],navy:['深蓝','Navy']};
-  if(!labels[S.generalTheme])S.generalTheme='ruby';
+  if(!labels[S.generalTheme])S.generalTheme='navy';
+  localStorage.setItem('campusbank_palette_version','navy-20261022');
+  localStorage.setItem('campusbank_general_theme',S.generalTheme);
   document.body.dataset.generalTheme=S.generalTheme;
   const picker=$('generalThemePicker');picker.hidden=S.bankMode==='student';
   picker.setAttribute('aria-label',t('社会银行配色','General banking colours'));

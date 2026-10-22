@@ -1,6 +1,6 @@
 # Realistic fictional forms and banking themes — v2.5.0
 
-Account opening and transfers now offer a fuller service journey: fill in the scenario, inspect the canonical review, confirm, and receive a request reference. General banking offers blue, ruby red, violet and navy previews in the sidebar; student banking retains green. The active mode changes the sidebar, headings, cards, conversation accents, buttons, forms and tables, and remains associated with conversation history. General palette preferences are saved in this browser; switching palettes preserves the current chat and composer text. Navy uses a dark sidebar with a light content area. New browsers start with ruby red.
+Account opening and transfers now offer a fuller service journey: fill in the scenario, inspect the canonical review, confirm, and receive a request reference. General banking defaults to navy, with blue, ruby red and violet alternatives in the sidebar; student banking retains green. The active mode changes the sidebar, headings, cards, conversation accents, buttons, forms and tables, and remains associated with conversation history. General palette preferences are saved in this browser; switching palettes preserves the current chat and composer text. Navy uses a dark sidebar with a light content area. A one-time preference migration applies the team's selected navy default; subsequent choices remain saved. History titles use larger light text, selected titles use dark text on a pale background, and hover/focus states retain readable contrast.
 
 ## Reference journeys
 
