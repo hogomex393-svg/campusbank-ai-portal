@@ -1372,29 +1372,11 @@ label textarea::placeholder {
   max-height: 45vh;
 }
 
-/* General banking palette previews. Student banking retains the green palette. */
-body[data-bank-mode="general"][data-general-theme="ruby"] {
- --bg:#fffafa; --side:#fbf0f2; --ink:#3e2630; --muted:#8b6a74; --line:#eedce1; --accent:#b6344b; --soft:#fae8ed; --navy:#81283b;
- --theme-tab:#f3dfe5; --theme-chip:#fff2f5; --theme-hover:#f8e1e8; --theme-border:#d68c9b; --theme-table:#fbeaf0; --theme-row:#fff7f9; --theme-field:#fffdfd; --theme-hover-accent:#92283c;
-}
-body[data-bank-mode="general"][data-general-theme="violet"] {
- --bg:#fcfaff; --side:#f2edfa; --ink:#322a45; --muted:#7e7295; --line:#e4dcef; --accent:#7650c4; --soft:#eee6fb; --navy:#56368a;
- --theme-tab:#e7ddf6; --theme-chip:#f6f1ff; --theme-hover:#ebe1fb; --theme-border:#b29ad9; --theme-table:#f0e9fc; --theme-row:#faf7ff; --theme-field:#fefcff; --theme-hover-accent:#5c3b9e;
-}
+/* General banking uses the selected navy palette; student banking stays green. */
 body[data-bank-mode="general"][data-general-theme="navy"] {
  --bg:#f9fbfe; --side:#112b4b; --ink:#23354d; --muted:#6d8097; --line:#d9e2ed; --accent:#285887; --soft:#e5edf6; --navy:#163654;
  --theme-tab:#dce7f2; --theme-chip:#eef3fa; --theme-hover:#e0eaf6; --theme-border:#8da8c5; --theme-table:#e8f0f8; --theme-row:#f4f7fc; --theme-field:#fbfdff; --theme-hover-accent:#1a4065;
 }
-.theme-picker { margin:0 16px 15px; flex-shrink:0; }
-.theme-picker>span { display:block; color:var(--muted); font-size:10px; margin:0 4px 7px; }
-.theme-choices { display:flex; gap:4px; }
-.theme-choice { flex:1; display:flex; align-items:center; justify-content:center; gap:5px; font-size:10px; padding:7px 3px; border-radius:8px; border:1px solid transparent; color:var(--muted); white-space:nowrap; }
-.theme-choice::before { content:""; width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-.theme-choice[data-theme="blue"]::before { background:#235cdb; }
-.theme-choice[data-theme="ruby"]::before { background:#b6344b; }
-.theme-choice[data-theme="violet"]::before { background:#7650c4; }
-.theme-choice[data-theme="navy"]::before { background:#163654; }
-.theme-choice[aria-pressed="true"] { background:white; border-color:var(--line); color:var(--accent); box-shadow:0 2px 8px #152c4210; font-weight:650; }
 body[data-bank-mode="general"][data-general-theme="navy"] .sidebar { color:#e7eef8; --muted:#adbed3; --line:#34516f; }
 body[data-bank-mode="general"][data-general-theme="navy"] .sidebar .brand-mark { background:#e8f0fb; color:#163654; }
 body[data-bank-mode="general"][data-general-theme="navy"] .sidebar .business-nav button,body[data-bank-mode="general"][data-general-theme="navy"] .sidebar .business-nav .icon,body[data-bank-mode="general"][data-general-theme="navy"] .sidebar .section-title span,body[data-bank-mode="general"][data-general-theme="navy"] .sidebar .history-group { color:#b9c9df; }
@@ -1404,7 +1386,6 @@ body[data-bank-mode="general"][data-general-theme="navy"] .sidebar .new-chat { b
 body[data-bank-mode="general"][data-general-theme="navy"] .sidebar .nav-item:hover,body[data-bank-mode="general"][data-general-theme="navy"] .sidebar .business-nav button:hover,body[data-bank-mode="general"][data-general-theme="navy"] .sidebar .utility:hover { background:#24476a; }
 body[data-bank-mode="general"][data-general-theme="navy"] .sidebar .bank-mode-switch { background:#203d60; }
 body[data-bank-mode="general"][data-general-theme="navy"] .sidebar .bank-mode-switch button.active { color:#163654; }
-body[data-bank-mode="general"][data-general-theme="navy"] .sidebar .theme-choice[data-theme="navy"]::before { background:#5c8fc0; }
 /* Keep every history state legible against the navy sidebar. */
 body[data-bank-mode="general"][data-general-theme="navy"] .sidebar .history-entry > button:first-child { color:#e8effb; font-size:13px; font-weight:500; }
 body[data-bank-mode="general"][data-general-theme="navy"] .sidebar .history-entry:hover { background:#25486d; }

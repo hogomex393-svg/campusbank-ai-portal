@@ -8,8 +8,6 @@ const S = {
   busy: false,
   mode: "agent",
   bankMode: localStorage.getItem("campusbank_bank_mode") || "general",
-  generalTheme:localStorage.getItem('campusbank_palette_version')==='navy-20261022'
-    ? localStorage.getItem('campusbank_general_theme') || 'navy' : 'navy',
   staffTab: "tickets",
   debug: false,
   lang: localStorage.getItem("campusbank_language") || "zh",
@@ -306,23 +304,7 @@ function updateBankModeUI() {
   $("bankModeHint").textContent=student?t("账户、学费与学习生活支持","Accounts, tuition and student support"):t("日常生活与个人金融服务","Everyday and personal finance");
   document.body.dataset.bankMode=S.bankMode;
   localStorage.setItem("campusbank_bank_mode",S.bankMode);
-  updateGeneralTheme();
-}
-function updateGeneralTheme() {
-  const labels={blue:['亮蓝','Blue'],ruby:['酒红','Ruby'],violet:['紫色','Violet'],navy:['深蓝','Navy']};
-  if(!labels[S.generalTheme])S.generalTheme='navy';
-  localStorage.setItem('campusbank_palette_version','navy-20261022');
-  localStorage.setItem('campusbank_general_theme',S.generalTheme);
-  document.body.dataset.generalTheme=S.generalTheme;
-  const picker=$('generalThemePicker');picker.hidden=S.bankMode==='student';
-  picker.setAttribute('aria-label',t('社会银行配色','General banking colours'));
-  $('themePickerLabel').textContent=t('配色预览','Try a colour');
-  for(const b of picker.querySelectorAll('button')){
-    const [zh,en]=labels[b.dataset.theme];b.textContent=t(zh,en);
-    b.setAttribute('aria-label',t(zh+'配色',en+' theme'));
-    b.setAttribute('aria-pressed',String(b.dataset.theme===S.generalTheme));
-    b.onclick=()=>{S.generalTheme=b.dataset.theme;localStorage.setItem('campusbank_general_theme',S.generalTheme);updateGeneralTheme();};
-  }
+  document.body.dataset.generalTheme='navy';
 }
 async function switchBankMode(mode) {
   if (S.busy || S.bankMode===mode) return;
