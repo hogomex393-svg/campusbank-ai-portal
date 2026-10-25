@@ -26,6 +26,7 @@ jobs:
           node scripts/verify_frontend.mjs
           node scripts/verify_streaming.mjs
           node scripts/verify_scenarios.mjs
+          node scripts/verify_review_ui.mjs
       - name: Build the deployment image
         run: docker build -t campusbank-ci .
       - name: Verify Docker workflow and persistent records

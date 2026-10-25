@@ -28,4 +28,4 @@ def reply_details(reply, user_text, previous_language="en"):
         "latency_ms": getattr(reply, "latency_ms", 0), "api_calls": getattr(reply, "api_calls", 0),
         "usage": getattr(reply, "usage", {}), "error": getattr(reply, "error", None),
         "language_corrections": getattr(reply, "language_corrections", 0),
-        "followups":getattr(reply,'followups',[])}
+        "followups":getattr(reply,'followups',[]),"sources":getattr(reply,'sources',[]),"consistency_corrections":getattr(reply,'consistency_corrections',0)}

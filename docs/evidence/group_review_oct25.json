@@ -1,0 +1,49 @@
+{
+  "version": "2.6.0",
+  "date": "2026-10-25",
+  "python_tests_passed": 133,
+  "frontend_suites_passed": 4,
+  "mobile_viewport": "375x812",
+  "mobile_close_button_overlay_escape": true,
+  "mobile_helper_min_px": 12,
+  "mobile_horizontal_overflow": false,
+  "offline": {
+    "offline": {
+      "turns": 59,
+      "structured_proxy_passed": 59,
+      "online_errors": 0,
+      "api_calls": 0
+    }
+  },
+  "matched_sample": {
+    "agent": {
+      "turns": 10,
+      "structured_proxy_passed": 10,
+      "online_errors": 0,
+      "api_calls": 15
+    },
+    "rag": {
+      "turns": 10,
+      "structured_proxy_passed": 10,
+      "online_errors": 0,
+      "api_calls": 10
+    },
+    "llm": {
+      "turns": 10,
+      "structured_proxy_passed": 10,
+      "online_errors": 0,
+      "api_calls": 10
+    },
+    "offline": {
+      "turns": 10,
+      "structured_proxy_passed": 10,
+      "online_errors": 0,
+      "api_calls": 0
+    }
+  },
+  "limitations": [
+    "Authored regression proxies, not overall accuracy.",
+    "No independent participant or naturalness scoring.",
+    "Classroom twenty-minute test uses simulated time."
+  ]
+}

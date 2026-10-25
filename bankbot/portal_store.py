@@ -50,6 +50,10 @@ class PortalStore:
                 fingerprint TEXT NOT NULL, result TEXT NOT NULL, PRIMARY KEY(owner,request_key));
             CREATE TABLE IF NOT EXISTS request_events(id INTEGER PRIMARY KEY AUTOINCREMENT,request_id TEXT NOT NULL,
                 actor TEXT NOT NULL,status TEXT NOT NULL,note TEXT NOT NULL,created_at TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS answer_feedback(message_id INTEGER NOT NULL,owner TEXT NOT NULL,helpful INTEGER NOT NULL,
+                reason TEXT NOT NULL,comment TEXT NOT NULL,updated_at TEXT NOT NULL,PRIMARY KEY(message_id,owner));
+            CREATE TABLE IF NOT EXISTS request_revisions(id INTEGER PRIMARY KEY AUTOINCREMENT,request_id TEXT NOT NULL,
+                action TEXT NOT NULL,before_json TEXT NOT NULL,after_json TEXT NOT NULL,created_at TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS tickets(id TEXT PRIMARY KEY, owner TEXT NOT NULL, chat_id TEXT,
                 subject TEXT NOT NULL, description TEXT NOT NULL, category TEXT NOT NULL,
                 status TEXT NOT NULL, assigned_to TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
@@ -67,6 +71,8 @@ class PortalStore:
             columns={r['name'] for r in c.execute('PRAGMA table_info(requests)')}
             for name,default in [('bank_mode','general'),('staff_note',''),('scenario_json','null')]:
                 if name not in columns:c.execute(f"ALTER TABLE requests ADD COLUMN {name} TEXT NOT NULL DEFAULT '{default}'")
+            for table in ('chats','requests'):
+                if 'archived' not in {r['name'] for r in c.execute('PRAGMA table_info('+table+')')}:c.execute('ALTER TABLE '+table+' ADD COLUMN archived INTEGER NOT NULL DEFAULT 0')
 
     @contextmanager
     def db(self):
@@ -163,7 +169,7 @@ class PortalStore:
     def create_chat(self,owner,title='新对话',bank_mode='general'):
         id_=ident();stamp=now()
         state=coerce_state();state.bank_mode=bank_mode
-        with self.db() as c:c.execute('INSERT INTO chats VALUES(?,?,?,?,?,?)',(id_,owner,title,json.dumps(asdict(state)),stamp,stamp))
+        with self.db() as c:c.execute('INSERT INTO chats(id,owner,title,state_json,created_at,updated_at) VALUES(?,?,?,?,?,?)',(id_,owner,title,json.dumps(asdict(state)),stamp,stamp))
         return self.chat(owner,id_)
 
     def chat(self,owner,id_):
@@ -174,12 +180,32 @@ class PortalStore:
             ticket=c.execute("SELECT id,status FROM tickets WHERE chat_id=? AND status IN ('waiting','active') ORDER BY created_at DESC LIMIT 1",(id_,)).fetchone()
         result=dict(row);result['state']=json.loads(result.pop('state_json'))
         for m in messages:m['metadata']=json.loads(m['metadata'])
+        with self.db() as c:
+            feedback={r['message_id']:dict(r) for r in c.execute('SELECT message_id,helpful,reason,comment FROM answer_feedback WHERE owner=?',(owner,))}
+        for m in messages:
+            if m['id'] in feedback:m['feedback']=feedback[m['id']]
         result['messages']=messages;result['ticket']=dict(ticket) if ticket else None
         return result
 
-    def chats(self,owner):
+    def chats(self,owner,archived=False):
         with self.db() as c:
-            return [dict(r) for r in c.execute('SELECT id,title,created_at,updated_at FROM chats WHERE owner=? ORDER BY updated_at DESC',(owner,))]
+            return [dict(r) for r in c.execute('SELECT id,title,created_at,updated_at,archived FROM chats WHERE owner=? AND archived=? ORDER BY updated_at DESC',(owner,int(archived)))]
+
+    def archive_chat(self,owner,id_,archived):
+        chat=self.chat(owner,id_)
+        if archived and chat['ticket']:raise PortalError(409,'请先结束当前人工客服工单。')
+        with self.db() as c:c.execute('UPDATE chats SET archived=? WHERE id=?',(int(archived),id_))
+        return {'id':id_,'archived':archived}
+
+    def save_feedback(self,owner,chat_id,message_id,helpful,reason,comment):
+        self.chat(owner,chat_id)
+        if reason not in ('helpful','irrelevant','missing_details','misunderstood','incorrect','other'):raise PortalError(400,'请选择有效的反馈原因。')
+        if helpful!=(reason=='helpful'):raise PortalError(400,'反馈选项与原因不一致。')
+        with self.db() as c:
+            message=c.execute("SELECT metadata FROM messages WHERE id=? AND chat_id=? AND role='assistant'",(message_id,chat_id)).fetchone()
+            if not message or json.loads(message['metadata']).get('sender') in ('staff','service'):raise PortalError(400,'只能评价 AI 咨询回答。')
+            c.execute('INSERT INTO answer_feedback VALUES(?,?,?,?,?,?) ON CONFLICT(message_id,owner) DO UPDATE SET helpful=excluded.helpful,reason=excluded.reason,comment=excluded.comment,updated_at=excluded.updated_at',(message_id,owner,int(helpful),reason,comment.strip(),now()))
+        return {'message_id':message_id,'helpful':helpful,'reason':reason,'comment':comment.strip()}
 
     def rename_chat(self,owner,id_,title):
         self.chat(owner,id_)
@@ -188,7 +214,7 @@ class PortalStore:
     def append_message(self,id_,role,content,metadata=None):
         with self.db() as c:
             c.execute('INSERT INTO messages(chat_id,role,content,metadata,created_at) VALUES(?,?,?,?,?)',(id_,role,content,json.dumps(metadata or {},ensure_ascii=False),now()))
-            c.execute('UPDATE chats SET updated_at=? WHERE id=?',(now(),id_))
+            c.execute("UPDATE chats SET updated_at=?,archived=CASE WHEN ?='user' THEN 0 ELSE archived END WHERE id=?",(now(),role,id_))
             c.execute("UPDATE tickets SET updated_at=? WHERE chat_id=? AND status IN ('waiting','active')",(now(),id_))
 
     def update_state(self,id_,state):
@@ -267,14 +293,15 @@ class PortalStore:
             self.append_message(chat_id,'assistant',message,{'sender':'service','ticket_id':id_})
         return result
 
-    def requests(self,owner):
-        with self.db() as c:rows=[dict(r) for r in c.execute('SELECT * FROM requests WHERE owner=? ORDER BY created_at DESC',(owner,))]
+    def requests(self,owner,archived=False):
+        with self.db() as c:rows=[dict(r) for r in c.execute('SELECT * FROM requests WHERE owner=? AND archived=? ORDER BY created_at DESC',(owner,int(archived)))]
         for r in rows:r['payload']=json.loads(r['payload']);r['scenario']=json.loads(r.pop('scenario_json'));r['title']=SERVICES[r['service_id']]['title']
         return rows
 
-    def business_requests(self):
+    def business_requests(self,archived=None):
         with self.db() as c:
             rows=[dict(r) for r in c.execute("SELECT r.*,u.display_name AS customer_name FROM requests r LEFT JOIN users u ON r.owner='u:'||u.id WHERE r.service_id!='human_support' ORDER BY r.created_at DESC")]
+        if archived is not None:rows=[r for r in rows if bool(r['archived'])==archived]
         for row in rows:
             row['payload']=json.loads(row['payload']);row['scenario']=json.loads(row.pop('scenario_json'));row['title']=SERVICES[row['service_id']]['title']
         return rows
@@ -285,6 +312,14 @@ class PortalStore:
         with self.db() as c:row['events']=[dict(r) for r in c.execute('SELECT actor,status,note,created_at FROM request_events WHERE request_id=? ORDER BY id',(id_,))]
         return row
 
+    def own_request(self,owner,id_):
+        with self.db() as c:
+            raw=c.execute('SELECT * FROM requests WHERE owner=? AND id=?',(owner,id_)).fetchone()
+            if not raw:raise PortalError(404,'业务申请不存在。')
+            row=dict(raw);row['payload']=json.loads(row['payload']);row['scenario']=json.loads(row.pop('scenario_json'));row['title']=SERVICES[row['service_id']]['title']
+            row['events']=[dict(e) for e in c.execute('SELECT actor,status,note,created_at FROM request_events WHERE request_id=? ORDER BY id',(id_,))]
+        return row
+
     def review_request(self,id_,user,status,note):
         if status not in ('processing','completed','needs_info'):raise PortalError(400,'请选择有效的业务处理状态。')
         if not isinstance(note,str) or len(note)>2000:raise PortalError(400,'处理备注最长2000字。')
@@ -293,9 +328,50 @@ class PortalStore:
             c.execute('BEGIN IMMEDIATE')
             row=c.execute("SELECT * FROM requests WHERE id=? AND service_id!='human_support'",(id_,)).fetchone()
             if not row:raise PortalError(404,'业务申请不存在。')
+            if row['status']=='cancelled':raise PortalError(409,'这项申请已经撤回。')
             c.execute('UPDATE requests SET status=?,staff_note=? WHERE id=?',(status,note.strip(),id_))
             c.execute('INSERT INTO request_events(request_id,actor,status,note,created_at) VALUES(?,?,?,?,?)',(id_,user['display_name'],status,note.strip(),now()))
         return self.business_request(id_)
+
+    def archive_request(self,owner,id_,archived):
+        with self.db() as c:
+            row=c.execute('SELECT * FROM requests WHERE owner=? AND id=?',(owner,id_)).fetchone()
+            if not row:raise PortalError(404,'业务申请不存在。')
+            if archived and row['status'] not in ('completed','cancelled'):raise PortalError(409,'只能归档已完成或已撤回的申请。')
+            c.execute('UPDATE requests SET archived=? WHERE id=?',(int(archived),id_))
+        return {'id':id_,'archived':archived}
+
+    def customer_request_action(self,owner,id_,action,payload,scenario,request_key):
+        signature=hashlib.sha256(json.dumps([id_,action,payload,scenario],sort_keys=True,ensure_ascii=False).encode()).hexdigest()
+        with self.db() as c:
+            c.execute('BEGIN IMMEDIATE')
+            row=c.execute("SELECT * FROM requests WHERE owner=? AND id=? AND service_id!='human_support'",(owner,id_)).fetchone()
+            if not row:raise PortalError(404,'业务申请不存在。')
+            prior=c.execute('SELECT * FROM request_submissions WHERE owner=? AND request_key=?',(owner,request_key)).fetchone()
+            if prior:
+                if prior['fingerprint']!=signature:raise PortalError(409,'提交标识已用于其他内容，请重新打开服务窗口。')
+                return json.loads(prior['result'])
+            if row['status'] in ('completed','cancelled'):raise PortalError(409,'这项申请已结束，不能再修改。')
+            before={'payload':json.loads(row['payload']),'scenario':json.loads(row['scenario_json']),'status':row['status']}
+            if action=='supplement':
+                if row['status']!='needs_info':raise PortalError(409,'工作人员标记待补充资料后才能补充。')
+                clean=self.validate_form(row['service_id'],payload)
+                try:record=validate_scenario(row['service_id'],scenario,clean,today=datetime.now(timezone.utc).date())
+                except ValueError as exc:raise PortalError(400,str(exc)) from None
+                if before['scenario'] and not record:raise PortalError(400,'请保留原申请的场景资料。')
+                status='needs_info' if record and record.get('needs_info') else 'pending'
+                c.execute('UPDATE requests SET payload=?,scenario_json=?,status=?,archived=0 WHERE id=?',(json.dumps(clean,ensure_ascii=False),json.dumps(record,ensure_ascii=False),status,id_))
+                note='客户补充了演示资料，保留原申请编号。'
+            elif action=='withdraw':
+                clean=before['payload'];record=before['scenario'];status='cancelled'
+                c.execute("UPDATE requests SET status='cancelled' WHERE id=?",(id_,));note='客户撤回演示申请。'
+            else:raise PortalError(400,'请选择有效的申请操作。')
+            after={'payload':clean,'scenario':record,'status':status}
+            c.execute('INSERT INTO request_revisions(request_id,action,before_json,after_json,created_at) VALUES(?,?,?,?,?)',(id_,action,json.dumps(before,ensure_ascii=False),json.dumps(after,ensure_ascii=False),now()))
+            c.execute('INSERT INTO request_events(request_id,actor,status,note,created_at) VALUES(?,?,?,?,?)',(id_,'Customer',status,note,now()))
+            result={'id':id_,'service_id':row['service_id'],'payload':clean,'scenario':record,'status':status,'demo':True}
+            c.execute('INSERT INTO request_submissions VALUES(?,?,?,?)',(owner,request_key,signature,json.dumps(result,ensure_ascii=False)))
+        return result
 
     def tickets(self,owner=None):
         query='''SELECT t.*,u.display_name AS customer_name,u.username AS customer_username,
@@ -357,7 +433,7 @@ class PortalStore:
             title=next((m['content'][:35] for m in display if m.get('role')=='user'),'旧版会话')
             with self.db() as c:
                 if c.execute('SELECT 1 FROM chats WHERE id=?',(id_,)).fetchone():continue
-                c.execute('INSERT INTO chats VALUES(?,?,?,?,?,?)',(id_,owner,title,json.dumps(asdict(state),ensure_ascii=False),record['time'],record['time']))
+                c.execute('INSERT INTO chats(id,owner,title,state_json,created_at,updated_at) VALUES(?,?,?,?,?,?)',(id_,owner,title,json.dumps(asdict(state),ensure_ascii=False),record['time'],record['time']))
                 for m in display:
                     if m.get('role') in ('user','assistant') and isinstance(m.get('content'),str):
                         c.execute('INSERT INTO messages(chat_id,role,content,metadata,created_at) VALUES(?,?,?,?,?)',(id_,m['role'],m['content'],json.dumps(m.get('details',{}),ensure_ascii=False),record['time']))

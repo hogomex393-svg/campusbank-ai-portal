@@ -1,0 +1,718 @@
+[
+  {
+    "id": "FX_ZH",
+    "category": "quote",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "模拟国际转账100英镑，一共扣多少？",
+        "expect": {
+          "service": "transfer_demo",
+          "contains": [
+            "108.00",
+            "117.00"
+          ]
+        }
+      },
+      {
+        "input": "改成五百英镑",
+        "expect": {
+          "fields": {
+            "amount": "500",
+            "transfer_type": "international"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "FX_EN",
+    "category": "quote",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "Simulate an international transfer of GBP 100 to Alex. What is the total debit?",
+        "expect": {
+          "service": "transfer_demo",
+          "contains": [
+            "108.00",
+            "117.00"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "USD_ZH",
+    "category": "quote",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "给Alex模拟国际转账100英镑，收款币种USD。",
+        "expect": {
+          "contains": [
+            "128.00"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "DOMESTIC_EN",
+    "category": "quote",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "Simulate a domestic transfer of GBP 100 to Sam.",
+        "expect": {
+          "service": "transfer_demo",
+          "fields": {
+            "amount": "100",
+            "transfer_type": "domestic"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "SLOT_ZH",
+    "category": "slots",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "模拟国际转账100英镑，准备窗口。",
+        "expect": {
+          "service": "transfer_demo"
+        }
+      },
+      {
+        "input": "Alex",
+        "expect": {
+          "fields": {
+            "recipient": "Alex",
+            "amount": "100"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "NEG_ZH",
+    "category": "negation",
+    "bank_mode": "student",
+    "turns": [
+      {
+        "input": "我不想借钱，只看不用偿还的资助，帮我打开合适的窗口，学习阶段选本科。",
+        "expect": {
+          "service": "funding_enquiry",
+          "exclude_loan": true,
+          "fields": {
+            "study_level": "undergraduate"
+          }
+        }
+      },
+      {
+        "input": "那需要什么材料？",
+        "expect": {
+          "exclude_loan": true
+        }
+      },
+      {
+        "input": "贷款也可以看看",
+        "expect": {
+          "service": "education_loan"
+        }
+      }
+    ]
+  },
+  {
+    "id": "NEG_EN",
+    "category": "negation",
+    "bank_mode": "student",
+    "turns": [
+      {
+        "input": "I do not want loans. Show scholarships and grants, undergraduate level, and open the enquiry.",
+        "expect": {
+          "service": "funding_enquiry",
+          "exclude_loan": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "SCHOLARSHIP_ZH",
+    "category": "funding",
+    "bank_mode": "student",
+    "turns": [
+      {
+        "input": "帮我查询本科奖学金，打开窗口。",
+        "expect": {
+          "service": "funding_enquiry",
+          "fields": {
+            "funding_type": "scholarship",
+            "study_level": "undergraduate"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "GRANT_EN",
+    "category": "funding",
+    "bank_mode": "student",
+    "turns": [
+      {
+        "input": "Show postgraduate student grants and open the enquiry window.",
+        "expect": {
+          "service": "funding_enquiry",
+          "fields": {
+            "funding_type": "grants",
+            "study_level": "postgraduate"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "LOAN_ZH",
+    "category": "funding",
+    "bank_mode": "student",
+    "turns": [
+      {
+        "input": "助学贷款需要什么材料？",
+        "expect": {
+          "service": "education_loan"
+        }
+      }
+    ]
+  },
+  {
+    "id": "LOAN_EN",
+    "category": "funding",
+    "bank_mode": "student",
+    "turns": [
+      {
+        "input": "How do student loan repayments and interest work?",
+        "expect": {
+          "service": "education_loan"
+        }
+      }
+    ]
+  },
+  {
+    "id": "LOST_ZH",
+    "category": "card",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "我的银行卡丢了，怎么办？",
+        "expect": {
+          "card_followups": true,
+          "service": "replace_card",
+          "not_sources": [
+            "CARD_PIN",
+            "CARD_ACTIVATE",
+            "CARD_DECLINED"
+          ]
+        }
+      },
+      {
+        "input": "补办要多少钱？现在已经冻结了吗？",
+        "expect": {
+          "card_followups": true,
+          "service": "replace_card",
+          "not_sources": [
+            "CARD_PIN",
+            "CARD_ACTIVATE",
+            "CARD_DECLINED"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "LOST_EN",
+    "category": "card",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "I lost my debit card. Can this portal freeze it?",
+        "expect": {
+          "card_followups": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "REPLACE_ZH",
+    "category": "card",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "补卡演示需要填写哪些内容？",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "REPLACE_EN",
+    "category": "card",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "How much does a replacement debit card cost?",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "STUDENT_ZH",
+    "category": "retrieval",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "学生账户有什么月费和资格？",
+        "expect": {
+          "not_sources": [
+            "CARD_CREDIT_FEES",
+            "LOAN_ELIGIBILITY"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "STUDENT_EN",
+    "category": "retrieval",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "What are the student account fees and eligibility?",
+        "expect": {
+          "not_sources": [
+            "CARD_CREDIT_FEES",
+            "LOAN_ELIGIBILITY"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "DOCS_ZH",
+    "category": "account",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "学生账户开户需要哪些材料？",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "DOCS_EN",
+    "category": "account",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "What documents are needed for a student account?",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "OPEN_ZH",
+    "category": "account",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "我要在线开学生账户，请准备窗口。",
+        "expect": {
+          "service": "open_account",
+          "fields": {
+            "product": "student_account",
+            "channel": "online"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "OPEN_EN",
+    "category": "account",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "Open an everyday account online and prepare the form.",
+        "expect": {
+          "service": "open_account",
+          "fields": {
+            "product": "everyday_account",
+            "channel": "online"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "COMPARE_ZH",
+    "category": "account",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "比较学生账户和日常账户的费用、年龄、材料。",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "COMPARE_EN",
+    "category": "account",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "Compare student and everyday accounts in a table.",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "MIN_ZH",
+    "category": "boundary",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "学生账户最低开户存款是多少？",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "MIN_EN",
+    "category": "boundary",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "What is the minimum opening deposit for a student account?",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "BRANCH_ZH",
+    "category": "branch",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "伦敦网点在哪里，几点营业？",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "BRANCH_EN",
+    "category": "branch",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "Where is the Lancaster branch and what are its hours?",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "UNKNOWN_BRANCH_ZH",
+    "category": "boundary",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "在上海有网点吗？",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "UNKNOWN_BRANCH_EN",
+    "category": "boundary",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "Where is the branch in Oxford?",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "APPOINTMENT_ZH",
+    "category": "slots",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "预约伦敦2030年11月2日，咨询学生账户。",
+        "expect": {
+          "service": "branch_appointment"
+        }
+      },
+      {
+        "input": "改成曼彻斯特",
+        "expect": {
+          "fields": {
+            "city": "Manchester",
+            "date": "2030-11-02"
+          },
+          "service": "branch_appointment"
+        }
+      }
+    ]
+  },
+  {
+    "id": "APPOINTMENT_EN",
+    "category": "branch",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "Book a branch appointment in London on 2030-11-02.",
+        "expect": {
+          "service": "branch_appointment"
+        }
+      }
+    ]
+  },
+  {
+    "id": "HUMAN_ZH",
+    "category": "handoff",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "转人工客服",
+        "expect": {
+          "service": "human_support"
+        }
+      }
+    ]
+  },
+  {
+    "id": "HUMAN_EN",
+    "category": "handoff",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "I want to speak to a human support agent.",
+        "expect": {
+          "service": "human_support"
+        }
+      }
+    ]
+  },
+  {
+    "id": "NO_HUMAN_ZH",
+    "category": "negation",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "不用转人工，告诉我学生账户月费。",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "NO_HUMAN_EN",
+    "category": "negation",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "Do not transfer me to a human. What is the student account fee?",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "SAVINGS_ZH",
+    "category": "savings",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "储蓄账户利率和最低存款是多少？",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "SAVINGS_EN",
+    "category": "savings",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "What are the savings account interest and minimum opening deposit?",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "LOAN_PERSONAL_ZH",
+    "category": "loan",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "个人贷款申请需要哪些材料？",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "LOAN_PERSONAL_EN",
+    "category": "loan",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "Who is eligible for the personal loan?",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "DIGITAL_ZH",
+    "category": "digital",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "忘记网银密码该怎么办？",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "DIGITAL_EN",
+    "category": "digital",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "I forgot my online banking password. What should I do?",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "PRIVACY_ZH",
+    "category": "boundary",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "你需要我的银行卡密码吗？",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "PRIVACY_EN",
+    "category": "boundary",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "Should I enter my real account number or PIN here?",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "GREETING_ZH",
+    "category": "smalltalk",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "你好",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "GREETING_EN",
+    "category": "smalltalk",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "Hello",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "OFFTOPIC_ZH",
+    "category": "boundary",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "帮我写一首诗",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "OFFTOPIC_EN",
+    "category": "boundary",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "Can you help me cook dinner?",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "FEE_SWITCH_ZH",
+    "category": "context",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "学生账户月费是多少？",
+        "expect": {}
+      },
+      {
+        "input": "改问日常账户呢？",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "LANGUAGE_SWITCH",
+    "category": "context",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "学生账户开户需要什么材料？",
+        "expect": {}
+      },
+      {
+        "input": "What about the monthly fee?",
+        "expect": {}
+      }
+    ]
+  },
+  {
+    "id": "COMPLETE_TRANSFER_EN",
+    "category": "slots",
+    "bank_mode": "general",
+    "turns": [
+      {
+        "input": "Simulate an international transfer of GBP 2000 to Sam.",
+        "expect": {
+          "service": "transfer_demo",
+          "fields": {
+            "amount": "2000",
+            "recipient": "Sam",
+            "transfer_type": "international"
+          }
+        }
+      },
+      {
+        "input": "Change the amount to 500.",
+        "expect": {
+          "fields": {
+            "amount": "500",
+            "recipient": "Sam",
+            "transfer_type": "international"
+          }
+        }
+      }
+    ]
+  }
+]

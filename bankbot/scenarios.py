@@ -2,6 +2,10 @@
 from datetime import date
 from decimal import Decimal, ROUND_HALF_UP
 from difflib import SequenceMatcher
+import json
+from pathlib import Path
+
+TRANSFER_POLICY=json.loads((Path(__file__).resolve().parents[1]/'data/transfer_policy.json').read_text(encoding='utf-8'))
 
 
 def choice(value,zh,en):return {'value':value,'label':zh,'label_en':en}
@@ -21,8 +25,8 @@ PAYERS=[
 PAYEES=[
  {'id':'alex_demo','name':'Alex Morgan','label':'Alex · 个人收款人','label_en':'Alex · individual','type':'domestic','account_type':'personal','bank':'CampusBank Demo','country':'UK','currency':'GBP','rate':'1','routing':'DEMO-SORT-01','account':'DEMO-ACCT-ALEX'},
  {'id':'tuition_demo','name':'Example University','label':'示例大学 · 学费账户','label_en':'Example University · tuition','type':'domestic','account_type':'business','bank':'CampusBank Demo','country':'UK','currency':'GBP','rate':'1','routing':'DEMO-SORT-02','account':'DEMO-ACCT-TUITION'},
- {'id':'europe_demo','name':'Example EU College','label':'欧洲示例学院 · EUR','label_en':'Example EU College · EUR','type':'international','account_type':'business','bank':'Example EU Demo Bank','country':'DE','currency':'EUR','rate':'1.17','routing':'DEMO-BIC-EU','account':'DEMO-IBAN-EU-NOT-VALID'},
- {'id':'us_demo','name':'Example US College','label':'美国示例学院 · USD','label_en':'Example US College · USD','type':'international','account_type':'business','bank':'Example US Demo Bank','country':'US','currency':'USD','rate':'1.28','routing':'DEMO-ROUTING-US','account':'DEMO-ACCT-US-NOT-VALID'},
+ {'id':'europe_demo','name':'Example EU College','label':'欧洲示例学院 · EUR','label_en':'Example EU College · EUR','type':'international','account_type':'business','bank':'Example EU Demo Bank','country':'DE','currency':'EUR','rate':TRANSFER_POLICY['rates']['EUR'],'routing':'DEMO-BIC-EU','account':'DEMO-IBAN-EU-NOT-VALID'},
+ {'id':'us_demo','name':'Example US College','label':'美国示例学院 · USD','label_en':'Example US College · USD','type':'international','account_type':'business','bank':'Example US Demo Bank','country':'US','currency':'USD','rate':TRANSFER_POLICY['rates']['USD'],'routing':'DEMO-ROUTING-US','account':'DEMO-ACCT-US-NOT-VALID'},
 ]
 
 ACCOUNT_FIELDS=[
@@ -70,6 +74,24 @@ def name_match(name,expected):
     left,right=normal(name),normal(expected)
     return 'match' if left==right else 'close' if SequenceMatcher(None,left,right).ratio()>=.8 else 'mismatch'
 
+def transfer_quote(amount,transfer_type='domestic',payer_id='everyday_demo',payee_id=None,currency=None):
+    """One decimal calculation shared by chat tools, previews and saved receipts."""
+    from decimal import InvalidOperation
+    try:amount=Decimal(str(amount))
+    except InvalidOperation:raise ValueError('金额格式不正确。') from None
+    if not amount.is_finite() or not Decimal('0.01')<=amount<=1000000 or amount.as_tuple().exponent < -2:raise ValueError('金额超出允许范围或超过两位小数。')
+    if transfer_type not in ('domestic','international'):raise ValueError('收款资料与转账类型不一致。')
+    payer=next((p for p in PAYERS if p['id']==payer_id),None)
+    if payee_id:payee=next((p for p in PAYEES if p['id']==payee_id),None)
+    else:payee=next((p for p in PAYEES if p['type']==transfer_type and (not currency or p['currency']==currency)),None)
+    if not payer or not payee or payee['type']!=transfer_type:raise ValueError('收款资料与转账类型不一致。')
+    fee=Decimal(TRANSFER_POLICY['fees'][transfer_type]);total=amount+fee;balance=Decimal(payer['balance'])
+    if total>balance:raise ValueError('演示余额不足，请减少金额或更换付款账户。')
+    money=lambda x:f'{x.quantize(Decimal("0.01"),rounding=ROUND_HALF_UP):.2f}'
+    return {'currency':'GBP','amount':money(amount),'fee':money(fee),'total':money(total),'available':money(balance),'estimated_after':money(balance-total),
+            'receive_currency':payee['currency'],'receive_amount':money(amount*Decimal(payee['rate'])),'rate':payee['rate'],'fictional':True,
+            'payee_profile':payee['id'],'source_id':'DEMO_TRANSFER_QUOTE','version':TRANSFER_POLICY['version']}
+
 def validate_scenario(service_id,values,payload,today=None,confirm=True):
     if values is None:return None  # Readable compatibility for existing saved/legacy requests.
     schema=SCENARIOS.get(service_id)
@@ -112,17 +134,12 @@ def validate_scenario(service_id,values,payload,today=None,confirm=True):
         match=name_match(clean['payee_name'],payee['name'])
         if match=='mismatch':raise ValueError('收款名称不匹配，请核对演示收款资料。')
         if confirm and match=='close' and not clean['payee_ack']:raise ValueError('名称存在细微差异，请勾选核对确认。')
-        amount=Decimal(payload['amount']);fee=Decimal('8') if payee['type']=='international' else Decimal('0')
-        total=amount+fee;balance=Decimal(payer['balance'])
-        if total>balance:raise ValueError('演示余额不足，请减少金额或更换付款账户。')
+        quote=transfer_quote(payload['amount'],payload['transfer_type'],clean['payer'],clean['payee_profile'])
         if clean['execution']=='scheduled':
             try:scheduled=date.fromisoformat(clean['execution_date'])
             except ValueError:raise ValueError('日期格式不正确。') from None
             if scheduled<(today or date.today()):raise ValueError('预约日期不能早于今天。')
         else:clean['execution_date']=''
-        money=lambda x:f'{x.quantize(Decimal("0.01"),rounding=ROUND_HALF_UP):.2f}'
-        quote={'currency':'GBP','amount':money(amount),'fee':money(fee),'total':money(total),'available':money(balance),'estimated_after':money(balance-total),
-            'receive_currency':payee['currency'],'receive_amount':money(amount*Decimal(payee['rate'])),'rate':payee['rate'],'fictional':True}
         result['quote']=quote;result['payee_match']=match
         row('付款账户','Pay from',payer['label'],payer['label_en']);row('演示可用余额','Fictional available balance','GBP '+quote['available'])
         row('收款账户名称','Payee account name',clean['payee_name']);row('收款银行／国家','Payee bank / country',payee['bank']+' / '+payee['country'])

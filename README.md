@@ -11,6 +11,8 @@
 
 [中文介绍](README.zh-CN.md)
 
+**Version 2.6.0:** [group-review fixes and self-audit](docs/group-review-oct25.md), including shared FX quotes, persistent exclusions, relevant sources/follow-ups, mobile controls, feedback, reversible archives and original-request updates.
+
 **Version 2.5.0:** [richer account/transfer scenarios and blue/green banking themes](docs/realistic-scenarios-and-themes.md), including fictional applicant profiles, document readiness, name checks, fee/FX review and staff-visible details.
 
 **Version 2.4.1:** [live streamed answers](docs/streaming-answers.md), with progressive text, readable tables, and persisted final messages.
@@ -77,7 +79,7 @@ flowchart LR
     API <--> DB
 ```
 
-The online agent uses the DeepSeek Chat Completions API and four tools: `search_bank_faq`, `get_product_info`, `find_branch`, and `open_service_window`. Bank-specific facts come from structured local records. Opening a window returns an allowlisted UI action; the model does not submit a form or approve a transaction.
+The online agent uses the DeepSeek Chat Completions API and allowlisted tools: `search_bank_faq`, `get_product_info`, `find_branch`, `search_student_funding`, `get_transfer_quote`, and `open_service_window`. Bank-specific facts come from structured local records. Opening a window returns an allowlisted UI action; the model does not submit a form or approve a transaction.
 
 FAQ retrieval combines word and character TF-IDF similarity across English and Chinese questions and aliases. The model receives recent conversation context, while the portal retains the full visible history. Tool calls, source IDs, token usage, latency, actual response mode, and sanitized failures are recorded with replies for inspection.
 
@@ -87,10 +89,10 @@ Online **agent**, retrieval-augmented **RAG**, model-only **LLM**, and API-free 
 
 | Check | Recorded result | Scope |
 | --- | --- | --- |
-| Python suite | **119 tests passed** | Account/session behavior, tools, language, streamed answers, realistic fictional forms, history, support ownership, roles, cloud settings, quotas, and recovery. |
+| Python suite | **133 tests passed** | Account/session behavior, tools, language, streamed answers, realistic fictional forms, history, support ownership, roles, cloud settings, quotas, and recovery. |
 | Frontend workflow checks | Offline DOM assertions passed | History retention, service forms, customer/staff controls, handoff, polling updates, preserved drafts, and escaping; HTTP is mocked. |
-| FAQ retrieval | **72/78 Hit@3 (92.3%)** | Authored benchmark, offline run on 2026-10-20; two of 80 questions are not retrieval-scorable. |
-| Offline response proxy | **57/80 (71.25%)** | Lexical key-point matching; this is not a factual accuracy or usability score. |
+| FAQ retrieval | **72/78 Hit@3 (92.3%)** | Historical benchmark before the October 25 filter changes, run on 2026-10-20; two of 80 questions are not retrieval-scorable. |
+| Offline response proxy | **57/80 (71.25%)** | Historical lexical key-point matching; not a factual accuracy or usability score. |
 | Bilingual online regression | **10/10 language checks**, 18 API calls, one successful correction, no recorded errors | Authored DeepSeek regression on 2026-10-14, including the observed failure scenario; not a general quality estimate. |
 | Hosted deployment | HTTPS, live DeepSeek responses, handoff creation, customer read-only support history, and restart persistence checked | Recorded deployment smoke checks; no claim of continuous availability. |
 
@@ -145,6 +147,7 @@ npm install --no-save --prefix .build_frontend jsdom@30.1.2
 node scripts/verify_frontend.mjs
 node scripts/verify_streaming.mjs
 node scripts/verify_scenarios.mjs
+node scripts/verify_review_ui.mjs
 ```
 
 The [GitHub workflow](.github/workflows/cloud-ci.yml) also builds the Docker image and verifies account, support, and persistence behavior in a disposable container. Online evaluation is opt-in and uses your configured API account.

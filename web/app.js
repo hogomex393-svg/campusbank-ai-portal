@@ -150,9 +150,13 @@ function setChatUrl(id) {
   else u.searchParams.delete("chat");
   history.replaceState(null, "", u);
 }
-function closeMobile() {
+function closeMobile(restoreFocus=false) {
   $("sidebar").classList.remove("open");
+  $('sidebarBackdrop').hidden=true;
+  $('menuToggle').setAttribute('aria-expanded','false');
+  if(restoreFocus)$('menuToggle').focus();
 }
+function openMobile(){ $('sidebar').classList.add('open');$('sidebarBackdrop').hidden=false;$('menuToggle').setAttribute('aria-expanded','true');$('sidebarClose').focus(); }
 function busy(value) {
   S.busy = value;
   $("sendButton").disabled = value || S.cooldownUntil > Date.now();
@@ -176,6 +180,7 @@ function statusText(value) {
       waiting: t("等待接单", "Waiting"),
       active: t("客服处理中", "Active"),
       resolved: t("已结束", "Resolved"),
+      cancelled:t('已撤回','Withdrawn'),
     }[value] || value
   );
 }
@@ -397,12 +402,19 @@ function renderHistory() {
       "aria-label",
       t("重命名 " + c.title, "Rename " + c.title),
     );
-    row.append(b, rename);
+    const archive=button(S.showArchivedChats?'↶':'↥','archive-chat',async()=>{
+      if(S.busy)return;
+      try{await api('/api/chats/'+c.id+'/archive','PATCH',{archived:!S.showArchivedChats});if(S.current?.id===c.id&&!S.showArchivedChats){S.current=null;setChatUrl(null);showChat();}await refreshHistory();}
+      catch(e){toast(e.message);}
+    });archive.setAttribute('aria-label',S.showArchivedChats?t('恢复对话','Restore chat'):t('归档对话','Archive chat'));
+    row.append(b, rename,archive);
     container.append(row);
   }
 }
 async function refreshHistory() {
-  S.chats = await api("/api/chats");
+  S.chats = await api('/api/chats'+(S.showArchivedChats?'?archived=true':''));
+  $('archiveHistoryToggle').textContent=S.showArchivedChats?t('返回','Back'):t('归档','Archive');
+  document.querySelector('.history-head>span').textContent=S.showArchivedChats?t('已归档对话','Archived chats'):t('历史对话','Chat history');
   renderHistory();
 }
 function title(value) {
@@ -572,7 +584,7 @@ function renderMessage(m) {
       if (!service) continue;
       const b = button("", "service-action", () => {
         if (service.id === "human_support") startHandoff();
-        else openService(service.id, action.prefill || {});
+        else openService(service.id, action.prefill || {},null,action.scenario_prefill || {});
       });
       b.append(
         icon(service.icon),
@@ -583,6 +595,7 @@ function renderMessage(m) {
         ),
         icon("chevron"),
       );
+      if(action.missing_fields?.length)b.title=t('待补充：','Still needed: ')+action.missing_fields.map(f=>t(f.label,f.label_en)).join('、');
       actions.append(b);
     }
     if (actions.childNodes.length) body.append(actions);
@@ -614,11 +627,29 @@ function renderMessage(m) {
         .then(() => toast(t("已复制", "Copied"))),
     );
     foot.append(copy);
+    if(m.id && !meta.sender){
+      const feedbackStatus=el('span','feedback-status',m.feedback?t('已保存反馈','Feedback saved'):'');
+      const save=async(helpful,reason,comment='')=>{
+        try{const value=await api(`/api/chats/${S.current.id}/messages/${m.id}/feedback`,'POST',{helpful,reason,comment});m.feedback=value;feedbackStatus.textContent=t('已保存反馈，谢谢','Feedback saved, thank you');return true;}
+        catch(e){toast(e.message);return false;}
+      };
+      foot.append(button(t('有帮助','Helpful'),'feedback-button',()=>save(true,'helpful')),
+        button(t('没帮助','Not helpful'),'feedback-button',()=>{
+          if(body.querySelector('.feedback-form'))return;
+          const form=el('form','feedback-form');const reason=el('select');reason.setAttribute('aria-label',t('反馈原因','Feedback reason'));
+          for(const [value,zh,en] of [['irrelevant','不相关','Irrelevant'],['missing_details','缺少资料','Missing details'],['misunderstood','误解意图或改口','Misunderstood intent/change'],['incorrect','事实不一致','Inconsistent facts'],['other','其他','Other']]){const option=el('option','',t(zh,en));option.value=value;reason.append(option);}
+          const comment=el('input');comment.maxLength=300;comment.placeholder=t('补充说明（选填，请勿填写隐私信息）','Optional comment; no private information');comment.setAttribute('aria-label',t('反馈说明','Feedback comment'));
+          const submit=el('button','secondary-button',t('保存反馈','Save feedback'));submit.type='submit';form.append(reason,comment,submit);form.onsubmit=async e=>{e.preventDefault();submit.disabled=true;if(await save(false,reason.value,comment.value))form.remove();else submit.disabled=false;};body.append(form);
+        }),feedbackStatus);
+    }
     body.append(foot);
     if (S.debug) {
       const d = el("details", "source-details");
+      const sources=el('div','public-source-list');
+      for(const source of meta.sources || [])sources.append(el('p','',t(source.title,source.title_en)+' · '+source.id+' · '+source.version));
       d.append(
         el("summary", "", t("资料与工具详情", "Sources and tools")),
+        sources,
         el("pre", "", JSON.stringify(meta, null, 2)),
       );
       body.append(d);
@@ -806,7 +837,7 @@ async function requestStream(chatPath,body,onEvent) {
 function showSendFeedback(error) {
   const root = $("sendFeedback");
   clearTimeout(S.cooldownTimer);
-  if (error.retryAfter) S.cooldownUntil = Date.now() + Math.min(120, Math.max(1, error.retryAfter)) * 1000;
+  if (error.retryAfter) S.cooldownUntil = Date.now() + Math.min(3600, Math.max(1, error.retryAfter)) * 1000;
   root.hidden = false;
   const tick = () => {
     root.replaceChildren();
@@ -892,7 +923,8 @@ async function showRequests() {
     return;
   }
   try {
-    const records = await api("/api/requests");
+    page.append(button(S.showArchivedRequests?t('查看当前申请','View active requests'):t('查看已归档申请','View archived requests'),'secondary-button',()=>{S.showArchivedRequests=!S.showArchivedRequests;showRequests();}));
+    const records = await api('/api/requests'+(S.showArchivedRequests?'?archived=true':''));
     if (!records.length)
       page.append(
         el(
@@ -935,8 +967,17 @@ async function showRequests() {
         );
       }
       if(r.scenario)d.append(scenarioTable(r.scenario));
+      d.addEventListener('toggle',async()=>{if(!d.open||d.dataset.loaded)return;try{const detail=await api('/api/requests/'+r.id);const timeline=el('div','request-review-history');for(const e of detail.events || [])timeline.append(el('p','',timeText(e.created_at)+' · '+statusText(e.status)+' · '+e.note));d.append(timeline);d.dataset.loaded='yes';}catch(e){toast(e.message);}});
       wrap.append(d);
       if (r.staff_note) wrap.append(el("p","staff-review-note",t("工作人员备注：","Staff note: ")+r.staff_note));
+      const requestActions=el('div','request-customer-actions');
+      if(r.service_id!=='human_support'&&r.status==='needs_info'&&!r.archived)requestActions.append(button(t('补充原申请资料','Supplement this request'),'secondary-button',()=>openService(r.service_id,r.payload,r)));
+      if(r.service_id!=='human_support'&&!['completed','cancelled'].includes(r.status)&&!r.archived)requestActions.append(button(t('撤回演示申请','Withdraw demo request'),'text-button',async()=>{
+        if(!confirm(t('确认撤回这项演示申请？处理记录会保留。','Withdraw this demo request? Its history will remain available.')))return;
+        try{await api('/api/requests/'+r.id+'/action','POST',{action:'withdraw',request_id:crypto.randomUUID().replaceAll('-','')});await showRequests();}catch(e){toast(e.message);}
+      }));
+      if(['completed','cancelled'].includes(r.status))requestActions.append(button(r.archived?t('恢复记录','Restore record'):t('归档记录','Archive record'),'text-button',async()=>{try{await api('/api/requests/'+r.id+'/archive','PATCH',{archived:!r.archived});await showRequests();}catch(e){toast(e.message);}}));
+      wrap.append(requestActions);
       page.append(wrap);
     }
   } catch (e) {
@@ -1130,7 +1171,7 @@ function optionLabel(field, value) {
   const option = field.options?.find(o => o.value === value);
   return option ? t(option.label, option.label_en || option.value.replaceAll("_", " ")) : value;
 }
-function draftKey(id) { return `${S.boot.user?.id || "guest"}:${S.current?.id || "none"}:${id}`; }
+function draftKey(id) { return `${S.boot.user?.id || "guest"}:${S.current?.id || "none"}:${id}:${S.requestEditing?.id || 'new'}`; }
 function scenarioDefaults(service,base) {
   if(!service.scenario)return null;
   const values=Object.fromEntries(service.scenario.fields.map(f=>[f.name,f.default]));
@@ -1248,22 +1289,29 @@ function mountScenario(form,service) {
   update();save();timer=setTimeout(calculate,80);
   return {read,calculate,get record(){return lastRecord;}};
 }
-function openService(id, prefill = {}) {
+function openService(id, prefill = {},editing=null,scenarioPrefill={}) {
   const service = serviceBy(id);
   if (!service) return;
   S.service = service;
-  const base = {...prefill, ...(S.current?.service_drafts?.[id] || {})};
+  S.requestEditing=editing;
+  const base = editing?{...prefill}:{...prefill, ...(S.current?.service_drafts?.[id] || {})};
   if(id==='open_account'&&!base.product)base.product=S.bankMode==='student'?'student_account':'everyday_account';
   if(id==='apply_card'&&!base.linked_product)base.linked_product=S.bankMode==='student'?'student_account':'everyday_account';
-  const signature = JSON.stringify(base);
+  const signature = JSON.stringify([base,id==='transfer_demo'?S.current?.service_context?.transfer_currency:null]);
   const saved = S.formDrafts.get(draftKey(id));
   prefill = saved?.signature === signature ? {...base, ...saved.values} : base;
   S.servicePrefill = prefill;
   S.serviceSignature = signature;
   S.serviceSubmission = saved?.submission || null;
   S.scenarioRecord=null;
-  S.serviceScenario=saved?.signature===signature&&saved.scenario?{...saved.scenario}:scenarioDefaults(service,prefill);
-  $("serviceTitle").textContent = t(service.title, service.en);
+  S.serviceScenario=saved?.signature===signature&&saved.scenario?{...saved.scenario}:editing?.scenario?.details?{...editing.scenario.details}:scenarioDefaults(service,prefill);
+  if(id==='transfer_demo'&&S.serviceScenario&&!editing&&saved?.signature!==signature){
+    const currency=S.current?.service_context?.transfer_currency;
+    Object.assign(S.serviceScenario,scenarioPrefill);
+    if(currency==='USD')Object.assign(S.serviceScenario,{payee_profile:'us_demo',payee_name:'Example US College'});
+    else if(currency==='EUR')Object.assign(S.serviceScenario,{payee_profile:'europe_demo',payee_name:'Example EU College'});
+  }
+  $("serviceTitle").textContent = (editing?t('补充原申请 · ','Supplement request · '):'')+t(service.title, service.en);
   renderServiceForm(prefill);
   if (!$("serviceDialog").open) $("serviceDialog").showModal();
 }
@@ -1397,7 +1445,8 @@ function renderReview(values) {
   const body = $("serviceBody");
   const scenario=S.serviceScenario?{...S.serviceScenario}:null;
   const record=S.scenarioRecord;
-  const fingerprint = JSON.stringify([s.id, values, S.current?.id || null,scenario]);
+  const editing=S.requestEditing;
+  const fingerprint = JSON.stringify([s.id, values, S.current?.id || null,scenario,editing?.id]);
   if (!S.serviceSubmission || S.serviceSubmission.fingerprint !== fingerprint)
     S.serviceSubmission = {fingerprint, key:crypto.randomUUID().replaceAll("-", "")};
   body.replaceChildren();
@@ -1437,7 +1486,7 @@ function renderReview(values) {
         if (!S.boot.user) {
           $("serviceDialog").close();
           openAuth("login", () => {
-            openService(s.id, values);
+            openService(s.id, values,editing);
             S.serviceScenario=scenario;S.scenarioRecord=record;
             renderReview(values);
           });
@@ -1451,7 +1500,7 @@ function renderReview(values) {
           let chatId = S.current?.id;
           if (s.id === "human_support" && !chatId)
             chatId = (await ensureChat()).id;
-          const r = await api("/api/requests", "POST", {
+          const r = editing?await api('/api/requests/'+editing.id+'/action','POST',{action:'supplement',payload:values,scenario,request_id:submission.key}):await api("/api/requests", "POST", {
             service_id: s.id,
             payload: values,
             chat_id: chatId || null,
@@ -1461,6 +1510,7 @@ function renderReview(values) {
             scenario,
           });
           S.formDrafts.delete(draftKey(s.id));
+          S.requestEditing=null;
           renderReceipt(r);
           if (S.current) {
             S.current = await api("/api/chats/" + S.current.id);
@@ -1759,6 +1809,7 @@ async function showStaff() {
   const status = el("span", "muted tiny", t("正在同步…", "Syncing…"));
   status.id = "staffSyncStatus";
   toolbar.append(status);
+  if(S.staffTab==='requests')toolbar.append(button(S.showArchivedBusinessRequests?t('当前申请','Active applications'):t('已归档申请','Archived applications'),'secondary-button',()=>{S.showArchivedBusinessRequests=!S.showArchivedBusinessRequests;S.businessId=null;S.businessFingerprint='';showStaff();}));
   page.append(toolbar);
   const tabs=el('div','staff-tabs');
   for(const [id,zh,en] of [['tickets','人工客服工单','Support tickets'],['requests','业务申请与表单','Applications and forms']])
@@ -1805,7 +1856,7 @@ async function refreshBusinessRequests() {
   if(S.view!=='staff'||!hasStaffAccess()||S.businessPolling)return;
   S.businessPolling=true;
   try {
-    const rows=await api('/api/admin/requests');
+    const rows=await api('/api/admin/requests'+(S.showArchivedBusinessRequests?'?archived=true':''));
     if(S.view!=='staff'||S.staffTab!=='requests')return;
     S.businessData=rows;const root=$('businessWorkbench');if(!root)return;
     let list=$('businessRequestList'),detail=$('businessRequestDetail');
@@ -2176,6 +2227,8 @@ function setLanguage() {
   localStorage.setItem("campusbank_language", S.lang);
   document.documentElement.lang = S.lang === "zh" ? "zh-CN" : "en";
   $("languageToggle").textContent = S.lang === "zh" ? "English" : "中文";
+  $('sidebarClose').setAttribute('aria-label',t('关闭侧边栏','Close sidebar'));$('sidebarBackdrop').setAttribute('aria-label',t('关闭侧边栏遮罩','Close sidebar overlay'));
+  $('archiveHistoryToggle').textContent=S.showArchivedChats?t('返回','Back'):t('归档','Archive');
   $("newChat").children[1].textContent = t("新建对话", "New chat");
   $("homeNav").lastChild.textContent = t("智能咨询", "Assistant");
   $("requestsNav").lastChild.textContent = t("我的办理记录", "My requests");
@@ -2195,10 +2248,7 @@ function setLanguage() {
     "CampusBank 为虚构银行。业务窗口只登记演示请求，请勿提供真实银行卡号、密码或验证码。",
     "CampusBank is a fictional bank. Forms record demo requests only. Please use example situations.",
   );
-  document.querySelector(".history-head>span").textContent = t(
-    "历史对话",
-    "Chat history",
-  );
+  document.querySelector('.history-head>span').textContent=S.showArchivedChats?t('已归档对话','Archived chats'):t('历史对话','Chat history');
   document.querySelector(".section-title").firstChild.textContent = t(
     "业务服务 ",
     "Banking services ",
@@ -2259,6 +2309,7 @@ async function init() {
     if (!$("historySearch").hidden) $("historySearch").focus();
   };
   $("historySearch").oninput = renderHistory;
+  $('archiveHistoryToggle').onclick=async()=>{if(S.busy)return;S.showArchivedChats=!S.showArchivedChats;await refreshHistory();};
   $("accountButton").onclick = showProfile;
   $("composer").onsubmit = (e) => {
     e.preventDefault();
@@ -2270,7 +2321,10 @@ async function init() {
       sendMessage();
     }
   };
-  $("menuToggle").onclick = () => $("sidebar").classList.toggle("open");
+  $('menuToggle').setAttribute('aria-controls','sidebar');$('menuToggle').setAttribute('aria-expanded','false');
+  $("menuToggle").onclick = () => $('sidebar').classList.contains('open')?closeMobile(true):openMobile();
+  $('sidebarClose').onclick=()=>closeMobile(true);$('sidebarBackdrop').onclick=()=>closeMobile(true);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('sidebar').classList.contains('open')&&!document.querySelector('dialog[open]')){e.preventDefault();closeMobile(true);}});
   $("settingsButton").onclick = () => $("settingsDialog").showModal();
   $("modeSelect").onchange = (e) => {
     S.mode = e.target.value;

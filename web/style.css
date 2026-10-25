@@ -1398,3 +1398,30 @@ body[data-bank-mode="general"][data-general-theme="navy"] .sidebar .history-grou
 body[data-bank-mode="general"][data-general-theme="navy"] .sidebar .history-head { color:#dce7f5; font-size:12px; font-weight:600; }
 body[data-bank-mode="general"][data-general-theme="navy"] .sidebar .profile-button small { color:#bfd0e4; }
 body[data-bank-mode="general"][data-general-theme="navy"] .sidebar .history-entry button:focus-visible { outline:2px solid #96bde9; outline-offset:2px; }
+
+.sidebar-close { display:none; }
+.sidebar-backdrop { display:none; }
+@media(max-width:720px) {
+ .sidebar-close { display:grid; place-items:center; position:absolute; top:12px; right:10px; width:34px; height:34px; border-radius:8px; color:inherit; font-size:25px; z-index:2; }
+ .sidebar.open { z-index:31; }
+ .sidebar-backdrop:not([hidden]) { display:block; position:fixed; inset:0 0 0 280px; background:#10243c66; z-index:30; border:0; }
+ .sidebar { padding-top:40px; }
+}
+@media(max-width:640px) {
+ .composer-note,.composer-toolbar>span,.bank-mode-hint,.section-title,.section-title span,.history-group,.history-head,.profile-button small,.auth-dialog>p,.drawer-desc,.service-notice,.steps,label,.form-error,.table-hint,.small,.tiny,.request-main small,.business-request-item small,.welcome-caption,.message-meta,.followup-heading,.source-details,.source-details pre { font-size:12px !important; line-height:1.6; }
+ label input:not([type="checkbox"]),label select,label textarea { font-size:16px; min-height:44px; }
+ .composer-note { text-align:left; }
+ .sidebar-close { min-width:40px; min-height:40px; }
+}
+
+.history-entry .archive-chat { opacity:0; font-size:16px; color:inherit; padding:5px; }
+.history-entry:hover .archive-chat,.history-entry.active .archive-chat { opacity:1; }
+.feedback-button { padding:3px 6px; border-radius:5px; color:var(--muted); }
+.feedback-button:hover { background:var(--soft); color:var(--accent); }
+.feedback-status { color:var(--accent); }
+.feedback-form { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; padding:12px; border:1px solid var(--line); border-radius:10px; }
+.feedback-form input { flex:1; min-width:160px; padding:9px; border:1px solid var(--line); border-radius:7px; }
+.feedback-form select { padding:9px; border:1px solid var(--line); border-radius:7px; }
+.request-customer-actions { display:flex; gap:9px; flex-wrap:wrap; margin:8px 0 20px; }
+.public-source-list p { padding:7px 0; border-bottom:1px solid var(--line); overflow-wrap:anywhere; }
+@media(max-width:640px) { .history-entry .archive-chat { opacity:1; min-width:32px; } .feedback-button { font-size:12px; min-height:35px; } }

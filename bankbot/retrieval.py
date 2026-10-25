@@ -54,7 +54,15 @@ class Retriever:
                 char = TfidfVectorizer(analyzer="char_wb", ngram_range=(3, 5))
                 self.indexes[language] = (rows, word, char, word.fit_transform(texts), char.fit_transform(texts))
 
-    def search(self, query: str, k: int = 3, product: str | None = None) -> list[dict]:
+    def search(self, query: str, k: int = 3, product: str | None = None,exclude_loan=False) -> list[dict]:
+        from .dialogue import PRODUCT_ALIASES,attributes_of
+        text=query.lower()
+        explicit={p for p,aliases in PRODUCT_ALIASES.items() if any(a in text for a in aliases)}
+        products=explicit or ({product} if product else set())
+        topics=set()
+        for p in products:topics.add('accounts' if p.endswith('_account') and p!='savings_account' else 'savings' if p=='savings_account' else 'loans' if p=='personal_loan' else 'cards')
+        for topic,pattern in [('payments',r'transfer|payment|转账|汇款'),('branches',r'branch|opening hours|网点|营业时间'),('cards',r'lost|stolen|freeze|replacement|挂失|补办|补卡|冻结'),('digital',r'login|password|登录|密码'),('support',r'complaint|human support|投诉|人工客服')]:
+            if re.search(pattern,text):topics.add(topic)
         language = detect_language(query)
         query = normalize(query)
         if not query:
@@ -67,7 +75,14 @@ class Retriever:
         for index, score in zip(rows, 0.8 * w + 0.2 * c):
             scores[index] = max(scores[index], float(score))
         ranked = sorted(range(len(scores)), key=lambda i: (-scores[i], self.faq[i]["faq_id"]))
-        if product:
-            allowed = [i for i in ranked if self.faq[i].get("product") in (product, "")]
-            ranked = allowed
+        if products:ranked=[i for i in ranked if self.faq[i].get('product') in products or not self.faq[i].get('product') and self.faq[i]['topic'] in topics]
+        elif topics:ranked=[i for i in ranked if self.faq[i]['topic'] in topics]
+        if exclude_loan:ranked=[i for i in ranked if self.faq[i]['topic']!='loans']
+        procedural=set()
+        for attribute,pattern in [('lost',r'\blost\b|stolen|freeze|挂失|遗失|丢|冻结'),('replacement',r'replac|damaged|补办|补卡|损坏'),('pin',r'\bpin\b'),('activate',r'activat|激活'),('declined',r'declin|拒付')]:
+            if re.search(pattern,text):procedural.add(attribute)
+        wanted=procedural or set(attributes_of(text))
+        if wanted:
+            matching=[i for i in ranked if self.faq[i].get('attribute') in wanted]
+            if matching:ranked=matching
         return [dict(self.faq[i], score=round(float(scores[i]), 6)) for i in ranked[:k]]

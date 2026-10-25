@@ -62,12 +62,23 @@ class ScenarioBody(Body):
     scenario:dict
 class ReplyBody(Body):text:str=Field(min_length=1,max_length=2000)
 class RoleBody(Body):portal_role:str=Field(pattern=r'^(customer|staff)$')
+class ArchiveBody(Body):archived:bool
+class FeedbackBody(Body):
+    helpful:bool
+    reason:str=Field(default='helpful',pattern=r'^(helpful|irrelevant|missing_details|misunderstood|incorrect|other)$')
+    comment:str=Field(default='',max_length=300)
+class RequestActionBody(Body):
+    action:str=Field(pattern=r'^(supplement|withdraw)$')
+    payload:dict=Field(default_factory=dict)
+    scenario:dict|None=None
+    request_id:str=Field(default_factory=lambda:uuid.uuid4().hex,pattern=r'^[a-f0-9]{32}$')
 
 
 def public_chat(chat):
     result={k:chat[k] for k in ('id','title','created_at','updated_at','messages','ticket')}
     result['service_drafts']=coerce_state(chat['state']).service_drafts
     result['bank_mode']=coerce_state(chat['state']).bank_mode
+    result['service_context']={'transfer_currency':coerce_state(chat['state']).constraints.get('transfer_currency')}
     return result
 
 
@@ -132,10 +143,11 @@ def create_app(db_path=None,service=None):
         if not who:
             token,who=store.new_session();set_cookie(response,token,req)
         return {'user':who['user'],'csrf':who['csrf'],'categories':CATEGORIES,'services':list(SERVICES.values()),
-                'bank_references':BANK_REFERENCES,'api_available':bool(settings.api_key),'version':'2.5.0','portal_role':who['portal_role'],
+                'bank_references':BANK_REFERENCES,'api_available':bool(settings.api_key),'version':'2.6.0','portal_role':who['portal_role'],
                 'open_staff_testing':settings.open_staff_testing,'testing_staff':who.get('testing_staff',False),'funding_programs':PROGRAMS,
                 'today':datetime.now(timezone.utc).date().isoformat(),
                 'requires_login':settings.cloud_mode,'registration_access_code_required':settings.cloud_mode,
+                'limits':{'account_per_minute':settings.demo_rpm if who.get('user') and who['user']['username'].casefold() in settings.demo_accounts else settings.account_rpm,'global_per_minute':settings.global_rpm,'demo_profile':bool(who.get('user') and who['user']['username'].casefold() in settings.demo_accounts)},
                 'first_admin_setup_required':settings.cloud_mode and not store.has_admin()}
 
     def sign_in(req,response,user,old,portal_role='customer',test_staff=False):
@@ -197,7 +209,13 @@ def create_app(db_path=None,service=None):
         return sign_in(req,response,user,who,body.portal_role,testing)
 
     @app.get('/api/chats')
-    def chats(req:Request):return store.chats(session(req)['owner'])
+    def chats(req:Request,archived:bool=False):return store.chats(session(req)['owner'],archived)
+
+    @app.patch('/api/chats/{id_}/archive')
+    def archive_chat(id_:str,body:ArchiveBody,req:Request):return store.archive_chat(mutate(req)['owner'],id_,body.archived)
+
+    @app.post('/api/chats/{id_}/messages/{message_id}/feedback')
+    def feedback(id_:str,message_id:int,body:FeedbackBody,req:Request):return store.save_feedback(mutate(req)['owner'],id_,message_id,body.helpful,body.reason,body.comment)
 
     @app.post('/api/chats')
     def new_chat(req:Request,body:CreateChatBody|None=None):return public_chat(store.create_chat(mutate(req)['owner'],bank_mode=body.bank_mode if body else 'general'))
@@ -226,12 +244,14 @@ def create_app(db_path=None,service=None):
             return {'ticket':store.ticket(result['id']),'chat':public_chat(store.chat(who['owner'],id_)),'existing':False}
 
     def perform_send(id_:str,body:SendBody,req:Request,on_event=None):
+        request_started=time.monotonic()
         who=mutate(req);store.chat(who['owner'],id_)
         if settings.cloud_mode and not who['user']:raise PortalError(401,'请登录后再开始咨询。')
         if not body.text.strip():raise PortalError(400,'请输入问题。')
         with locks_guard:lock=locks.setdefault(id_,threading.Lock())
         with lock:
             fresh,saved=store.begin_send(id_,body.request_id)
+            queue_wait_ms=round((time.monotonic()-request_started)*1000)
             if not fresh:
                 if saved:return saved
                 raise PortalError(409,'这条消息正在处理，请稍后查看记录。')
@@ -241,14 +261,17 @@ def create_app(db_path=None,service=None):
                     stamp=time.time()
                     recent=[t for t in send_attempts.get(who['owner'],[]) if t>stamp-60]
                     global_recent=[t for t in send_attempts.get('*',[]) if t>stamp-60]
-                    if len(recent)>=6 or len(global_recent)>=30:
+                    hourly=[t for t in send_attempts.get('hour',[]) if t>stamp-3600]
+                    limit=settings.demo_rpm if who['user'] and who['user']['username'].casefold() in settings.demo_accounts else settings.account_rpm
+                    if len(recent)>=limit or len(global_recent)>=settings.global_rpm or len(hourly)>=settings.hourly_requests:
                         # Release this idempotency reservation so the same message can be retried later.
                         with store.db() as c:c.execute('DELETE FROM sends WHERE chat_id=? AND request_id=?',(id_,body.request_id))
                         error=PortalError(429,'咨询过于频繁，请稍等一分钟后重试。')
-                        blocked=recent if len(recent)>=6 else global_recent
-                        error.retry_after=max(1,int(60-(stamp-min(blocked)))+1)
+                        blocked,window=(hourly,3600) if len(hourly)>=settings.hourly_requests else (recent,60) if len(recent)>=limit else (global_recent,60)
+                        error.retry_after=max(1,int(window-(stamp-min(blocked)))+1)
                         raise error
                     send_attempts[who['owner']]=recent+[stamp];send_attempts['*']=global_recent+[stamp]
+                    send_attempts['hour']=hourly+[stamp]
             store.append_message(id_,'user',body.text)
             if current['title']=='新对话':store.rename_chat(who['owner'],id_,body.text[:30])
             if current['ticket']:
@@ -271,6 +294,8 @@ def create_app(db_path=None,service=None):
                     answer='处理时发生错误，问题与历史已经保留，请稍后重试。' if detect_language(body.text)=='zh' else 'I could not process this request. Your messages are saved; please try again.'
                     meta={'mode':'error','error':'application_error','actions':[]}
                     state.turns.append([{'role':'user','content':body.text},{'role':'assistant','content':answer}]);store.update_state(id_,state)
+            meta['server_ms']=round((time.monotonic()-request_started)*1000)
+            meta['queue_ms']=queue_wait_ms
             store.append_message(id_,'assistant',answer,meta)
             result=public_chat(store.chat(who['owner'],id_));store.finish_send(id_,body.request_id,result)
             return result
@@ -304,7 +329,16 @@ def create_app(db_path=None,service=None):
         return StreamingResponse(chunks(),media_type='text/event-stream',headers={'X-Accel-Buffering':'no','Cache-Control':'no-store, no-transform'})
 
     @app.get('/api/requests')
-    def requests(req:Request):return store.requests(session(req)['owner'])
+    def requests(req:Request,archived:bool=False):return store.requests(session(req)['owner'],archived)
+
+    @app.patch('/api/requests/{id_}/archive')
+    def archive_request(id_:str,body:ArchiveBody,req:Request):return store.archive_request(mutate(req)['owner'],id_,body.archived)
+
+    @app.get('/api/requests/{id_}')
+    def own_request(id_:str,req:Request):return store.own_request(session(req)['owner'],id_)
+
+    @app.post('/api/requests/{id_}/action')
+    def request_action(id_:str,body:RequestActionBody,req:Request):return store.customer_request_action(mutate(req)['owner'],id_,body.action,body.payload,body.scenario,body.request_id)
 
     @app.post('/api/scenarios/preview')
     def scenario_preview(body:ScenarioBody,req:Request):
@@ -333,7 +367,7 @@ def create_app(db_path=None,service=None):
         return store.submit(who['owner'],body.service_id,body.payload,body.chat_id,body.request_id,body.bank_mode,scenario=body.scenario)
 
     @app.get('/api/admin/requests')
-    def business_requests(req:Request):admin(req);return store.business_requests()
+    def business_requests(req:Request,archived:bool=False):admin(req);return store.business_requests(archived)
 
     @app.get('/api/admin/requests/{id_}')
     def business_request(id_:str,req:Request):admin(req);return store.business_request(id_)
@@ -380,7 +414,7 @@ def create_app(db_path=None,service=None):
         return {'imported':store.import_legacy(who['owner'],records)}
 
     @app.get('/api/health')
-    def health():return {'ok':True,'version':'2.5.0'}
+    def health():return {'ok':True,'version':'2.6.0'}
 
     app.mount('/assets',StaticFiles(directory=ROOT/'web'),name='assets')
     @app.get('/')

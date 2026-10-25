@@ -10,6 +10,7 @@
   <body>
     <div class="shell">
       <aside class="sidebar" id="sidebar">
+        <button id="sidebarClose" class="sidebar-close" type="button" aria-label="关闭侧边栏">×</button>
         <button class="brand" id="brandHome">
           <span class="brand-mark">C</span
           ><span>CampusBank<small>你的银行服务助手</small></span>
@@ -37,7 +38,7 @@
           <nav class="business-nav" id="businessNav"></nav>
           <div class="history-head">
             <span>历史对话</span
-            ><button
+            ><button id="archiveHistoryToggle" class="text-button" type="button">归档</button><button
               class="icon-btn"
               id="historySearchToggle"
               aria-label="搜索历史"
@@ -72,6 +73,7 @@
           </button>
         </div>
       </aside>
+      <button id="sidebarBackdrop" class="sidebar-backdrop" type="button" aria-label="关闭侧边栏遮罩" hidden></button>
       <main class="main">
         <header class="topbar">
           <div class="topbar-left">

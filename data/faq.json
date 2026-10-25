@@ -170,14 +170,14 @@
     "aliases": [
       "Can I order a new card if mine is broken?"
     ],
-    "answer": "Request a replacement Debit Card in the demo app or through support. The replacement costs GBP 5 and arrives in 5 working days.",
+    "answer": "Use the Lost or damaged card window to record a replacement request. The fictional replacement fee is GBP 5. The 5 working days in this fictional policy is an illustrative reference only; the portal does not dispatch cards or track real delivery.",
     "source": "Original fictional CampusBank coursework policy",
-    "version": "1.1-bilingual",
+    "version": "1.2-portal-consistency",
     "question_zh": "借记卡损坏后如何补办？",
     "aliases_zh": [
       "银行卡坏了可以申请新卡吗？"
     ],
-    "answer_zh": "可以在演示应用中或通过客服申请补办借记卡。补卡费用为 5 英镑，预计 5 个工作日送达。"
+    "answer_zh": "请通过“挂失与补卡服务”窗口登记补卡演示请求。虚构补卡费为 5 英镑，虚构政策中 5 个工作日的时间仅供演示参考；本门户不会寄送银行卡，也不会跟踪真实物流。"
   },
   {
     "faq_id": "CARD_ACTIVATE",

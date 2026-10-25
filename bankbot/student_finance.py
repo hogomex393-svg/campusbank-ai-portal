@@ -29,15 +29,17 @@ PROGRAMS = [
   'levels':['undergraduate','postgraduate'],'service_id':'funding_enquiry'},
 ]
 
-def search_funding(query='',level=None,kind=None):
+def search_funding(query='',level=None,kind=None,exclude_loan=False):
+    from .intent import update_constraints
     text=query.lower()
+    exclude_loan=exclude_loan or update_constraints(query).get('exclude_loan',False)
     if not kind:
         if any(w in text for w in ('贷款','loan')) and any(w in text for w in ('奖学金','scholarship','补助','grant')):kind='all'
         elif any(w in text for w in ('奖学金','scholarship')) and any(w in text for w in ('补助','助学金','grant')):kind='awards'
         elif any(word in text for word in ('助学贷款','学贷','education loan','student loan','tuition loan')):kind='loan'
         elif any(word in text for word in ('奖学金','scholarship')) and not any(word in text for word in ('补助','grant')):kind='scholarship'
         elif any(word in text for word in ('补助','助学金','grant')):kind='grants'
-    return [dict(row) for row in PROGRAMS if (not level or level in row['levels']) and
+    return [dict(row) for row in PROGRAMS if (not exclude_loan or row['kind']!='loan') and (not level or level in row['levels']) and
             (not kind or kind=='all' or row['kind']==kind or kind=='grants' and row['kind'] in ('grant','emergency') or kind=='awards' and row['kind']!='loan')]
 
 def is_funding_question(text,bank_mode='general'):
@@ -46,8 +48,8 @@ def is_funding_question(text,bank_mode='general'):
                 or re.search(r'(?:学费|生活费|tuition|living cost).*(?:支持|帮助|贷款|付不起|怎么办|support|funding|afford)',text,re.I)
                 or bank_mode=='student' and re.search(r'经济.*(?:困难|压力)|付不起|financial difficult|struggling.*(?:pay|money)',text,re.I))
 
-def funding_answer(text,language):
-    rows=search_funding(text)
+def funding_answer(text,language,constraints=None):
+    rows=search_funding(text,exclude_loan=(constraints or {}).get('exclude_loan',False))
     intro='以下是学生银行的虚构演示项目，用于课程展示，并非真实国家或学校政策。' if language=='zh' else 'These are fictional student-banking programs for the coursework demo, not real government or university policies.'
     pieces=[intro]
     for row in rows:

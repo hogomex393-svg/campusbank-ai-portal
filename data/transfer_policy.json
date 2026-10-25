@@ -1,0 +1,8 @@
+{
+  "version": "2026-10-25",
+  "base_currency": "GBP",
+  "fees": {"domestic": "0", "international": "8"},
+  "rates": {"GBP": "1", "EUR": "1.17", "USD": "1.28"},
+  "fictional": true,
+  "capability": "Fixed fictional estimates only; no real FX, payment or account access."
+}

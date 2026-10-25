@@ -1,5 +1,14 @@
 """Translate public portal errors without leaking internal exceptions."""
 MESSAGES = {
+ '请选择有效的反馈原因。':'Choose a valid feedback reason.',
+ '反馈选项与原因不一致。':'The feedback choice and reason do not match.',
+ '只能评价 AI 咨询回答。':'Only AI consultation answers can be rated.',
+ '只能归档已完成或已撤回的申请。':'Only completed or withdrawn requests can be archived.',
+ '工作人员标记待补充资料后才能补充。':'Staff must mark the request as needing information before it can be supplemented.',
+ '这项申请已结束，不能再修改。':'This request has ended and cannot be changed.',
+ '这项申请已经撤回。':'This request has already been withdrawn.',
+ '请先结束当前人工客服工单。':'Finish the active support ticket first.',
+ '请保留原申请的场景资料。':'Keep the original request scenario details.',
  '预约日期不能早于今天。':'The visit date cannot be earlier than today.',
  '日期格式不正确。':'Enter a valid visit date.',
  '金额格式不正确。':'Enter a valid amount.',
