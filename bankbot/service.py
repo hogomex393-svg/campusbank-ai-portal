@@ -228,6 +228,7 @@ class ChatService:
         quote_result=None
         transfer_draft=new.service_drafts.get('transfer_demo',{})
         transfer_question=bool(re.search(r'转账|汇款|transfer|汇率|exchange rate|\bfx\b|一共|总共|扣多少|到账|total|receive',text,re.I)) and (new.active_service=='transfer_demo' or prepared.state.topic=='payments')
+        if draft_action and draft_action['service_id']=='transfer_demo':transfer_question=True
         if transfer_question and transfer_draft.get('amount'):
             args={'amount':transfer_draft['amount'],'transfer_type':transfer_draft.get('transfer_type','domestic')}
             if re.search(r'美元|(?<![A-Za-z])USD(?![A-Za-z])',text,re.I):new.constraints['transfer_currency']='USD'
@@ -407,8 +408,10 @@ class ChatService:
         if draft_action and actual_mode=='offline' and re.search(r'改成|改为|换成|change|instead',text,re.I):
             service=SERVICES[draft_action['service_id']]
             labels={f['name']:f['label'] if language=='zh' else f['label_en'] for f in service['fields']}
-            summary='; '.join(labels[key]+': '+str(value) for key,value in new.service_drafts[draft_action['service_id']].items())
+            summary='; '.join(labels[key]+': '+str(value) for key,value in explicit_fields.items() if old.service_drafts.get(draft_action['service_id'],{}).get(key)!=value)
             answer=('表单草稿已更新：'+summary+'。请打开下方窗口核对；尚未提交。') if language=='zh' else ('Draft updated: '+summary+'. Open the form below to review; nothing has been submitted.')
+            if explicit_fields and not summary:answer=('这次没有变化字段，原草稿保持不变，尚未提交。' if language=='zh' else 'No fields changed. The draft is unchanged and has not been submitted.')
+            if explicit_fields and quote_result and quote_result.get('quote'):answer+='\n\n'+quote_answer(quote_result['quote'],language)
             if not explicit_fields:
                 answer='暂时无法确定要修改的字段，请明确新的城市、收款人昵称或数字金额。原草稿保持不变。' if language=='zh' else 'I could not identify the changed field. Specify a city, recipient nickname or numeric GBP amount; the previous draft is unchanged.'
         if not turn or turn[-1]["role"] != "assistant":

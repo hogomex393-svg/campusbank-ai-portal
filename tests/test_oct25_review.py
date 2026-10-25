@@ -32,6 +32,7 @@ class ReviewDialogueTests(unittest.TestCase):
         third=bot.respond('Change the amount to 500.',second.state,'offline')
         self.assertEqual(third.state.service_drafts['transfer_demo'],{'transfer_type':'international','recipient':'Sam','amount':'500'})
         self.assertEqual([f['name'] for f in third.actions[0]['changed_fields']],['amount'])
+        self.assertNotIn('Sam',third.answer);self.assertIn('508.00',third.answer)
 
     def test_I01_chat_quote_and_preview_use_identical_calculator(self):
         bot=ChatService(Settings())
