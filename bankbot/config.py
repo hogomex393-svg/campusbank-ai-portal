@@ -29,6 +29,7 @@ class Settings:
     max_tokens: int = 1600
     provider: str = 'deepseek'
     open_staff_testing: bool = False
+    staff_access_code: str = field(default='', repr=False)
     retrieval_threshold: float = 0.18
     data_dir: Path = ROOT / "data"
     database_path: Path | None = None
@@ -59,6 +60,9 @@ class Settings:
         cloud=deployment=='cloud'
         bootstrap=val('BANKBOT_BOOTSTRAP_CODE','')
         access=val('BANKBOT_TEST_ACCESS_CODE','')
+        staff_access=val('BANKBOT_STAFF_ACCESS_CODE','').strip()
+        if staff_access and not 16<=len(staff_access)<=128:
+            raise ValueError('BANKBOT_STAFF_ACCESS_CODE must contain 16 to 128 characters.')
         provider=val('LLM_PROVIDER','deepseek').lower()
         if provider not in ('deepseek','qwen','openai_compatible'):raise ValueError('Unsupported LLM_PROVIDER.')
         fallback_key=val('DEEPSEEK_API_KEY','') if provider=='deepseek' else val('DASHSCOPE_API_KEY','') if provider=='qwen' else ''
@@ -79,6 +83,7 @@ class Settings:
             model=val('LLM_MODEL',fallback_model),
             provider=provider,max_tokens=max(300,min(int(val('LLM_MAX_TOKENS','1600')),6000)),
             open_staff_testing=val('BANKBOT_OPEN_STAFF_TESTING','false').lower() in ('true','1','yes'),
+            staff_access_code=staff_access,
             timeout_seconds=max(1, min(float(val("BANKBOT_TIMEOUT_SECONDS", "45")), 120)),
             max_tool_rounds=max(1, min(int(val("BANKBOT_MAX_TOOL_ROUNDS", "3")), 5)),
             history_turns=max(1, min(int(val("BANKBOT_HISTORY_TURNS", "6")), 20)),

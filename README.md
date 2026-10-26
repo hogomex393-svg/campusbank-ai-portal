@@ -13,6 +13,8 @@
 
 **Version 2.6.0:** [group-review fixes and self-audit](docs/group-review-oct25.md), including shared FX quotes, persistent exclusions, relevant sources/follow-ups, mobile controls, feedback, reversible archives and original-request updates.
 
+**Version 2.6.1:** the one-click test-staff entry is removed. Operators can configure a private reusable staff invitation for individual staff accounts; see [deployment and accounts](docs/deployment.md). This invitation never grants administrator rights.
+
 **Version 2.5.0:** [richer account/transfer scenarios and blue/green banking themes](docs/realistic-scenarios-and-themes.md), including fictional applicant profiles, document readiness, name checks, fee/FX review and staff-visible details.
 
 **Version 2.4.1:** [live streamed answers](docs/streaming-answers.md), with progressive text, readable tables, and persisted final messages.

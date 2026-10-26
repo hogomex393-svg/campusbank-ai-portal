@@ -24,6 +24,7 @@ The current hosted deployment uses Railway, a Python 3.13 Docker image, one serv
 6. Enter your own API key and supported model name privately. Never put keys into a Docker layer or frontend file.
 7. Visit the site as the owner and register with the staff identity and bootstrap code. Ordinary early customers never become administrators in cloud mode.
 8. Issue single-use staff invitations from the owner workbench. Share the separate test access code privately with invited customer testers.
+   For repeated team onboarding, set a private `BANKBOT_STAFF_ACCESS_CODE` (16–128 characters) and keep `BANKBOT_OPEN_STAFF_TESTING=false`. The shared invitation has no automatic expiry and can enable multiple individual staff accounts. Select Staff at registration, or at sign-in with an existing customer's correct password, and enter the shared code once. Later staff sign-ins need only the account password. It grants no administrator rights. Replacing/removing the environment value blocks future enrolment with the old code; existing staff membership remains. Do not put a usable code in Git or frontend assets.
 9. Check `/api/health`, create synthetic chats and support messages, restart the service, and confirm that records remain.
 
 The existing `railway.json` records the configuration used in the deployed prototype. Railway CLI reported a configuration-as-code transition due on **2026-12-01**; verify the provider's supported format before a later redeployment. No automatic connection to the existing hosted service is configured by this GitHub repository.

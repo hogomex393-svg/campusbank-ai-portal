@@ -1,5 +1,6 @@
 """Translate public portal errors without leaking internal exceptions."""
 MESSAGES = {
+ '客服邀请码无效或已过期，请核对团队共享邀请码或向管理员获取新邀请码。':'The staff invitation is invalid or expired. Check the shared team code or ask an administrator for a new invitation.',
  '请选择有效的反馈原因。':'Choose a valid feedback reason.',
  '反馈选项与原因不一致。':'The feedback choice and reason do not match.',
  '只能评价 AI 咨询回答。':'Only AI consultation answers can be rated.',

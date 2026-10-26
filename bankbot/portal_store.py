@@ -27,9 +27,10 @@ def digest(token):return hashlib.sha256(token.encode()).hexdigest()
 
 
 class PortalStore:
-    def __init__(self,path,bootstrap_code='',open_staff_testing=False):
+    def __init__(self,path,bootstrap_code='',open_staff_testing=False,staff_access_code=''):
         self.bootstrap_code=bootstrap_code
         self.open_staff_testing=open_staff_testing
+        self.staff_access_code=staff_access_code
         self.path=Path(path);self.path.parent.mkdir(parents=True,exist_ok=True)
         with self.db() as c:
             c.execute('PRAGMA journal_mode=WAL')
@@ -112,6 +113,8 @@ class PortalStore:
             if self.bootstrap_code:
                 admin=staff and not bool(c.execute('SELECT 1 FROM users WHERE is_admin=1 LIMIT 1').fetchone()) and secrets.compare_digest(invite_code.encode(),self.bootstrap_code.encode())
             else:admin=allow_first_admin and not bool(c.execute('SELECT 1 FROM users LIMIT 1').fetchone())
+            # The shared invitation never grants owner privileges, even on a fresh local database.
+            if staff and self._shared_invite_matches(invite_code):admin=False
             if staff and not admin:self._consume_invite(c,invite_code,id_)
             try:c.execute('INSERT INTO users(id,username,display_name,password_hash,salt,is_admin,created_at,is_staff) VALUES(?,?,?,?,?,?,?,?)',(id_,username,display_name,hashed,salt,int(admin),now(),int(staff)))
             except sqlite3.IntegrityError:raise PortalError(409,'该用户名已被使用。') from None
@@ -150,10 +153,15 @@ class PortalStore:
             c.execute('INSERT INTO staff_invites VALUES(?,?,?,NULL)',(digest(code),user_id,expires))
         return {'invite_code':code,'expires_at':datetime.fromtimestamp(expires,timezone.utc).isoformat(),'single_use':True}
 
+    def _shared_invite_matches(self,code):
+        return bool(self.staff_access_code) and hmac.compare_digest(code.encode(),self.staff_access_code.encode())
+
     def _consume_invite(self,c,code,user_id):
+        # Configured privately by the operator: reusable, no automatic expiry, staff only.
+        if self._shared_invite_matches(code):return
         invite=c.execute('SELECT * FROM staff_invites WHERE token_hash=?',(digest(code),)).fetchone()
         if not invite or invite['used_by'] or invite['expires']<=time.time():
-            raise PortalError(403,'工作人员需要管理员提供的有效邀请码；邀请码只能使用一次。')
+            raise PortalError(403,'客服邀请码无效或已过期，请核对团队共享邀请码或向管理员获取新邀请码。')
         c.execute('UPDATE staff_invites SET used_by=? WHERE token_hash=?',(user_id,digest(code)))
 
     def enroll_staff(self,user,code):

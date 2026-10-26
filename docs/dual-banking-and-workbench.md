@@ -20,7 +20,7 @@ Up to three contextual next-question chips appear below the latest AI answer. Cl
 
 ## Staff access during testing
 
-`BANKBOT_OPEN_STAFF_TESTING` defaults to `false`. With this explicitly enabled, the sign-in dialog and customer profile offer a one-click test-staff entry. Staff registration/sign-in also needs no invitation during this mode. Existing account passwords are still checked; the one-click entry creates a separate test session instead of bypassing someone else's password.
+The sign-in dialog and customer profile no longer offer a one-click test-staff entry. Keep `BANKBOT_OPEN_STAFF_TESTING=false` for invitation-based access. An operator can configure a private reusable `BANKBOT_STAFF_ACCESS_CODE` with no automatic expiry. Multiple people can use it to enable their own staff accounts; it grants no administrator rights. One-use administrator invitations remain supported. Existing staff still sign in with their own password and need not enter an invitation again. The legacy open-testing backend is retained for isolated regression fixtures and is disabled on the hosted deployment.
 
 Temporary staff capability is attached to the session, without granting new administrator rights or persisting permanent staff membership. Turning the flag off and restarting/redeploying revokes those temporary staff sessions and restores invitation-based staff access. Private bootstrap and administrator-only invitation/import actions remain separate.
 

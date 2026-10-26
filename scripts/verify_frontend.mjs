@@ -179,7 +179,7 @@ w.fetch = async (url, options = {}) => {
 };
 w.eval(
   (await fs.readFile(path.join(root, "web/app.js"), "utf8")) +
-    "\nwindow.__test={S,showChat,showStaff,switchPortalRole,showSupportHistory,showCustomerTicket,startHandoff,newChat,selectChat,sendMessage,showServices,openService,showRequests,showReferences,renderChat,openAuth,authKind,markdown,setLanguage,switchBankMode,enterTestStaff,refreshBusinessRequests};",
+    "\nwindow.__test={S,showChat,showStaff,switchPortalRole,showSupportHistory,showCustomerTicket,startHandoff,newChat,selectChat,sendMessage,showServices,openService,showRequests,showReferences,renderChat,openAuth,authKind,markdown,setLanguage,switchBankMode,refreshBusinessRequests};",
 );
 async function flush() {
   for (let i = 0; i < 20; i++)
@@ -440,8 +440,13 @@ assert(w.document.getElementById('studentBankMode').classList.contains('active')
 
 ui.S.boot.open_staff_testing=true;ui.openAuth('login');
 w.document.getElementById('portalRole').value='staff';w.document.getElementById('portalRole').dispatchEvent(new w.Event('change'));
-assert(w.document.getElementById('staffInviteField').hidden);assert(!w.document.getElementById('staffTestEntry').hidden);
-await ui.enterTestStaff();assert.equal(ui.S.boot.user.is_admin,0);assert.equal(ui.S.staffTab,'requests');
+assert(!w.document.getElementById('staffInviteField').hidden);
+assert.equal(w.document.getElementById('staffTestEntry'),null);
+assert.equal(w.document.getElementById('staffTestLogin'),null);
+user={...user,is_admin:0,is_staff:1};ui.S.boot.user=user;
+w.document.getElementById('authDialog').close();
+ui.S.staffTab='requests';await ui.switchPortalRole('staff');
+assert.equal(ui.S.boot.user.is_admin,0);assert.equal(ui.S.staffTab,'requests');
 assert(w.document.getElementById('businessRequestDetail').querySelector('table'));
 const reviewNote=w.document.querySelector('.business-review-note');reviewNote.value='Please add a demo document summary.';reviewNote.dispatchEvent(new w.Event('input'));
 await supportSync();assert.equal(w.document.querySelector('.business-review-note').value,'Please add a demo document summary.');
@@ -453,7 +458,7 @@ const summary = {
   dual_mode_navigation_and_history:true,
   student_funding_directory_filters:true,
   followup_bubbles_send_contextual_question:true,
-  invitation_free_test_staff_entry:true,
+  staff_login_requires_invitation_and_has_no_test_entry:true,
   business_forms_visible_to_staff:true,
   business_review_draft_survives_polling:true,
   review_note_and_status_reach_customer:true,

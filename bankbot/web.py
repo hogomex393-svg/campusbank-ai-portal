@@ -86,7 +86,7 @@ def create_app(db_path=None,service=None):
     from .service import ChatService
     app=FastAPI(title='CampusBank local demo portal',docs_url=None,redoc_url=None)
     settings=Settings.load()
-    store=PortalStore(db_path or settings.database_path or ROOT/'logs/portal.sqlite3',bootstrap_code=settings.bootstrap_code if settings.cloud_mode else '',open_staff_testing=settings.open_staff_testing)
+    store=PortalStore(db_path or settings.database_path or ROOT/'logs/portal.sqlite3',bootstrap_code=settings.bootstrap_code if settings.cloud_mode else '',open_staff_testing=settings.open_staff_testing,staff_access_code=settings.staff_access_code)
     bot=service or ChatService(settings)
     app.state.store=store;app.state.bot=bot
     locks={};locks_guard=threading.Lock();login_attempts={};send_attempts={};quota_guard=threading.Lock()
@@ -143,7 +143,7 @@ def create_app(db_path=None,service=None):
         if not who:
             token,who=store.new_session();set_cookie(response,token,req)
         return {'user':who['user'],'csrf':who['csrf'],'categories':CATEGORIES,'services':list(SERVICES.values()),
-                'bank_references':BANK_REFERENCES,'api_available':bool(settings.api_key),'version':'2.6.0','portal_role':who['portal_role'],
+                'bank_references':BANK_REFERENCES,'api_available':bool(settings.api_key),'version':'2.6.1','portal_role':who['portal_role'],
                 'open_staff_testing':settings.open_staff_testing,'testing_staff':who.get('testing_staff',False),'funding_programs':PROGRAMS,
                 'today':datetime.now(timezone.utc).date().isoformat(),
                 'requires_login':settings.cloud_mode,'registration_access_code_required':settings.cloud_mode,
@@ -414,7 +414,7 @@ def create_app(db_path=None,service=None):
         return {'imported':store.import_legacy(who['owner'],records)}
 
     @app.get('/api/health')
-    def health():return {'ok':True,'version':'2.6.0'}
+    def health():return {'ok':True,'version':'2.6.1'}
 
     app.mount('/assets',StaticFiles(directory=ROOT/'web'),name='assets')
     @app.get('/')

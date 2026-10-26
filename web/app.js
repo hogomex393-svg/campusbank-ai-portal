@@ -1610,8 +1610,7 @@ function authKind(kind) {
 }
 function updateAuthRole() {
   const staff = $("portalRole").value === "staff";
-  $("staffInviteField").hidden = !staff || !!S.boot?.open_staff_testing;
-  $("staffTestEntry").hidden=!S.boot?.open_staff_testing;
+  $("staffInviteField").hidden = !staff;
   const groupCode =
     S.authKind === "register" &&
     !staff &&
@@ -1622,12 +1621,10 @@ function updateAuthRole() {
     staff && S.authKind === "register" && S.boot?.first_admin_setup_required
       ? t("管理员初始化邀请码", "Administrator setup invitation")
       : t("工作人员邀请码", "Staff invitation");
-  $("authSubtitle").textContent = staff && S.boot?.open_staff_testing
-    ? t('当前为测试阶段，工作人员注册和登录无需邀请码，也可一键进入测试客服。','Staff registration and sign-in need no invitation during testing. You can also use the one-click test entry.')
-    : staff
+  $("authSubtitle").textContent = staff
     ? t(
-        "工作人员进入客服端。首次开通需要管理员邀请码；已开通的账户无需再次填写。",
-        "Staff enter the support workspace. An invitation is required only when first enabling staff access.",
+        "首次开通客服身份，请填写团队共享邀请码或管理员提供的邀请码。已开通的账户以后无需再次填写。",
+        "Use the shared team code or an administrator invitation to enable staff access. Existing staff can leave the code blank.",
       )
     : t(
         "客户登录后可咨询、办理业务并接收人工回复。",
@@ -1733,7 +1730,6 @@ function showProfile() {
           ),
       ),
     );
-  else if(S.boot.open_staff_testing)p.append(button(t('一键进入测试客服','Enter test staff workspace'),'secondary-button full',enterTestStaff));
   $("profileDialog").showModal();
 }
 async function switchPortalRole(role) {
@@ -1841,16 +1837,6 @@ async function showStaff() {
   $('scrollArea').scrollTop=0;
   S.staffDetailFingerprint = "";
   await refreshStaff();
-}
-async function enterTestStaff() {
-  if(S.busy)return;
-  const buttonEl=$('staffTestLogin');buttonEl.disabled=true;
-  try {
-    const data=await api('/api/testing/staff-session','POST',{});
-    Object.assign(S.boot,data);S.current=null;S.staffTab='requests';S.afterLogin=null;
-    $('authDialog').close();if($('profileDialog').open)$('profileDialog').close();setChatUrl(null);renderSidebar();await refreshHistory();await showStaff();
-    identityChannel?.postMessage('identity-changed');
-  }catch(e){$('authError').textContent=e.message;}finally{buttonEl.disabled=false;}
 }
 async function refreshBusinessRequests() {
   if(S.view!=='staff'||!hasStaffAccess()||S.businessPolling)return;
@@ -2267,8 +2253,6 @@ function setLanguage() {
   );
   $("staffNav").lastChild.textContent = t("工作人员演示台", "Staff workspace");
   updateBankModeUI();
-  $('staffTestNotice').textContent=t('测试期间可免邀请码进入客服端，不额外授予管理员权限。','Test staff can enter without an invitation; no additional administrator permissions are granted.');
-  $('staffTestLogin').textContent=t('一键进入测试客服','Enter test staff workspace');
   renderSidebar();
   if (S.view === "chat") showChat(false);
   else if (S.view === "requests") showRequests();
@@ -2297,7 +2281,6 @@ async function init() {
   $("newChat").onclick = newChat;
   $('generalBankMode').onclick=()=>switchBankMode('general');
   $('studentBankMode').onclick=()=>switchBankMode('student');
-  $('staffTestLogin').onclick=enterTestStaff;
   $("brandHome").onclick = () => showChat();
   $("homeNav").onclick = () => showChat();
   $("requestsNav").onclick = showRequests;
