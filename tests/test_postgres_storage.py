@@ -48,6 +48,19 @@ class DatabaseConfigurationTests(unittest.TestCase):
             with self.subTest(url=url), self.assertRaises(ValueError):
                 self.load(**self.cloud_values(), DATABASE_URL=url)
 
+    def test_cutover_maintenance_blocks_api_writes_and_session_creation(self):
+        with tempfile.TemporaryDirectory() as folder:
+            settings = Settings(database_path=Path(folder)/'portal.sqlite3', maintenance_mode=True)
+            with patch('bankbot.web.Settings.load', return_value=settings):
+                app = create_app(service=StubAgent())
+            with TestClient(app) as client:
+                self.assertEqual(client.get('/api/health').status_code, 200)
+                self.assertEqual(client.get('/').status_code, 200)
+                self.assertEqual(client.get('/api/bootstrap').status_code, 503)
+                self.assertEqual(client.post('/api/chats').status_code, 503)
+                with app.state.store.db() as connection:
+                    self.assertEqual(connection.execute('SELECT COUNT(*) FROM sessions').fetchone()[0], 0)
+
 
 @unittest.skipUnless(os.environ.get('PG_TEST_DATABASE_URL'), 'Set PG_TEST_DATABASE_URL for real PostgreSQL tests')
 class PostgresWorkflowTests(unittest.TestCase):

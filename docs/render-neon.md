@@ -33,6 +33,12 @@ are preserved. Retrying the same import returns its recorded completion result.
 A different import into an occupied database is rejected. The importer updates
 identity sequences so subsequent messages and review events receive new IDs.
 
+For the final cutover, run the old service with `BANKBOT_MAINTENANCE_MODE=true`,
+wait for its previous deployment to finish draining, then export the final
+snapshot. Maintenance blocks every API route except health checks, including
+guest-session creation. Keep the new service in maintenance until import and
+verification finish, then deploy it with the flag set to `false`.
+
 ## Render setup
 
 Push the migration source to GitHub and deploy the repository Dockerfile as one

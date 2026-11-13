@@ -136,7 +136,12 @@ def create_app(db_path=None,service=None):
 
     @app.middleware('http')
     async def security_headers(req,call_next):
-        response=await call_next(req)
+        if settings.maintenance_mode and req.url.path.startswith('/api/') and req.url.path!='/api/health':
+            message=('系统正在迁移，请稍后重试。' if req.headers.get('Accept-Language','zh').startswith('zh')
+                     else 'The system is being migrated. Please try again shortly.')
+            response=JSONResponse({'detail':message},status_code=503,headers={'Retry-After':'120'})
+        else:
+            response=await call_next(req)
         response.headers['X-Content-Type-Options']='nosniff'
         response.headers['Referrer-Policy']='same-origin'
         response.headers['X-Frame-Options']='DENY'

@@ -35,6 +35,7 @@ class Settings:
     database_path: Path | None = None
     database_url: str = field(default='', repr=False)
     cloud_mode: bool = False
+    maintenance_mode: bool = False
     public_url: str = ""
     bootstrap_code: str = field(default="", repr=False)
     test_access_code: str = field(default="", repr=False)
@@ -103,7 +104,8 @@ class Settings:
             history_turns=max(1, min(int(val("BANKBOT_HISTORY_TURNS", "6")), 20)),
             database_path=Path(database) if database else None,
             database_url=database_url,
-            cloud_mode=cloud,public_url=public_url,bootstrap_code=bootstrap,test_access_code=access,
+            cloud_mode=cloud,maintenance_mode=val('BANKBOT_MAINTENANCE_MODE','false').lower() in ('true','1','yes'),
+            public_url=public_url,bootstrap_code=bootstrap,test_access_code=access,
             demo_accounts=tuple(x.strip().casefold() for x in val('BANKBOT_DEMO_ACCOUNTS','').split(',') if x.strip()),
             account_rpm=max(1,min(int(val('BANKBOT_ACCOUNT_RPM','6')),30)),demo_rpm=max(6,min(int(val('BANKBOT_DEMO_RPM','18')),30)),
             global_rpm=max(6,min(int(val('BANKBOT_GLOBAL_RPM','30')),120)),hourly_requests=max(6,min(int(val('BANKBOT_HOURLY_REQUESTS','240')),2000)),
