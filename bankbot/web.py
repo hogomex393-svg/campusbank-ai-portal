@@ -1,5 +1,6 @@
 """Local banking portal API and static front end. Run python -m bankbot.web."""
 from pathlib import Path
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from dataclasses import asdict
 from urllib.parse import urlparse
@@ -84,9 +85,15 @@ def public_chat(chat):
 
 def create_app(db_path=None,service=None):
     from .service import ChatService
-    app=FastAPI(title='CampusBank local demo portal',docs_url=None,redoc_url=None)
+    @asynccontextmanager
+    async def lifespan(app):
+        try:
+            yield
+        finally:
+            store.close()
+    app=FastAPI(title='CampusBank local demo portal',docs_url=None,redoc_url=None,lifespan=lifespan)
     settings=Settings.load()
-    store=PortalStore(db_path or settings.database_path or ROOT/'logs/portal.sqlite3',bootstrap_code=settings.bootstrap_code if settings.cloud_mode else '',open_staff_testing=settings.open_staff_testing,staff_access_code=settings.staff_access_code)
+    store=PortalStore(db_path or settings.database_url or settings.database_path or ROOT/'logs/portal.sqlite3',bootstrap_code=settings.bootstrap_code if settings.cloud_mode else '',open_staff_testing=settings.open_staff_testing,staff_access_code=settings.staff_access_code)
     bot=service or ChatService(settings)
     app.state.store=store;app.state.bot=bot
     locks={};locks_guard=threading.Lock();login_attempts={};send_attempts={};quota_guard=threading.Lock()

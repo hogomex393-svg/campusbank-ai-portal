@@ -12,8 +12,9 @@ def main(argv=None):
     parser=argparse.ArgumentParser(description='Reset a CampusBank demo account password on the server computer.')
     parser.add_argument('--username',required=True,help='Existing login username, not the display name.')
     args=parser.parse_args(argv)
-    path=Settings.load().database_path or ROOT/'logs/portal.sqlite3'
-    if not path.is_file():
+    settings=Settings.load()
+    path=settings.database_url or settings.database_path or ROOT/'logs/portal.sqlite3'
+    if not settings.database_url and not path.is_file():
         print('找不到本机账户数据库，请在运行 CampusBank 的服务器电脑上操作。')
         return 1
     if not sys.stdin.isatty():

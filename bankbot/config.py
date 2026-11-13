@@ -2,7 +2,7 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 import os
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -33,6 +33,7 @@ class Settings:
     retrieval_threshold: float = 0.18
     data_dir: Path = ROOT / "data"
     database_path: Path | None = None
+    database_url: str = field(default='', repr=False)
     cloud_mode: bool = False
     public_url: str = ""
     bootstrap_code: str = field(default="", repr=False)
@@ -52,11 +53,18 @@ class Settings:
         if deployment not in ('local','cloud'):
             raise ValueError('BANKBOT_DEPLOYMENT must be local or cloud.')
         database=val('BANKBOT_DB_PATH','')
+        database_url=val('BANKBOT_DATABASE_URL',val('DATABASE_URL','')).strip()
+        if database_url:
+            parsed_database=urlparse(database_url)
+            if parsed_database.scheme not in ('postgres','postgresql') or not parsed_database.hostname or not parsed_database.path.strip('/'):
+                raise ValueError('DATABASE_URL must be a PostgreSQL connection URL.')
         if not database and os.environ.get('RAILWAY_VOLUME_MOUNT_PATH'):
             database=str(Path(os.environ['RAILWAY_VOLUME_MOUNT_PATH'])/'portal.sqlite3')
         public_url=val('BANKBOT_PUBLIC_URL','').rstrip('/')
         if not public_url and os.environ.get('RAILWAY_PUBLIC_DOMAIN'):
             public_url='https://'+os.environ['RAILWAY_PUBLIC_DOMAIN']
+        if not public_url and os.environ.get('RENDER_EXTERNAL_URL'):
+            public_url=os.environ['RENDER_EXTERNAL_URL'].rstrip('/')
         cloud=deployment=='cloud'
         bootstrap=val('BANKBOT_BOOTSTRAP_CODE','')
         access=val('BANKBOT_TEST_ACCESS_CODE','')
@@ -69,8 +77,14 @@ class Settings:
         fallback_base=val('DEEPSEEK_BASE_URL','https://api.deepseek.com') if provider=='deepseek' else val('DASHSCOPE_BASE_URL','https://dashscope.aliyuncs.com/compatible-mode/v1') if provider=='qwen' else ''
         fallback_model=val('DEEPSEEK_MODEL','deepseek-v4-pro') if provider=='deepseek' else 'qwen3.7-plus' if provider=='qwen' else ''
         if cloud:
-            if not database or not Path(database).is_absolute():
-                raise ValueError('Cloud mode requires an absolute BANKBOT_DB_PATH on a persistent volume.')
+            if database_url:
+                ssl_mode=parse_qs(urlparse(database_url).query).get('sslmode',[''])[0]
+                if ssl_mode not in ('require','verify-ca','verify-full'):
+                    raise ValueError('Cloud PostgreSQL requires sslmode=require or certificate verification.')
+            elif os.environ.get('RENDER')=='true':
+                raise ValueError('Render requires DATABASE_URL for persistent account storage.')
+            elif not database or not Path(database).is_absolute():
+                raise ValueError('Cloud mode requires DATABASE_URL or an absolute persistent BANKBOT_DB_PATH.')
             if len(bootstrap)<24 or len(access)<12:
                 raise ValueError('Cloud mode requires BANKBOT_BOOTSTRAP_CODE (24+ characters) and BANKBOT_TEST_ACCESS_CODE (12+ characters).')
             if public_url:
@@ -88,6 +102,7 @@ class Settings:
             max_tool_rounds=max(1, min(int(val("BANKBOT_MAX_TOOL_ROUNDS", "3")), 5)),
             history_turns=max(1, min(int(val("BANKBOT_HISTORY_TURNS", "6")), 20)),
             database_path=Path(database) if database else None,
+            database_url=database_url,
             cloud_mode=cloud,public_url=public_url,bootstrap_code=bootstrap,test_access_code=access,
             demo_accounts=tuple(x.strip().casefold() for x in val('BANKBOT_DEMO_ACCOUNTS','').split(',') if x.strip()),
             account_rpm=max(1,min(int(val('BANKBOT_ACCOUNT_RPM','6')),30)),demo_rpm=max(6,min(int(val('BANKBOT_DEMO_RPM','18')),30)),

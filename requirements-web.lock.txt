@@ -13,6 +13,8 @@ numpy==2.5.3
 opentelemetry-api==1.45.1
 pydantic==2.14.1
 pydantic_core==2.50.1
+psycopg[binary]==3.3.9
+psycopg-pool==3.3.3
 scikit-learn==1.9.1
 scipy==1.18.1
 starlette==1.7.0
