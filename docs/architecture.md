@@ -2,7 +2,7 @@
 
 ## Components
 
-The browser uses plain HTML, CSS, and JavaScript. FastAPI serves the interface, JSON endpoints, and a POST SSE endpoint for streamed answers. A SQLite store holds users, hashed sessions, chats, messages, service requests, tickets, and staff invitations. One server instance is used in the current deployment.
+The browser uses plain HTML, CSS, and JavaScript. FastAPI serves the interface, JSON endpoints, and a POST SSE endpoint for streamed answers. SQL storage holds users, hashed sessions, chats, messages, service requests, tickets, and staff invitations. Hosted records use PostgreSQL on Neon, while local demos use SQLite. The current deployment runs one server instance.
 
 The model service is separate from the portal. This allows the CLI, web interface, evaluation harness, and test fixtures to use the same dialogue/retrieval/orchestration implementation.
 
@@ -45,6 +45,6 @@ These controls have automated coverage; this is not a security audit or a certif
 
 ## Persistence and synchronization
 
-SQLite uses WAL and transactional operations. Cloud storage mounts `/data`; the database path is `/data/portal.sqlite3`. Provider restart persistence was checked. Visible customer/staff pages poll every three seconds; updates preserve selected context and unfinished staff replies. The implementation does not use WebSockets.
+Local SQLite storage uses WAL and transactional operations. Hosted PostgreSQL storage uses a connection pool and transaction-scoped advisory locks. Render restarts retain records in the independent Neon database. Visible customer/staff pages poll every three seconds, preserving selected context and unfinished staff replies.
 
 For larger deployments, external relational storage, centralized quotas, push events, structured operational monitoring, and account recovery would need further work.
