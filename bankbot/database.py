@@ -54,6 +54,14 @@ class PostgresConnection:
             if statement.strip():
                 self.execute(statement)
 
+    def executemany(self, statement, parameters):
+        cursor = self.connection.cursor()
+        try:
+            cursor.executemany(statement.replace('?', '%s'), parameters)
+        except self.integrity_error:
+            raise sqlite3.IntegrityError('Database constraint violation') from None
+        return PostgresCursor(cursor)
+
 
 class Database:
     def __init__(self, location):
@@ -69,7 +77,7 @@ class Database:
             self.integrity_error = psycopg.IntegrityError
             self.pool = ConnectionPool(
                 conninfo=str(location), min_size=0, max_size=4,
-                timeout=20, max_idle=60, reconnect_timeout=20,
+                timeout=20, max_idle=60, reconnect_timeout=20, open=True,
                 check=ConnectionPool.check_connection,
                 kwargs={'row_factory': dict_row, 'connect_timeout': 15,
                         'prepare_threshold': None, 'application_name': 'campusbank'},

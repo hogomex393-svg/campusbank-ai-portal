@@ -60,8 +60,9 @@ def import_sqlite(source, destination_url):
                     names = ','.join('"' + name + '"' for name in columns[table])
                     placeholders = ','.join('?' for name in columns[table])
                     statement = f'INSERT INTO {table} ({names}) VALUES ({placeholders})'
-                    for row in records[table]:
-                        database.execute(statement, tuple(row[name] for name in columns[table]))
+                    if records[table]:
+                        database.executemany(statement,
+                            [tuple(row[name] for name in columns[table]) for row in records[table]])
                 for table in IDENTITY_TABLES:
                     database.execute(f"SELECT setval(pg_get_serial_sequence('{table}', 'id'), "
                         f"COALESCE(MAX(id), 0) + 1, false) FROM {table}")

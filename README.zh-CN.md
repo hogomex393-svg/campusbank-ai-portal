@@ -1,6 +1,8 @@
 # CampusBank：中英双语 AI 银行服务交互原型
 
-[英文项目主页](README.md) · [在线演示](https://campusbank-production.up.railway.app/)
+[英文项目主页](README.md) · [在线演示](https://campusbank-team12.onrender.com/)
+
+在线版使用 Render 与 Neon PostgreSQL，账户、聊天和业务记录保存在独立数据库中。免费实例闲置后会休眠，首次打开时可能需要等待唤醒，部署配置见 [Render 与 Neon 使用说明](docs/render-neon.md)。
 
 版本 2.6.0 按组内评审修复汇率、否定意图、追问/检索、演示限流及手机菜单，加入回答反馈、可恢复归档、原申请补充/撤回和评测导出，详见 [逐项修复与审查说明](docs/group-review-oct25.md)。
 

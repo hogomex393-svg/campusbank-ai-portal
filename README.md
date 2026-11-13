@@ -7,7 +7,7 @@
 
 **A conversational service interface that connects natural-language questions, grounded AI answers, guided service windows, and human support in one persistent conversation.**
 
-[Live demo](https://campusbank-production.up.railway.app/) · [Interaction design](docs/interaction-design.md) · [Architecture](docs/architecture.md) · [Evaluation](docs/evaluation.md) · [Research directions](docs/research-directions.md)
+[Live demo](https://campusbank-team12.onrender.com/) · [Interaction design](docs/interaction-design.md) · [Architecture](docs/architecture.md) · [Evaluation](docs/evaluation.md) · [Research directions](docs/research-directions.md)
 
 [中文介绍](README.zh-CN.md)
 
@@ -25,7 +25,7 @@
 
 CampusBank explores a practical interaction problem: **how can a user move from asking a question to completing the next service step without losing context or confusing AI with human staff?** The project combines a DeepSeek-powered bilingual agent with a multi-user web portal, an approved service catalog, and a separate staff workbench.
 
-The hosted demo uses invitation-based registration; contact the project owner for access. You can also run the complete portal locally in offline mode without an API key. Hosting availability depends on the current Railway plan.
+The hosted demo uses invitation-based registration; contact the project owner for access. You can also run the complete portal locally in offline mode without an API key. The web service runs on Render with persistent records in Neon PostgreSQL. Free instances can take time to wake after inactivity. See the [Render and Neon setup](docs/render-neon.md).
 
 > CampusBank is a fictional educational prototype. Its products, fees, branches, applications, and transfers are synthetic. Service windows record demonstration requests; no real bank account or financial transaction is connected.
 

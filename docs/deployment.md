@@ -14,7 +14,18 @@ Start with `python -m bankbot.web --host 0.0.0.0 --port 8501`. Other computers u
 
 ## Public cloud deployment
 
-The current hosted deployment uses Railway, a Python 3.13 Docker image, one service instance, and a persistent `/data` volume. The Docker image copies only runtime source and synthetic knowledge.
+The current hosted deployment uses a Render Free web service with Neon PostgreSQL.
+Use `DATABASE_URL` for the database and the same private invitation and model
+configuration as the existing portal. `RENDER_EXTERNAL_URL` supplies the HTTPS
+origin for secure sessions. Follow the [Render and Neon setup](render-neon.md)
+for configuration, data import and verification.
+
+## SQLite cloud option
+
+The earlier Railway deployment used a Python 3.13 Docker image, one service
+instance and a persistent `/data` volume. The Docker image copies runtime
+source and synthetic knowledge. This configuration also supports a host with
+persistent local storage.
 
 1. Build from the repository Dockerfile. Expose the port supplied by the host (`PORT`, default 8080).
 2. Attach persistent storage at `/data` before creating accounts. Keep `BANKBOT_DB_PATH=/data/portal.sqlite3`.
@@ -27,10 +38,15 @@ The current hosted deployment uses Railway, a Python 3.13 Docker image, one serv
    For repeated team onboarding, set a private `BANKBOT_STAFF_ACCESS_CODE` (16–128 characters) and keep `BANKBOT_OPEN_STAFF_TESTING=false`. The shared invitation has no automatic expiry and can enable multiple individual staff accounts. Select Staff at registration, or at sign-in with an existing customer's correct password, and enter the shared code once. Later staff sign-ins need only the account password. It grants no administrator rights. Replacing/removing the environment value blocks future enrolment with the old code; existing staff membership remains. Do not put a usable code in Git or frontend assets.
 9. Check `/api/health`, create synthetic chats and support messages, restart the service, and confirm that records remain.
 
-The existing `railway.json` records the configuration used in the deployed prototype. Railway CLI reported a configuration-as-code transition due on **2026-12-01**; verify the provider's supported format before a later redeployment. No automatic connection to the existing hosted service is configured by this GitHub repository.
+The existing `railway.json` records the earlier deployment configuration. Railway
+CLI reported a configuration-as-code transition due on **2026-12-01**. Check the
+provider's supported format before reusing this deployment option.
 
 ## Operating limits
 
-Keep one instance/worker with the current SQLite and process-local rate limits. Three-second polling needs network access to the shared server. Model API costs are separate from hosting costs. Free/trial hosting credits and inactivity behavior are provider-dependent; this repository does not promise perpetual free hosting or continuous availability.
+Keep one instance/worker with the process-local classroom quotas. Local mode uses
+SQLite, while the Render deployment uses PostgreSQL. Three-second polling needs
+network access to the shared server. Model API costs are separate from hosting
+costs. Hosting and database usage follow the providers' current free-tier limits.
 
 Before public expansion, plan backups, account recovery, monitoring, storage migration, centralized quotas, and a security review. Use synthetic demonstration data throughout this version.
