@@ -9,7 +9,7 @@
       "What should I bring to open a student account?"
     ],
     "answer": "For the Student Account, bring a photo ID, proof of student status and proof of address.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "学生账户开户需要哪些材料？",
     "aliases_zh": [
@@ -27,7 +27,7 @@
       "Is the student account free each month?"
     ],
     "answer": "The Student Account has no monthly account fee. Optional international transfers have separate fees.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "学生账户有月费吗？",
     "aliases_zh": [
@@ -45,7 +45,7 @@
       "What is the minimum age for student banking?"
     ],
     "answer": "The demo Student Account is available to enrolled students aged 18 or above.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "谁可以开立学生账户？",
     "aliases_zh": [
@@ -62,14 +62,14 @@
     "aliases": [
       "Can I open a student account online?"
     ],
-    "answer": "Apply for the Student Account through the demo online application or visit a CampusBank branch.",
-    "source": "Original fictional CampusBank coursework policy",
+    "answer": "Apply for the Student Account through the demo online application or visit a BankFlow AI branch.",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "怎样申请学生账户？",
     "aliases_zh": [
       "学生账户可以网上开户吗？"
     ],
-    "answer_zh": "可以通过演示网上申请流程开立学生账户，也可以前往 CampusBank 网点办理。"
+    "answer_zh": "可以通过演示网上申请流程开立学生账户，也可以前往 BankFlow AI 网点办理。"
   },
   {
     "faq_id": "ACC_EVERYDAY_FEES",
@@ -81,7 +81,7 @@
       "How much does a current account cost per month?"
     ],
     "answer": "The demo Everyday Account costs GBP 3 per month.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "日常账户的月费是多少？",
     "aliases_zh": [
@@ -99,7 +99,7 @@
       "What identification is needed for a current account?"
     ],
     "answer": "For the Everyday Account, bring a photo ID and proof of address.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "开立日常账户需要哪些材料？",
     "aliases_zh": [
@@ -116,8 +116,8 @@
     "aliases": [
       "How do I terminate a bank account?"
     ],
-    "answer": "Contact CampusBank support or visit a branch to request closure. Settle any outstanding balance and move recurring payments first.",
-    "source": "Original fictional CampusBank coursework policy",
+    "answer": "Contact BankFlow AI support or visit a branch to request closure. Settle any outstanding balance and move recurring payments first.",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "怎样关闭银行账户？",
     "aliases_zh": [
@@ -135,7 +135,7 @@
       "Where can I change my residential address?"
     ],
     "answer": "Update your address in the demo app's Profile section or visit a branch with proof of the new address.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "怎样更新我的地址？",
     "aliases_zh": [
@@ -153,7 +153,7 @@
       "My bank card was stolen; what should I do?"
     ],
     "answer": "Use the Lost or damaged card window to record a demo freeze or replacement request. A replacement has a fictional GBP 5 fee. This portal cannot freeze a real card and has no separate banking app.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "借记卡丢了怎么办？",
     "aliases_zh": [
@@ -171,7 +171,7 @@
       "Can I order a new card if mine is broken?"
     ],
     "answer": "Use the Lost or damaged card window to record a replacement request. The fictional replacement fee is GBP 5. The 5 working days in this fictional policy is an illustrative reference only; the portal does not dispatch cards or track real delivery.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.2-portal-consistency",
     "question_zh": "借记卡损坏后如何补办？",
     "aliases_zh": [
@@ -189,7 +189,7 @@
       "How can I start using my new bank card?"
     ],
     "answer": "This portal cannot activate real debit cards. Use Digital banking help or Human support to record a demo assistance request. Do not enter real card details.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "怎样激活借记卡？",
     "aliases_zh": [
@@ -207,7 +207,7 @@
       "I cannot remember my bank card PIN."
     ],
     "answer": "Use the demo app's secure PIN-help process or contact support. Do not type your PIN into this chat.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "忘记借记卡 PIN 怎么办？",
     "aliases_zh": [
@@ -225,7 +225,7 @@
       "What paperwork is needed for a credit card application?"
     ],
     "answer": "For the demo Credit Card, provide a photo ID, proof of address and proof of income.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "申请信用卡需要哪些材料？",
     "aliases_zh": [
@@ -243,7 +243,7 @@
       "What are the credit card charges?"
     ],
     "answer": "The fictional Credit Card has no annual fee; late payments incur a GBP 10 demo fee.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "信用卡收年费吗？",
     "aliases_zh": [
@@ -261,7 +261,7 @@
       "What is the credit card purchase rate?"
     ],
     "answer": "The fictional Credit Card has a 19% annual purchase interest rate. This is a demonstration value.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "信用卡的利率是多少？",
     "aliases_zh": [
@@ -278,8 +278,8 @@
     "aliases": [
       "My card transaction did not go through."
     ],
-    "answer": "Check the card status, available funds and payment limit in the demo app. If the issue continues, contact CampusBank support; this assistant cannot inspect your transactions.",
-    "source": "Original fictional CampusBank coursework policy",
+    "answer": "Check the card status, available funds and payment limit in the demo app. If the issue continues, contact BankFlow AI support; this assistant cannot inspect your transactions.",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "刷卡付款被拒绝怎么办？",
     "aliases_zh": [
@@ -297,7 +297,7 @@
       "Does a local bank transfer cost anything?"
     ],
     "answer": "Demo domestic transfers are free. In the Transfer request window, review a fictional recipient nickname, amount and optional note before confirming. No money moves.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "国内转账的手续费是多少？",
     "aliases_zh": [
@@ -315,7 +315,7 @@
       "When will a local transfer arrive?"
     ],
     "answer": "Demo domestic transfers usually arrive within one working day. This assistant cannot track a real payment.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "国内转账多久到账？",
     "aliases_zh": [
@@ -333,7 +333,7 @@
       "How much does sending money abroad cost?"
     ],
     "answer": "The fictional international transfer fee is GBP 8 per payment. Other banks or currency conversion may add charges that are not specified in this demo.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "国际转账手续费是多少？",
     "aliases_zh": [
@@ -351,7 +351,7 @@
       "When does an overseas bank payment arrive?"
     ],
     "answer": "Demo international transfers usually take 3 to 5 working days. Weekends and holidays are not working days.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "国际转账多久到账？",
     "aliases_zh": [
@@ -369,7 +369,7 @@
       "Do I need an IBAN and SWIFT code to send money abroad?"
     ],
     "answer": "A simulated international transfer needs only transfer type, a fictional recipient nickname, a GBP demo amount and optional note. Open Transfer request and review before confirming. Do not provide IBAN, account numbers, SWIFT/BIC or actual payment details.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "国际转账需要哪些收款人信息？",
     "aliases_zh": [
@@ -387,7 +387,7 @@
       "How do I stop a bank payment before it is sent?"
     ],
     "answer": "Check the payment status in the demo app and contact support promptly. Completed transfers may not be cancellable; the assistant cannot cancel payments.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "可以取消尚未完成的转账吗？",
     "aliases_zh": [
@@ -405,7 +405,7 @@
       "Can I arrange the same transfer every month?"
     ],
     "answer": "Use the demo app's Payments section to create a standing order with an amount and schedule. You can review or cancel it in the app.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "如何设置定期转账？",
     "aliases_zh": [
@@ -423,7 +423,7 @@
       "My transfer failed; how can I get help?"
     ],
     "answer": "Check the transfer status and recipient information in the demo app. Contact support with the app's reference number through the secure support channel.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "转账失败了怎么办？",
     "aliases_zh": [
@@ -441,7 +441,7 @@
       "How much interest does the savings account pay?"
     ],
     "answer": "The fictional Savings Account pays 2% annual interest. This is a demo value, not a real bank rate.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "储蓄账户利率是多少？",
     "aliases_zh": [
@@ -459,7 +459,7 @@
       "Are there regular charges for the savings account?"
     ],
     "answer": "The demo Savings Account has no monthly account fee.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "储蓄账户每月收费吗？",
     "aliases_zh": [
@@ -477,7 +477,7 @@
       "What should I bring to open savings?"
     ],
     "answer": "For the Savings Account, bring a photo ID and proof of address.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "储蓄账户开户需要什么材料？",
     "aliases_zh": [
@@ -495,7 +495,7 @@
       "How much money is needed to start a savings account?"
     ],
     "answer": "The fictional Savings Account requires an opening deposit of GBP 10.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "储蓄账户最低开户存款是多少？",
     "aliases_zh": [
@@ -513,7 +513,7 @@
       "Is early withdrawal allowed for ordinary savings?"
     ],
     "answer": "The demo Savings Account allows withdrawals without an early-withdrawal penalty. It is not a fixed-term deposit.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "储蓄账户提前取款有罚金吗？",
     "aliases_zh": [
@@ -531,7 +531,7 @@
       "How often is interest added to savings?"
     ],
     "answer": "In this fictional demo, Savings Account interest is credited monthly.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "储蓄利息什么时候到账？",
     "aliases_zh": [
@@ -548,32 +548,32 @@
     "aliases": [
       "Can I apply for savings through the app?"
     ],
-    "answer": "Open a Savings Account through the demo app or at a CampusBank branch.",
-    "source": "Original fictional CampusBank coursework policy",
+    "answer": "Open a Savings Account through the demo app or at a BankFlow AI branch.",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "怎样开立储蓄账户？",
     "aliases_zh": [
       "可以通过应用申请储蓄账户吗？"
     ],
-    "answer_zh": "可以通过演示应用或前往 CampusBank 网点开立储蓄账户。"
+    "answer_zh": "可以通过演示应用或前往 BankFlow AI 网点开立储蓄账户。"
   },
   {
     "faq_id": "SAVE_FIXED_TERM",
     "topic": "savings",
     "product": "",
     "attribute": "fixed",
-    "question": "Does CampusBank offer fixed-term deposits?",
+    "question": "Does BankFlow AI offer fixed-term deposits?",
     "aliases": [
       "Can I put money into a fixed deposit?"
     ],
-    "answer": "Fixed-term deposits are not included in the CampusBank demo catalogue. Contact support for products outside this demo.",
-    "source": "Original fictional CampusBank coursework policy",
+    "answer": "Fixed-term deposits are not included in the BankFlow AI demo catalogue. Contact support for products outside this demo.",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "有定期存款产品吗？",
     "aliases_zh": [
-      "CampusBank 提供固定期限存款吗？"
+      "BankFlow AI 提供固定期限存款吗？"
     ],
-    "answer_zh": "CampusBank 演示产品目录不包含定期存款。关于演示范围以外的产品，请咨询客服。"
+    "answer_zh": "BankFlow AI 演示产品目录不包含定期存款。关于演示范围以外的产品，请咨询客服。"
   },
   {
     "faq_id": "LOAN_DOCUMENTS",
@@ -585,7 +585,7 @@
       "What paperwork should I provide for a loan?"
     ],
     "answer": "For the demo Personal Loan, provide a photo ID, proof of address and proof of income.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "个人贷款需要什么材料？",
     "aliases_zh": [
@@ -603,7 +603,7 @@
       "What are the personal loan requirements?"
     ],
     "answer": "The demo Personal Loan requires age 18 or above and an affordability review; eligibility is not approval.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "申请个人贷款有什么条件？",
     "aliases_zh": [
@@ -621,7 +621,7 @@
       "Is the personal loan rate fixed?"
     ],
     "answer": "The fictional Personal Loan has a fixed 8% annual interest rate. This is a demo value.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "个人贷款利率是多少？",
     "aliases_zh": [
@@ -639,7 +639,7 @@
       "Does applying for a loan cost anything?"
     ],
     "answer": "The demo Personal Loan has no application fee. Consult the loan agreement for other charges.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "申请个人贷款收费吗？",
     "aliases_zh": [
@@ -656,14 +656,14 @@
     "aliases": [
       "Can I submit a personal loan application online?"
     ],
-    "answer": "Apply for the Personal Loan online or request an appointment at a CampusBank branch.",
-    "source": "Original fictional CampusBank coursework policy",
+    "answer": "Apply for the Personal Loan online or request an appointment at a BankFlow AI branch.",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "怎样申请个人贷款？",
     "aliases_zh": [
       "个人贷款可以线上办理吗？"
     ],
-    "answer_zh": "可以在线申请演示个人贷款，也可以预约 CampusBank 网点。"
+    "answer_zh": "可以在线申请演示个人贷款，也可以预约 BankFlow AI 网点。"
   },
   {
     "faq_id": "LOAN_TIME",
@@ -675,7 +675,7 @@
       "When will I hear back about my loan application?"
     ],
     "answer": "The demo bank aims to review a complete Personal Loan application within 5 working days. This does not guarantee approval.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "个人贷款审核多久出结果？",
     "aliases_zh": [
@@ -693,7 +693,7 @@
       "Are loan repayments made monthly?"
     ],
     "answer": "The demo Personal Loan uses monthly repayments by direct debit. Consult your loan agreement for the schedule; the assistant cannot see your agreement.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "个人贷款怎样还款？",
     "aliases_zh": [
@@ -711,7 +711,7 @@
       "Can I clear my loan before the end of the term?"
     ],
     "answer": "Contact support to request a demo early-repayment quote. Any settlement charge is determined by the agreement, not by this assistant.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "个人贷款可以提前还清吗？",
     "aliases_zh": [
@@ -729,7 +729,7 @@
       "How can I create online banking access?"
     ],
     "answer": "Use the demo bank's online registration flow or request help at a branch. Follow its secure verification steps outside this chat.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "怎样注册网上银行？",
     "aliases_zh": [
@@ -747,7 +747,7 @@
       "I forgot my banking password."
     ],
     "answer": "Choose Forgot password on the demo login screen and follow the secure recovery steps. Do not share passwords or recovery codes here.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "忘记网银密码怎么重置？",
     "aliases_zh": [
@@ -765,7 +765,7 @@
       "I am locked out of the banking app."
     ],
     "answer": "Check the app version and your connection, then use the secure recovery flow if necessary. Contact support if access remains blocked.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "网上银行无法登录怎么办？",
     "aliases_zh": [
@@ -783,11 +783,11 @@
       "How do I download the banking app?"
     ],
     "answer": "This coursework demo does not publish a mobile app. The app references describe a fictional banking workflow; use this web chat for the demonstration.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "在哪里下载手机银行应用？",
     "aliases_zh": [
-      "有真实的 CampusBank 手机应用吗？"
+      "有真实的 BankFlow AI 手机应用吗？"
     ],
     "answer_zh": "本课程演示没有发布真实手机应用。相关应用流程为虚构银行设定，请使用当前网页聊天进行演示。"
   },
@@ -801,7 +801,7 @@
       "Can I get alerts for card transactions?"
     ],
     "answer": "In the fictional app, open Settings and enable transaction notifications. Notifications are a demo policy, not a function executed by this assistant.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "如何开启付款通知？",
     "aliases_zh": [
@@ -819,7 +819,7 @@
       "Where can I update contact information?"
     ],
     "answer": "Use the fictional app's Profile section or contact support through its secure channel to update contact information.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "怎样修改绑定手机号？",
     "aliases_zh": [
@@ -837,7 +837,7 @@
       "A suspicious email asks for my banking password."
     ],
     "answer": "Do not share passwords or codes or follow suspicious login links. Use the bank's secure support channel to report the message.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "如何识别银行钓鱼邮件？",
     "aliases_zh": [
@@ -855,7 +855,7 @@
       "Where can I find my monthly account statements?"
     ],
     "answer": "In the fictional app, choose Accounts, then Statements, and select the month. This assistant cannot access or download your statements.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "如何下载银行账单？",
     "aliases_zh": [
@@ -873,7 +873,7 @@
       "What are the Lancaster branch opening hours?"
     ],
     "answer": "Our fictional Lancaster branch is at 10 Campus Way, Lancaster. It opens Monday to Friday 09:00-17:00.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "兰开斯特网点地址和营业时间是什么？",
     "aliases_zh": [
@@ -891,7 +891,7 @@
       "What are the London branch opening hours?"
     ],
     "answer": "Our fictional London branch is at 20 Learning Street, London. It opens Monday to Friday 09:00-17:00 and Saturday 10:00-13:00.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "伦敦网点在哪里、什么时候营业？",
     "aliases_zh": [
@@ -909,7 +909,7 @@
       "What are the Manchester branch opening hours?"
     ],
     "answer": "Our fictional Manchester branch is at 30 Library Road, Manchester. It opens Monday to Friday 09:00-17:00.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "曼彻斯特网点地址和营业时间是什么？",
     "aliases_zh": [
@@ -926,14 +926,14 @@
     "aliases": [
       "Do I need to reserve a bank appointment?"
     ],
-    "answer": "Request an appointment through CampusBank support. Walk-in availability depends on the fictional branch; this assistant cannot book appointments.",
-    "source": "Original fictional CampusBank coursework policy",
+    "answer": "Request an appointment through BankFlow AI support. Walk-in availability depends on the fictional branch; this assistant cannot book appointments.",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "怎样预约网点服务？",
     "aliases_zh": [
       "到银行需要预约吗？"
     ],
-    "answer_zh": "请通过 CampusBank 客服申请预约。虚构网点的直接到访安排取决于现场情况，本助手不能实际预约。"
+    "answer_zh": "请通过 BankFlow AI 客服申请预约。虚构网点的直接到访安排取决于现场情况，本助手不能实际预约。"
   },
   {
     "faq_id": "BR_WEEKEND",
@@ -945,7 +945,7 @@
       "Can I visit a branch during the weekend?"
     ],
     "answer": "The fictional London branch opens Saturday 10:00-13:00. Lancaster and Manchester branches are closed at weekends.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "哪些网点周六营业？",
     "aliases_zh": [
@@ -963,7 +963,7 @@
       "Are cash machines available after the branch closes?"
     ],
     "answer": "The fictional external ATMs at demo branches are available 24 hours, subject to maintenance. This assistant cannot confirm a live ATM status.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "营业时间外可以使用取款机吗？",
     "aliases_zh": [
@@ -980,14 +980,14 @@
     "aliases": [
       "Is step-free access available at demo branches?"
     ],
-    "answer": "All three fictional CampusBank branches provide step-free access. Contact support for any specific access needs.",
-    "source": "Original fictional CampusBank coursework policy",
+    "answer": "All three fictional BankFlow AI branches provide step-free access. Contact support for any specific access needs.",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "网点有无障碍通道吗？",
     "aliases_zh": [
       "轮椅使用者能进入网点吗？"
     ],
-    "answer_zh": "三个虚构 CampusBank 网点均设有无台阶通道。特殊无障碍需求请联系客服。"
+    "answer_zh": "三个虚构 BankFlow AI 网点均设有无台阶通道。特殊无障碍需求请联系客服。"
   },
   {
     "faq_id": "BR_HOLIDAY",
@@ -998,14 +998,14 @@
     "aliases": [
       "Can I visit the bank on a public holiday?"
     ],
-    "answer": "The fictional CampusBank branches are closed on bank holidays. Ordinary opening hours apply on working days.",
-    "source": "Original fictional CampusBank coursework policy",
+    "answer": "The fictional BankFlow AI branches are closed on bank holidays. Ordinary opening hours apply on working days.",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "银行节假日网点营业吗？",
     "aliases_zh": [
       "公众假期可以去分行吗？"
     ],
-    "answer_zh": "虚构 CampusBank 网点在银行节假日关闭。工作日按通常营业时间开放。"
+    "answer_zh": "虚构 BankFlow AI 网点在银行节假日关闭。工作日按通常营业时间开放。"
   },
   {
     "faq_id": "SUP_CONTACT",
@@ -1014,14 +1014,14 @@
     "attribute": "contact",
     "question": "How do I contact customer support?",
     "aliases": [
-      "What is the CampusBank support email?"
+      "What is the BankFlow AI support email?"
     ],
     "answer": "For this fictional demo, customer support is support@campusbank.example. The .example address is not a real contact channel.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "怎样联系银行客服？",
     "aliases_zh": [
-      "CampusBank 客服邮箱是什么？"
+      "BankFlow AI 客服邮箱是什么？"
     ],
     "answer_zh": "虚构客服邮箱为 support@campusbank.example。.example 地址仅用于演示，不是真实联系方式。"
   },
@@ -1034,14 +1034,14 @@
     "aliases": [
       "What are the helpdesk service hours?"
     ],
-    "answer": "Fictional CampusBank support hours are Monday to Friday 09:00-18:00.",
-    "source": "Original fictional CampusBank coursework policy",
+    "answer": "Fictional BankFlow AI support hours are Monday to Friday 09:00-18:00.",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "客服什么时候提供服务？",
     "aliases_zh": [
       "银行客服工作时间是什么？"
     ],
-    "answer_zh": "虚构 CampusBank 客服的服务时间为周一至周五 09:00—18:00。"
+    "answer_zh": "虚构 BankFlow AI 客服的服务时间为周一至周五 09:00—18:00。"
   },
   {
     "faq_id": "SUP_COMPLAINT",
@@ -1053,7 +1053,7 @@
       "Where can I complain about bank service?"
     ],
     "answer": "Send a complaint through the fictional secure support channel or discuss it at a branch. The demo policy aims to acknowledge complaints within 2 working days.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "怎样投诉银行服务？",
     "aliases_zh": [
@@ -1071,7 +1071,7 @@
       "Please connect me to a person."
     ],
     "answer": "This demo cannot connect to a live adviser. Its fictional support contact is support@campusbank.example, Monday to Friday 09:00-18:00.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "可以转人工客服吗？",
     "aliases_zh": [
@@ -1088,8 +1088,8 @@
     "aliases": [
       "I see a payment I did not authorise."
     ],
-    "answer": "For a real account incident, contact your actual bank through its official secure support channel. CampusBank only records a fictional support or lost-card request; it cannot inspect, freeze, reverse or investigate real transactions.",
-    "source": "Original fictional CampusBank coursework policy",
+    "answer": "For a real account incident, contact your actual bank through its official secure support channel. BankFlow AI only records a fictional support or lost-card request; it cannot inspect, freeze, reverse or investigate real transactions.",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "怎样报告疑似欺诈交易？",
     "aliases_zh": [
@@ -1106,14 +1106,14 @@
     "aliases": [
       "What can this assistant help me with?"
     ],
-    "answer": "I can explain fictional CampusBank accounts, cards, transfers, savings, loans, online banking, branches and support procedures.",
-    "source": "Original fictional CampusBank coursework policy",
+    "answer": "I can explain fictional BankFlow AI accounts, cards, transfers, savings, loans, online banking, branches and support procedures.",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "这个助手能回答哪些银行问题？",
     "aliases_zh": [
       "你可以帮助我了解什么？"
     ],
-    "answer_zh": "我可以介绍虚构 CampusBank 的账户、银行卡、转账、储蓄、贷款、网上银行、网点和客服流程。"
+    "answer_zh": "我可以介绍虚构 BankFlow AI 的账户、银行卡、转账、储蓄、贷款、网上银行、网点和客服流程。"
   },
   {
     "faq_id": "SUP_BALANCE",
@@ -1125,7 +1125,7 @@
       "How much money is in my bank account?"
     ],
     "answer": "I cannot access account balances. Check your balance through the bank's secure app or support channel; do not share account details here.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "你能查询我的账户余额吗？",
     "aliases_zh": [
@@ -1143,7 +1143,7 @@
       "Can I send you my password or card number?"
     ],
     "answer": "Do not share passwords, PINs, full card numbers or confidential account information in this demo chat.",
-    "source": "Original fictional CampusBank coursework policy",
+    "source": "Original fictional BankFlow AI coursework policy",
     "version": "1.1-bilingual",
     "question_zh": "可以在这里提供我的 PIN 吗？",
     "aliases_zh": [

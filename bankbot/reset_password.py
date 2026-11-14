@@ -9,13 +9,13 @@ from .portal_store import PortalStore, PortalError
 
 
 def main(argv=None):
-    parser=argparse.ArgumentParser(description='Reset a CampusBank demo account password on the server computer.')
+    parser=argparse.ArgumentParser(description='Reset a BankFlow AI demo account password on the server computer.')
     parser.add_argument('--username',required=True,help='Existing login username, not the display name.')
     args=parser.parse_args(argv)
     settings=Settings.load()
     path=settings.database_url or settings.database_path or ROOT/'logs/portal.sqlite3'
     if not settings.database_url and not path.is_file():
-        print('找不到本机账户数据库，请在运行 CampusBank 的服务器电脑上操作。')
+        print('找不到本机账户数据库，请在运行 BankFlow AI 的服务器电脑上操作。')
         return 1
     if not sys.stdin.isatty():
         print('请在交互式 PowerShell 终端中直接运行此命令；密码需要隐藏输入。')

@@ -1,4 +1,4 @@
-# Deploy CampusBank on Render and Neon
+# Deploy BankFlow AI on Render and Neon
 
 The web service runs the existing Python application on a Render Free instance.
 Neon stores accounts, conversations, submitted requests and support tickets in PostgreSQL.

@@ -1,6 +1,6 @@
 # Prospective research directions
 
-**Status: proposed work.** CampusBank is presently an applied AI and interaction-design prototype. The questions below describe possible studies, with no claimed results.
+**Status: proposed work.** BankFlow AI is presently an applied AI and interaction-design prototype. The questions below describe possible studies, with no claimed results.
 
 ## 1. Does an intent-aware service agent help users reach the next step?
 

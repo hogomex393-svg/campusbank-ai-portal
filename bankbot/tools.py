@@ -16,7 +16,7 @@ def schema(name, description, field):
 
 
 TOOL_SCHEMAS = [
-    schema("search_bank_faq", "Search fictional CampusBank policies and procedures. Include the product and the specific question. Use for bank-specific facts before answering.", "query"),
+    schema("search_bank_faq", "Search fictional BankFlow AI policies and procedures. Include the product and the specific question. Use for bank-specific facts before answering.", "query"),
     schema("get_product_info", "Get the authoritative fictional product record, including fees, required documents, eligibility and interest. Product names: student_account, everyday_account, savings_account, debit_card, credit_card, personal_loan.", "product_name"),
     schema("find_branch", "Find fictional branch addresses and opening hours in a named city. Ask for the city if it is missing. This tool only reads local demo records.", "city"),
 ]

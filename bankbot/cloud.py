@@ -14,7 +14,7 @@ def main():
     os.environ.setdefault('BANKBOT_DEPLOYMENT','cloud')
     settings=Settings.load()
     port=cloud_port()
-    print('CampusBank: starting cloud portal with persistent account storage...',flush=True)
+    print('BankFlow AI: starting cloud portal with persistent account storage...',flush=True)
     from .web import create_app
     import uvicorn
     app=create_app()

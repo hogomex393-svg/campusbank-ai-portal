@@ -91,7 +91,7 @@ def create_app(db_path=None,service=None):
             yield
         finally:
             store.close()
-    app=FastAPI(title='CampusBank local demo portal',docs_url=None,redoc_url=None,lifespan=lifespan)
+    app=FastAPI(title='BankFlow AI local demo portal',docs_url=None,redoc_url=None,lifespan=lifespan)
     settings=Settings.load()
     store=PortalStore(db_path or settings.database_url or settings.database_path or ROOT/'logs/portal.sqlite3',bootstrap_code=settings.bootstrap_code if settings.cloud_mode else '',open_staff_testing=settings.open_staff_testing,staff_access_code=settings.staff_access_code)
     bot=service or ChatService(settings)
@@ -445,13 +445,13 @@ def create_app(db_path=None,service=None):
 
 def main():
     import uvicorn
-    p=argparse.ArgumentParser(description='Start the local CampusBank web portal.')
+    p=argparse.ArgumentParser(description='Start the local BankFlow AI web portal.')
     p.add_argument('--port',type=int,default=8501)
     p.add_argument('--host',choices=('127.0.0.1','0.0.0.0'),default='127.0.0.1',help='Use 0.0.0.0 for an explicitly requested LAN demo.')
     args=p.parse_args()
     if not 1 <= args.port <= 65535:
         p.error('--port must be between 1 and 65535')
-    print('CampusBank: loading local knowledge and chat storage...',flush=True)
+    print('BankFlow AI: loading local knowledge and chat storage...',flush=True)
     app=create_app()
     print(f'Open in your browser after startup completes: http://127.0.0.1:{args.port}',flush=True)
     print('Keep this terminal open. Press Ctrl+C to stop the server.',flush=True)

@@ -2,7 +2,7 @@
 
 ## Design question
 
-Banking inquiry interfaces often require users to translate a vague goal into a product category, repeat context in a form, and repeat it again to a human. CampusBank brings these steps into one portal. The initial coursework requirement was a human-like inquiry agent with simple dialogue; the portfolio extension adds continuity and accountable service actions.
+Banking inquiry interfaces often require users to translate a vague goal into a product category, repeat context in a form, and repeat it again to a human. BankFlow AI brings these steps into one portal. The initial coursework requirement was a human-like inquiry agent with simple dialogue; the portfolio extension adds continuity and accountable service actions.
 
 ## Interaction decisions and acceptance conditions
 

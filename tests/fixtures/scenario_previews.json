@@ -34,8 +34,8 @@
       {
         "label": "收款银行／国家",
         "label_en": "Payee bank / country",
-        "value": "CampusBank Demo / UK",
-        "value_en": "CampusBank Demo / UK"
+        "value": "BankFlow AI Demo / UK",
+        "value_en": "BankFlow AI Demo / UK"
       },
       {
         "label": "收款账户类型",

@@ -9,9 +9,9 @@ The design follows the structure of official banking guidance, rather than copyi
 - [HSBC identity and address guidance](https://www.hsbc.co.uk/help/banking-made-easy/help-us-identify-you/) informs the distinction between identity and address evidence, and checking that application details agree with the documents.
 - [HSBC current-account application guidance](https://www.hsbc.co.uk/current-accounts/what-do-you-need-to-open-a-current-account/) informs eligibility and application-information review.
 - [NatWest payment guide](https://www.natwest.com/banking-with-natwest/how-to/make-payments.html) informs payee details, reference, amount, review and approval stages.
-- [NatWest Confirmation of Payee guidance](https://www.natwest.com/support-centre/banking-from-home/make-payments/what-is-confirmation-of-payee-cop-and-how-does-it-work.html) informs the name-check explanation. CampusBank compares only its own fixed fictional records; it does not use the actual CoP network.
+- [NatWest Confirmation of Payee guidance](https://www.natwest.com/support-centre/banking-from-home/make-payments/what-is-confirmation-of-payee-cop-and-how-does-it-work.html) informs the name-check explanation. BankFlow AI compares only its own fixed fictional records; it does not use the actual CoP network.
 
-These pages explain real-world patterns. CampusBank's account criteria, charges, balances and exchange rates remain the project's fictional data.
+These pages explain real-world patterns. BankFlow AI's account criteria, charges, balances and exchange rates remain the project's fictional data.
 
 ## Account-opening journey
 

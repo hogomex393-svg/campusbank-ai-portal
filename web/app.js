@@ -571,7 +571,7 @@ function renderMessage(m) {
       el(
         "div",
         "assistant-avatar",
-        meta.sender === "staff" ? t("人", "H") : "C",
+        meta.sender === "staff" ? t("人", "H") : "B",
       ),
     );
   const body = el("div", "message-body");
@@ -1123,8 +1123,8 @@ function showReferences() {
       "p",
       "page-subtitle",
       t(
-        "以下链接指向银行官方页面，用于了解业务分类、数字助手和服务入口。本站办理流程属于 CampusBank 课程演示。",
-        "Official bank pages for navigation, digital assistants and service entry points. CampusBank forms are fictional coursework flows.",
+        "以下链接指向银行官方页面，用于了解业务分类、数字助手和服务入口。本站办理流程属于 BankFlow AI 课程演示。",
+        "Official bank pages for navigation, digital assistants and service entry points. BankFlow AI forms are fictional coursework flows.",
       ),
     ),
   );
@@ -2185,7 +2185,7 @@ const STATIC_TEXT = {
  "登录":"Sign in", "注册":"Register", "用户名":"Username", "密码":"Password", "怎么称呼你":"Display name", "你的称呼":"Your display name", "至少 8 个字符":"At least 8 characters",
  "工作人员邀请码":"Staff invitation code", "首次开通工作人员身份时填写":"Required when enabling staff access", "小组测试邀请码":"Group testing access code", "向项目负责人获取":"Ask the project owner",
  "由部署者提供，供组员注册测试":"Provided privately by the project owner for group testing", "3–32 位字母、数字或下划线":"3–32 letters, digits, or underscores",
- "这是 CampusBank 课程演示账户，与真实银行账户无关。":"This is a local CampusBank demo account, unrelated to real bank accounts.",
+ "这是 BankFlow AI 课程演示账户，与真实银行账户无关。":"This is a local BankFlow AI demo account, unrelated to real bank accounts.",
  "回答方式":"Answer mode", "自然对话 Agent（推荐）":"Conversational agent (recommended)", "离线应急资料":"Offline reference mode", "实验：固定 RAG":"Experiment: retrieval-augmented generation", "实验：无资料 LLM":"Experiment: model without reference records",
  "显示资料与工具细节":"Show sources and tool details", "导出当前对话":"Export current conversation", "切换方式保留记录。自然对话需要已配置的 DeepSeek API。":"Changing modes preserves history. Conversational mode requires a configured DeepSeek API.",
  "个人账户":"Your account", "退出登录":"Sign out", "邀请工作人员":"Invite staff", "一次性邀请码":"Single-use invitation code", "复制邀请码":"Copy invitation code",
@@ -2231,8 +2231,8 @@ function setLanguage() {
     "Chinese / English · Reply follows your message",
   );
   document.querySelector(".composer-note").textContent = t(
-    "CampusBank 为虚构银行。业务窗口只登记演示请求，请勿提供真实银行卡号、密码或验证码。",
-    "CampusBank is a fictional bank. Forms record demo requests only. Please use example situations.",
+    "BankFlow AI 为虚构银行。业务窗口只登记演示请求，请勿提供真实银行卡号、密码或验证码。",
+    "BankFlow AI is a fictional bank. Forms record demo requests only. Please use example situations.",
   );
   document.querySelector('.history-head>span').textContent=S.showArchivedChats?t('已归档对话','Archived chats'):t('历史对话','Chat history');
   document.querySelector(".section-title").firstChild.textContent = t(
@@ -2324,7 +2324,7 @@ async function init() {
     });
     const a = el("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "campusbank_chat.json";
+    a.download = "bankflow_ai_chat.json";
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   };

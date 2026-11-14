@@ -1,4 +1,4 @@
-# CampusBank — Bilingual AI Banking Service Portal
+# BankFlow AI — Bilingual AI Banking Service Portal
 
 [![Cloud deployment checks](https://github.com/hogomex393-svg/campusbank-ai-portal/actions/workflows/cloud-ci.yml/badge.svg?branch=codex%2Fportfolio-release&event=push)](https://github.com/hogomex393-svg/campusbank-ai-portal/actions/workflows/cloud-ci.yml)
 ![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)
@@ -23,11 +23,11 @@
 
 **Version 2.3.0:** [dialogue/form consistency and readable-table fixes](docs/group-review-fixes.md), including preserved form drafts, safe repeated submissions, appointment validation, and complete English form text.
 
-CampusBank explores a practical interaction problem: **how can a user move from asking a question to completing the next service step without losing context or confusing AI with human staff?** The project combines a DeepSeek-powered bilingual agent with a multi-user web portal, an approved service catalog, and a separate staff workbench.
+BankFlow AI brings general banking and student banking into one conversational service portal. It explores a practical interaction problem: **how can a user move from asking a question to completing the next service step without losing context or confusing AI with human staff?** The project combines a DeepSeek-powered bilingual agent with a multi-user web portal, an approved service catalog, and a separate staff workbench.
 
 The hosted demo uses invitation-based registration; contact the project owner for access. You can also run the complete portal locally in offline mode without an API key. The web service runs on Render with persistent records in Neon PostgreSQL. Free instances can take time to wake after inactivity. See the [Render and Neon setup](docs/render-neon.md).
 
-> CampusBank is a fictional educational prototype. Its products, fees, branches, applications, and transfers are synthetic. Service windows record demonstration requests; no real bank account or financial transaction is connected.
+> BankFlow AI is a fictional educational prototype. Its products, fees, branches, applications, and transfers are synthetic. Service windows record demonstration requests; no real bank account or financial transaction is connected.
 
 ## What the interface does
 
@@ -46,7 +46,7 @@ General banking groups nine shared service windows into **Accounts, Cards, Payme
 
 ## Interface preview
 
-![CampusBank portal with business categories and conversation entry points](docs/assets/portal-home.png)
+![BankFlow AI portal with business categories and conversation entry points](docs/assets/portal-home.png)
 
 The same conversation can switch from a Chinese service request to an English follow-up while retaining the earlier answer and service button.
 

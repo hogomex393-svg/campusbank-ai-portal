@@ -7,13 +7,13 @@
     "fees": "The Student Account has no monthly account fee. Optional international transfers have separate fees.",
     "eligibility": "The demo Student Account is available to enrolled students aged 18 or above.",
     "rate": "The Student Account pays no interest in this fictional demo.",
-    "apply": "Apply for the Student Account through the demo online application or visit a CampusBank branch.",
+    "apply": "Apply for the Student Account through the demo online application or visit a BankFlow AI branch.",
     "display_name_zh": "学生账户",
     "documents_zh": "开立学生账户需要带照片身份证件、在读学生证明和地址证明。",
     "fees_zh": "学生账户不收取账户月费。国际转账等可选服务另外收费。",
     "eligibility_zh": "演示学生账户面向年满 18 岁的在读学生。",
     "rate_zh": "虚构学生账户不支付利息。",
-    "apply_zh": "可以通过演示网上申请流程开立学生账户，也可以前往 CampusBank 网点办理。"
+    "apply_zh": "可以通过演示网上申请流程开立学生账户，也可以前往 BankFlow AI 网点办理。"
   },
   {
     "product_name": "everyday_account",
@@ -23,13 +23,13 @@
     "fees": "The demo Everyday Account costs GBP 3 per month.",
     "eligibility": "The demo Everyday Account is available to adults aged 18 or above.",
     "rate": "The Everyday Account pays no interest in this fictional demo.",
-    "apply": "Apply for an Everyday Account online or at a CampusBank branch.",
+    "apply": "Apply for an Everyday Account online or at a BankFlow AI branch.",
     "display_name_zh": "日常账户",
     "documents_zh": "开立日常账户需要照片身份证件和地址证明。",
     "fees_zh": "演示日常账户每月收费 3 英镑。",
     "eligibility_zh": "演示日常账户面向年满 18 岁的成年人。",
     "rate_zh": "虚构日常账户不支付利息。",
-    "apply_zh": "可以在线申请日常账户，也可以到 CampusBank 网点办理。"
+    "apply_zh": "可以在线申请日常账户，也可以到 BankFlow AI 网点办理。"
   },
   {
     "product_name": "savings_account",
@@ -39,25 +39,25 @@
     "fees": "The demo Savings Account has no monthly account fee.",
     "eligibility": "The demo Savings Account is available to adults aged 18 or above, with an opening deposit of GBP 10.",
     "rate": "The fictional Savings Account pays 2% annual interest. This is a demo value, not a real bank rate.",
-    "apply": "Open a Savings Account through the demo app or at a CampusBank branch.",
+    "apply": "Open a Savings Account through the demo app or at a BankFlow AI branch.",
     "display_name_zh": "储蓄账户",
     "documents_zh": "开立储蓄账户需要照片身份证件和地址证明。",
     "fees_zh": "演示储蓄账户不收取账户月费。",
     "eligibility_zh": "演示储蓄账户面向年满 18 岁的成年人，最低开户存款为 10 英镑。",
     "rate_zh": "虚构储蓄账户的年利率为 2%。这是演示值，并非真实银行报价。",
-    "apply_zh": "可以通过演示应用或前往 CampusBank 网点开立储蓄账户。"
+    "apply_zh": "可以通过演示应用或前往 BankFlow AI 网点开立储蓄账户。"
   },
   {
     "product_name": "debit_card",
     "display_name": "Debit Card",
     "source_id": "PRODUCT_DEBIT",
-    "documents": "A demo Debit Card comes with a qualifying CampusBank account; use the account's required documents.",
+    "documents": "A demo Debit Card comes with a qualifying BankFlow AI account; use the account's required documents.",
     "fees": "The demo Debit Card has no annual fee. A replacement card costs GBP 5.",
     "eligibility": "The demo Debit Card is available to Student or Everyday Account holders aged 18 or above.",
     "rate": "The Debit Card uses account funds and has no credit interest rate.",
     "apply": "Request a Debit Card when opening a Student or Everyday Account.",
     "display_name_zh": "借记卡",
-    "documents_zh": "演示借记卡配套符合条件的 CampusBank 账户，材料要求与该账户一致。",
+    "documents_zh": "演示借记卡配套符合条件的 BankFlow AI 账户，材料要求与该账户一致。",
     "fees_zh": "演示借记卡不收年费，补卡费用为 5 英镑。",
     "eligibility_zh": "演示借记卡适用于年满 18 岁的学生账户或日常账户持有人。",
     "rate_zh": "借记卡使用账户资金，没有信用借款利率。",
@@ -87,12 +87,12 @@
     "fees": "The demo Personal Loan has no application fee. Consult the loan agreement for other charges.",
     "eligibility": "The demo Personal Loan requires age 18 or above and an affordability review; eligibility is not approval.",
     "rate": "The fictional Personal Loan has a fixed 8% annual interest rate. This is a demo value.",
-    "apply": "Apply for the Personal Loan online or request an appointment at a CampusBank branch.",
+    "apply": "Apply for the Personal Loan online or request an appointment at a BankFlow AI branch.",
     "display_name_zh": "个人贷款",
     "documents_zh": "演示个人贷款需要照片身份证件、地址证明和收入证明。",
     "fees_zh": "演示个人贷款不收申请费。其他费用以贷款协议为准。",
     "eligibility_zh": "演示个人贷款要求申请人年满 18 岁，并接受偿还能力审核。符合条件不等于获批。",
     "rate_zh": "虚构个人贷款的固定年利率为 8%，仅用于演示。",
-    "apply_zh": "可以在线申请演示个人贷款，也可以预约 CampusBank 网点。"
+    "apply_zh": "可以在线申请演示个人贷款，也可以预约 BankFlow AI 网点。"
   }
 ]

@@ -2,7 +2,7 @@
 
 ## Origin
 
-CampusBank began with the banking inquiry-agent functionality in a six-person CNSCC324 coursework group (Lab Class 1, Team 12). This repository contains the interactive portal and reproducible engineering checks. It excludes university assignment PDFs, report drafts, private keys, accounts, and live conversations.
+BankFlow AI began with the banking inquiry-agent functionality in a six-person CNSCC324 coursework group (Lab Class 1, Team 12). This repository contains the interactive portal and reproducible engineering checks. It excludes university assignment PDFs, report drafts, private keys, accounts, and live conversations.
 
 ## Interaction iterations
 

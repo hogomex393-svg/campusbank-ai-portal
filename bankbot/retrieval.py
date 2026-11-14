@@ -5,6 +5,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from .language import detect_language
 
 REPLACEMENTS = {
+    "campusbank": "bankflow ai",
     "charges": "fees", "charge": "fee", "costs": "fees", "cost": "fee",
     "paperwork": "documents", "identification": "id", "set up": "open",
     "stolen": "lost", "misplaced": "lost", "lose": "lost", "locked out": "login problem",

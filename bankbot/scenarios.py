@@ -23,8 +23,8 @@ PAYERS=[
  {'id':'student_demo','label':'学生账户 · DEMO-STU-01','label_en':'Student · DEMO-STU-01','balance':'1200.00','currency':'GBP'},
 ]
 PAYEES=[
- {'id':'alex_demo','name':'Alex Morgan','label':'Alex · 个人收款人','label_en':'Alex · individual','type':'domestic','account_type':'personal','bank':'CampusBank Demo','country':'UK','currency':'GBP','rate':'1','routing':'DEMO-SORT-01','account':'DEMO-ACCT-ALEX'},
- {'id':'tuition_demo','name':'Example University','label':'示例大学 · 学费账户','label_en':'Example University · tuition','type':'domestic','account_type':'business','bank':'CampusBank Demo','country':'UK','currency':'GBP','rate':'1','routing':'DEMO-SORT-02','account':'DEMO-ACCT-TUITION'},
+ {'id':'alex_demo','name':'Alex Morgan','label':'Alex · 个人收款人','label_en':'Alex · individual','type':'domestic','account_type':'personal','bank':'BankFlow AI Demo','country':'UK','currency':'GBP','rate':'1','routing':'DEMO-SORT-01','account':'DEMO-ACCT-ALEX'},
+ {'id':'tuition_demo','name':'Example University','label':'示例大学 · 学费账户','label_en':'Example University · tuition','type':'domestic','account_type':'business','bank':'BankFlow AI Demo','country':'UK','currency':'GBP','rate':'1','routing':'DEMO-SORT-02','account':'DEMO-ACCT-TUITION'},
  {'id':'europe_demo','name':'Example EU College','label':'欧洲示例学院 · EUR','label_en':'Example EU College · EUR','type':'international','account_type':'business','bank':'Example EU Demo Bank','country':'DE','currency':'EUR','rate':TRANSFER_POLICY['rates']['EUR'],'routing':'DEMO-BIC-EU','account':'DEMO-IBAN-EU-NOT-VALID'},
  {'id':'us_demo','name':'Example US College','label':'美国示例学院 · USD','label_en':'Example US College · USD','type':'international','account_type':'business','bank':'Example US Demo Bank','country':'US','currency':'USD','rate':TRANSFER_POLICY['rates']['USD'],'routing':'DEMO-ROUTING-US','account':'DEMO-ACCT-US-NOT-VALID'},
 ]
