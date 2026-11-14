@@ -48,9 +48,9 @@ General banking groups nine shared service windows into **Accounts, Cards, Payme
 
 ![BankFlow AI portal with business categories and conversation entry points](docs/assets/portal-home.png)
 
-The same conversation can switch from a Chinese service request to an English follow-up while retaining the earlier answer and service button.
+The same conversation can switch between English and Chinese while retaining context and earlier messages.
 
-![Chinese request followed by an English answer after the language correction fix](docs/assets/bilingual-conversation.png)
+![English and Chinese conversation with the BankFlow AI assistant](docs/assets/bilingual-conversation.png)
 
 An approved service action opens a guided form with separate entry, review, and confirmation stages.
 
