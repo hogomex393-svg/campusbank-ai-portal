@@ -7,7 +7,7 @@
 
 **A conversational service interface that connects natural-language questions, grounded AI answers, guided service windows, and human support in one persistent conversation.**
 
-[Live demo](https://campusbank-team12.onrender.com/) · [Interaction design](docs/interaction-design.md) · [Architecture](docs/architecture.md) · [Evaluation](docs/evaluation.md) · [Research directions](docs/research-directions.md)
+[Live demo](https://bankflow-ai-fkwj.onrender.com/) · [Interaction design](docs/interaction-design.md) · [Architecture](docs/architecture.md) · [Evaluation](docs/evaluation.md) · [Research directions](docs/research-directions.md)
 
 [中文介绍](README.zh-CN.md)
 

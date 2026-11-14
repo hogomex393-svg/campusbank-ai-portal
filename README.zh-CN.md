@@ -1,6 +1,6 @@
 # BankFlow AI：中英双语 AI 银行服务交互原型
 
-[英文项目主页](README.md) · [在线演示](https://campusbank-team12.onrender.com/)
+[英文项目主页](README.md) · [在线演示](https://bankflow-ai-fkwj.onrender.com/)
 
 在线版使用 Render 与 Neon PostgreSQL，账户、聊天和业务记录保存在独立数据库中。免费实例闲置后会休眠，首次打开时可能需要等待唤醒，部署配置见 [Render 与 Neon 使用说明](docs/render-neon.md)。
 

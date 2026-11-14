@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: campusbank
+    name: bankflow-ai
     runtime: docker
     plan: free
     region: frankfurt
